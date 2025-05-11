@@ -19,7 +19,8 @@ import {
   UsersRound,
   User,
   HelpCircle,
-  ShieldCheck
+  ShieldCheck,
+  CreditCard
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -45,6 +46,7 @@ export function Sidebar({ className }: SidebarProps) {
     { icon: Plug, label: "Integrations", href: "/integrations" },
     { icon: Settings, label: "Settings", href: "/settings" },
     { icon: User, label: "Profile", href: "/profile" },
+    { icon: CreditCard, label: "Subscription", href: "/subscription" },
     { icon: HelpCircle, label: "Help & Support", href: "/help" },
   ];
   

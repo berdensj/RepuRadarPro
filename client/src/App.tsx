@@ -18,6 +18,7 @@ import CompetitorsPage from "@/pages/competitors-page";
 import ReviewRequestsPage from "@/pages/review-requests-page";
 import ProfilePage from "@/pages/profile-page";
 import HelpPage from "@/pages/help-page";
+import SubscriptionPage from "@/pages/subscription-page";
 import AdminDashboardPage from "@/pages/admin/dashboard-page";
 import AdminUsersPage from "@/pages/admin/users-page";
 import AdminFinancialPage from "@/pages/admin/financial-page";
@@ -41,6 +42,7 @@ function Router() {
       <ProtectedRoute path="/integrations" component={IntegrationsPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
+      <ProtectedRoute path="/subscription" component={SubscriptionPage} />
       <ProtectedRoute path="/help" component={HelpPage} />
       <ProtectedRoute path="/admin" component={AdminDashboardPage} requiredRole="admin" />
       <ProtectedRoute path="/admin/users" component={AdminUsersPage} requiredRole="admin" />
