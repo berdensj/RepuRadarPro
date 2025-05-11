@@ -2044,6 +2044,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // DEVELOPMENT-ONLY: Create a test client account with sample data
+  app.get("/api/setup-test-client", async (req, res, next) => {
+    try {
+      // Check if client user already exists
+      const existingClient = await storage.getUserByUsername("client");
+      
+      if (existingClient) {
+        return res.status(200).json({ 
+          message: "Test client account already exists",
+          credentials: {
+            username: "client",
+            password: "client123"
+          }
+        });
+      }
+      
+      // Create client user with password 'client123'
+      const clientUser = await storage.createUser({
+        username: "client",
+        // This is the hash for 'client123'
+        password: "$2b$10$5QnkCEJKBTrfZS27qkZcU.tnULAjO4tmEt2s2XBuZIr6CYnigr96S",
+        email: "client@example.com",
+        fullName: "Test Client",
+        role: "user",
+        isActive: true,
+        profilePicture: null,
+        companyLogo: null,
+        plan: "premium"
+      });
+      
+      // Create locations for the client
+      const downtownLocation = await storage.createLocation({
+        userId: clientUser.id,
+        name: "Downtown Office",
+        address: "123 Main St, Downtown, NY 10001",
+        phone: "555-123-4567",
+        website: "https://example.com/downtown",
+        type: "office",
+        isActive: true
+      });
+      
+      const uptownLocation = await storage.createLocation({
+        userId: clientUser.id,
+        name: "Uptown Branch",
+        address: "456 Park Ave, Uptown, NY 10022",
+        phone: "555-987-6543",
+        website: "https://example.com/uptown",
+        type: "branch",
+        isActive: true
+      });
+      
+      // Create Downtown Location Reviews
+      await storage.createReview({
+        userId: clientUser.id,
+        locationId: downtownLocation.id,
+        customerName: "John Smith",
+        rating: 5,
+        title: "Excellent service!",
+        content: "The team at the downtown office was extremely helpful and professional. Highly recommended!",
+        platform: "Google",
+        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+        isResolved: true,
+        response: "Thank you for your kind words, John! We're glad we could help you."
+      });
+      
+      await storage.createReview({
+        userId: clientUser.id,
+        locationId: downtownLocation.id,
+        customerName: "Sarah Johnson",
+        rating: 4,
+        title: "Good experience overall",
+        content: "I had a good experience at the downtown office. The staff was helpful, although I had to wait a bit longer than expected.",
+        platform: "Yelp",
+        date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+        isResolved: true,
+        response: "Thanks for the feedback, Sarah. We appreciate your patience and will work on improving our wait times."
+      });
+      
+      await storage.createReview({
+        userId: clientUser.id,
+        locationId: downtownLocation.id,
+        customerName: "Mike Thompson",
+        rating: 2,
+        title: "Disappointed with service",
+        content: "Long wait times and staff seemed disorganized. Expected better service based on the reviews.",
+        platform: "Google",
+        date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+        isResolved: true,
+        response: "We're sorry to hear about your experience, Mike. We'd like to make it right - please contact our office manager to discuss further."
+      });
+      
+      // Create Uptown Location Reviews
+      await storage.createReview({
+        userId: clientUser.id,
+        locationId: uptownLocation.id,
+        customerName: "Emily Davis",
+        rating: 5,
+        title: "Fantastic experience",
+        content: "The uptown branch team was amazing! They went above and beyond to help me with my issue.",
+        platform: "Google",
+        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+        isResolved: true,
+        response: "Thank you for the wonderful review, Emily! We're delighted to have been able to help you."
+      });
+      
+      await storage.createReview({
+        userId: clientUser.id,
+        locationId: uptownLocation.id,
+        customerName: "Robert Wilson",
+        rating: 3,
+        title: "Average service",
+        content: "The service was okay but nothing special. Staff was polite but seemed rushed.",
+        platform: "Facebook",
+        date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+        isResolved: false
+      });
+      
+      await storage.createReview({
+        userId: clientUser.id,
+        locationId: uptownLocation.id,
+        customerName: "Jessica Brown",
+        rating: 4,
+        title: "Good service",
+        content: "I've been coming to this location for years. The service is consistently good.",
+        platform: "Yelp",
+        date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000),
+        isResolved: true,
+        response: "Thank you for being a loyal customer, Jessica! We value your continued trust in our services."
+      });
+      
+      // Create metrics for the client
+      await storage.createMetrics({
+        userId: clientUser.id,
+        date: new Date(),
+        averageRating: 3.83,
+        totalReviews: 6,
+        positivePercentage: 66.7,
+        keywordTrends: JSON.stringify({
+          "service": 6,
+          "staff": 4,
+          "helpful": 3,
+          "professional": 2,
+          "wait": 2
+        })
+      });
+      
+      res.status(201).json({
+        message: "Test client account created successfully",
+        credentials: {
+          username: "client",
+          password: "client123"
+        }
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
   // Create HTTP server
   const httpServer = createServer(app);
   return httpServer;
