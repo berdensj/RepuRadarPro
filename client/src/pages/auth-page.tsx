@@ -54,15 +54,22 @@ export default function AuthPage() {
 
   const onLoginSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+    console.log("Login attempt with:", loginEmail);
     loginMutation.mutate({
       email: loginEmail,
       password: loginPassword
     }, {
       onSuccess: (user) => {
+        // Console log for debugging
+        console.log("Login successful, user data:", user);
+        console.log("User role:", user.role);
+        
         // Navigate after successful login
         if (user.role === 'admin') {
+          console.log("Redirecting to admin dashboard");
           navigate('/admin');
         } else {
+          console.log("Redirecting to regular dashboard");
           navigate('/');
         }
       }
