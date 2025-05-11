@@ -119,7 +119,9 @@ export function setupAuth(app: Express) {
   app.post("/api/login", (req, res, next) => {
     passport.authenticate("local", (err: Error | null, user?: SelectUser, info?: { message: string }) => {
       if (err) return next(err);
-      if (!user) return res.status(401).json({ message: "Invalid username/email or password" });
+      if (!user) return res.status(401).json({ 
+        message: "We couldn't find a match for the information you entered. Please check your username/email and password and try again." 
+      });
       
       req.login(user, (loginErr) => {
         if (loginErr) return next(loginErr);

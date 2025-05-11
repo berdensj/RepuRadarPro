@@ -82,10 +82,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: `Welcome back, ${user.fullName}!`,
       });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
+      // Get the message from the error response if available
+      let errorMessage = "Unable to log in at this time. Please try again later.";
+      
+      try {
+        if (error.response && error.response.data && error.response.data.message) {
+          errorMessage = error.response.data.message;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+      } catch (e) {
+        // Fallback to default message if parsing fails
+      }
+      
       toast({
-        title: "Login failed",
-        description: error.message,
+        title: "Login Unsuccessful",
+        description: errorMessage,
         variant: "destructive",
       });
     },

@@ -11,6 +11,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   fullName: text("full_name").notNull(),
   profilePicture: text("profile_picture"),
+  companyLogo: text("company_logo"),
   plan: text("plan").default("Free").notNull(),
   role: text("role").default("user").notNull(), // Options: admin, user, staff
   isActive: boolean("is_active").default(true).notNull(),
