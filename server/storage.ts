@@ -95,6 +95,7 @@ export class MemStorage implements IStorage {
       isActive: true,
       createdAt: new Date(),
       profilePicture: null,
+      companyLogo: null,
       plan: 'enterprise'
     };
     this.users.set(adminUser.id, adminUser);
@@ -110,6 +111,7 @@ export class MemStorage implements IStorage {
       isActive: true,
       createdAt: new Date(),
       profilePicture: null,
+      companyLogo: null,
       plan: 'free'
     };
     this.users.set(regularUser.id, regularUser);
@@ -146,6 +148,7 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
       // Handle nullable fields with defaults
       profilePicture: insertUser.profilePicture || null,
+      companyLogo: insertUser.companyLogo || null,
       plan: insertUser.plan || 'free'
     };
     this.users.set(id, user);
