@@ -3,8 +3,19 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
-import { insertReviewSchema, insertAlertSchema, insertMetricsSchema } from "@shared/schema";
+import { insertReviewSchema, insertAlertSchema, insertMetricsSchema, insertReviewRequestSchema } from "@shared/schema";
 import { generateAIReply } from "./lib/openai";
+
+// Import external services
+import { importGooglePlacesReviews } from "./services/google-places";
+import { importYelpReviews } from "./services/yelp";
+import { importFacebookReviews } from "./services/facebook";
+import { processReviewRequest } from "./services/review-request";
+import { 
+  verifyWebhookSignature, 
+  verifyFacebookWebhook,
+  handleReviewWebhook 
+} from "./services/webhooks";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -317,6 +328,171 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // External API integrations routes
+  
+  // Google Places reviews import
+  app.post("/api/integrations/google-places/import", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const { locationId, placeId, apiKey } = req.body;
+      
+      if (!placeId || !apiKey) {
+        return res.status(400).json({ 
+          message: "Missing required fields: placeId and apiKey are required" 
+        });
+      }
+      
+      const result = await importGooglePlacesReviews(
+        userId,
+        locationId || null,
+        placeId,
+        apiKey
+      );
+      
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Yelp reviews import
+  app.post("/api/integrations/yelp/import", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const { locationId, businessId, apiKey } = req.body;
+      
+      if (!businessId || !apiKey) {
+        return res.status(400).json({ 
+          message: "Missing required fields: businessId and apiKey are required" 
+        });
+      }
+      
+      const result = await importYelpReviews(
+        userId,
+        locationId || null,
+        businessId,
+        apiKey
+      );
+      
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Facebook reviews import
+  app.post("/api/integrations/facebook/import", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const { locationId, pageId, accessToken } = req.body;
+      
+      if (!pageId || !accessToken) {
+        return res.status(400).json({ 
+          message: "Missing required fields: pageId and accessToken are required" 
+        });
+      }
+      
+      const result = await importFacebookReviews(
+        userId,
+        locationId || null,
+        pageId,
+        accessToken
+      );
+      
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Review request endpoints
+  app.post("/api/review-requests", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const validatedData = insertReviewRequestSchema.parse({
+        ...req.body,
+        userId
+      });
+      
+      const reviewRequest = await storage.createReviewRequest(validatedData);
+      res.status(201).json(reviewRequest);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/review-requests", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const reviewRequests = await storage.getReviewRequests(userId);
+      
+      res.json(reviewRequests);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.post("/api/review-requests/:id/send", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const requestId = Number(req.params.id);
+      const request = await storage.getReviewRequest(requestId);
+      
+      if (!request) {
+        return res.status(404).json({ message: "Review request not found" });
+      }
+      
+      if (request.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const result = await processReviewRequest(requestId);
+      
+      if (result.success) {
+        res.status(200).json({ message: "Review request sent successfully", result });
+      } else {
+        res.status(500).json({ message: "Failed to send review request", error: result.error });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Webhook endpoints
+  
+  // Facebook webhook verification endpoint (required by Facebook API)
+  app.get("/api/webhooks/facebook", verifyFacebookWebhook);
+  
+  // Facebook review notification webhook
+  app.post("/api/webhooks/facebook", 
+    (req, res, next) => verifyWebhookSignature(req, res, next, 'facebook'),
+    (req, res) => handleReviewWebhook(req, res, 'facebook')
+  );
+  
+  // Yelp review notification webhook
+  app.post("/api/webhooks/yelp", 
+    (req, res, next) => verifyWebhookSignature(req, res, next, 'yelp'),
+    (req, res) => handleReviewWebhook(req, res, 'yelp')
+  );
+  
+  // Google review notification webhook
+  app.post("/api/webhooks/google", 
+    (req, res, next) => verifyWebhookSignature(req, res, next, 'google'),
+    (req, res) => handleReviewWebhook(req, res, 'google')
+  );
+
+  // Create HTTP server
   const httpServer = createServer(app);
   return httpServer;
 }
