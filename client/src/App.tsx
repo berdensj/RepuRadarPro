@@ -8,12 +8,20 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 import DashboardPage from "@/pages/dashboard-page";
 import AuthPage from "@/pages/auth-page";
+import ReviewsPage from "@/pages/reviews-page";
+import AlertsPage from "@/pages/alerts-page";
+import ResponsesPage from "@/pages/responses-page";
+import AnalyticsPage from "@/pages/analytics-page";
 import { Route } from "wouter";
 
 function Router() {
   return (
     <Switch>
       <ProtectedRoute path="/" component={DashboardPage} />
+      <ProtectedRoute path="/reviews" component={ReviewsPage} />
+      <ProtectedRoute path="/alerts" component={AlertsPage} />
+      <ProtectedRoute path="/responses" component={ResponsesPage} />
+      <ProtectedRoute path="/analytics" component={AnalyticsPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
