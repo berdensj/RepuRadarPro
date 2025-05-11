@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
-import { useMutation } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 import { 
   Tabs, 
   TabsContent, 
@@ -27,6 +27,13 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -63,6 +70,14 @@ const appleMapsSchema = z.object({
 
 type IntegrationStatus = 'idle' | 'loading' | 'success' | 'error';
 
+interface Location {
+  id: number;
+  userId: number;
+  name: string;
+  address?: string;
+  phone?: string;
+}
+
 const IntegrationsPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -78,6 +93,15 @@ const IntegrationsPage = () => {
   const [yelpError, setYelpError] = useState<string | null>(null);
   const [facebookError, setFacebookError] = useState<string | null>(null);
   const [appleError, setAppleError] = useState<string | null>(null);
+  
+  // Fetch locations for dropdown
+  const { data: locations = [] } = useQuery({
+    queryKey: ['/api/locations'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/locations');
+      return res.json();
+    }
+  });
 
   // Form setup
   const googleForm = useForm<z.infer<typeof googlePlacesSchema>>({
@@ -331,9 +355,24 @@ const IntegrationsPage = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Location (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Location ID" {...field} />
-                        </FormControl>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a location" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="">All Locations</SelectItem>
+                            {locations.map((location) => (
+                              <SelectItem key={location.id} value={String(location.id)}>
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormDescription>
                           Link these reviews to a specific location
                         </FormDescription>
@@ -436,9 +475,24 @@ const IntegrationsPage = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Location (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Location ID" {...field} />
-                        </FormControl>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a location" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="">All Locations</SelectItem>
+                            {locations.map((location) => (
+                              <SelectItem key={location.id} value={String(location.id)}>
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormDescription>
                           Link these reviews to a specific location
                         </FormDescription>
