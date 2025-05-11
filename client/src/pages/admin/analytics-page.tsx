@@ -225,9 +225,8 @@ export default function AdminAnalyticsPage() {
                   ) : (
                     <LineChart
                       data={analyticsData?.reviewTrends || []}
-                      xField="date"
-                      yField="count"
-                      categories={["Google", "Yelp", "Facebook", "Apple Maps"]}
+                      xKey="date"
+                      yKeys={["Google", "Yelp", "Facebook", "Apple Maps"]}
                       colors={["#4285F4", "#C41200", "#3b5998", "#555555"]}
                     />
                   )}
@@ -275,9 +274,8 @@ export default function AdminAnalyticsPage() {
                     <div className="h-80">
                       <LineChart
                         data={analyticsData?.sentimentTrends || []}
-                        xField="date"
-                        yField="score"
-                        categories={["Positive", "Neutral", "Negative"]}
+                        xKey="date"
+                        yKeys={["Positive", "Neutral", "Negative"]}
                         colors={["#4CAF50", "#FF9800", "#F44336"]}
                       />
                     </div>
@@ -342,9 +340,9 @@ export default function AdminAnalyticsPage() {
                       <CardContent className="h-60">
                         <LineChart
                           data={analyticsData?.responseTimeTrend || []}
-                          xField="date"
-                          yField="hours"
-                          categories={["Average Response Time"]}
+                          xKey="date"
+                          yKeys={["hours"]}
+                          labels={["Average Response Time"]}
                           colors={["#6366F1"]}
                         />
                       </CardContent>
@@ -356,9 +354,9 @@ export default function AdminAnalyticsPage() {
                       <CardContent className="h-60">
                         <BarChart
                           data={analyticsData?.interactionDistribution || []}
-                          xField="type"
-                          yField="count"
-                          color="#9333EA"
+                          xKey="type"
+                          yKeys={["count"]}
+                          colors={["#9333EA"]}
                         />
                       </CardContent>
                     </Card>
@@ -390,9 +388,9 @@ export default function AdminAnalyticsPage() {
                       <CardContent className="h-60">
                         <BarChart
                           data={analyticsData?.ratingComparison || []}
-                          xField="name"
-                          yField="rating"
-                          color="#2563EB"
+                          xKey="name"
+                          yKeys={["rating"]}
+                          colors={["#2563EB"]}
                         />
                       </CardContent>
                     </Card>
@@ -403,9 +401,9 @@ export default function AdminAnalyticsPage() {
                       <CardContent className="h-60">
                         <BarChart
                           data={analyticsData?.volumeComparison || []}
-                          xField="name"
-                          yField="count"
-                          color="#10B981"
+                          xKey="name"
+                          yKeys={["count"]}
+                          colors={["#10B981"]}
                         />
                       </CardContent>
                     </Card>
