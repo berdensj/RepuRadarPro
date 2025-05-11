@@ -2060,15 +2060,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Import functions for password hashing
+      const { scrypt, randomBytes } = await import('crypto');
+      const { promisify } = await import('util');
+      const scryptAsync = promisify(scrypt);
+      
+      // Hash the password like in auth.ts
+      async function hashPassword(password: string) {
+        const salt = randomBytes(16).toString("hex");
+        const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+        return `${buf.toString("hex")}.${salt}`;
+      }
+      
       // Create client user with password 'client123'
       const clientUser = await storage.createUser({
         username: "client",
-        // This is the hash for 'client123'
-        password: "$2b$10$5QnkCEJKBTrfZS27qkZcU.tnULAjO4tmEt2s2XBuZIr6CYnigr96S",
+        password: await hashPassword("client123"),
         email: "client@example.com",
         fullName: "Test Client",
-        role: "user",
-        isActive: true,
         profilePicture: null,
         companyLogo: null,
         plan: "premium"
@@ -2080,9 +2089,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name: "Downtown Office",
         address: "123 Main St, Downtown, NY 10001",
         phone: "555-123-4567",
-        website: "https://example.com/downtown",
-        type: "office",
-        isActive: true
       });
       
       const uptownLocation = await storage.createLocation({
@@ -2090,9 +2096,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         name: "Uptown Branch",
         address: "456 Park Ave, Uptown, NY 10022",
         phone: "555-987-6543",
-        website: "https://example.com/uptown",
-        type: "branch",
-        isActive: true
       });
       
       // Create Downtown Location Reviews
