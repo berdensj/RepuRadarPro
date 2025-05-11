@@ -41,7 +41,12 @@ export default function AuthPage() {
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
-      navigate("/");
+      // Redirect admin users to the admin dashboard, regular users to the main dashboard
+      if (user.role === 'admin') {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     }
   }, [user, navigate]);
 
@@ -52,6 +57,15 @@ export default function AuthPage() {
     loginMutation.mutate({
       email: loginEmail,
       password: loginPassword
+    }, {
+      onSuccess: (user) => {
+        // Navigate after successful login
+        if (user.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/');
+        }
+      }
     });
   };
 

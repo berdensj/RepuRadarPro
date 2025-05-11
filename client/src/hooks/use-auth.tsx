@@ -66,6 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     enabled: !!user,
   });
 
+
+  
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
       const res = await apiRequest("POST", "/api/login", credentials);
@@ -73,6 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
+      queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
+      
       toast({
         title: "Login successful",
         description: `Welcome back, ${user.fullName}!`,
