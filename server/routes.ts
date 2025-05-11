@@ -1459,6 +1459,414 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Analytics Data
+  app.get("/api/admin/analytics", requireRole('admin'), async (req, res, next) => {
+    try {
+      const timeRange = req.query.timeRange || "30days";
+      const platform = req.query.platform || "all";
+      
+      // Sample data for Admin Analytics
+      const overview = {
+        totalReviews: 18762,
+        reviewChange: 22.8,
+        averageRating: 4.2,
+        ratingChange: 0.3,
+        responseRate: 82,
+        responseRateChange: 5.2,
+        sentimentScore: 87,
+        sentimentChange: 3.5
+      };
+      
+      const reviewTrends = [
+        { date: "Jan", Google: 850, Yelp: 450, Facebook: 240, "Apple Maps": 60 },
+        { date: "Feb", Google: 920, Yelp: 470, Facebook: 250, "Apple Maps": 65 },
+        { date: "Mar", Google: 980, Yelp: 490, Facebook: 265, "Apple Maps": 70 },
+        { date: "Apr", Google: 1050, Yelp: 520, Facebook: 280, "Apple Maps": 75 },
+        { date: "May", Google: 1120, Yelp: 560, Facebook: 300, "Apple Maps": 80 },
+        { date: "Jun", Google: 1190, Yelp: 580, Facebook: 320, "Apple Maps": 90 },
+        { date: "Jul", Google: 1240, Yelp: 610, Facebook: 340, "Apple Maps": 95 },
+        { date: "Aug", Google: 1320, Yelp: 645, Facebook: 360, "Apple Maps": 100 },
+        { date: "Sep", Google: 1380, Yelp: 680, Facebook: 385, "Apple Maps": 110 },
+        { date: "Oct", Google: 1450, Yelp: 730, Facebook: 410, "Apple Maps": 120 },
+        { date: "Nov", Google: 1530, Yelp: 785, Facebook: 435, "Apple Maps": 130 },
+      ];
+      
+      const ratingDistribution = [
+        { rating: "5", count: 8234 },
+        { rating: "4", count: 6218 },
+        { rating: "3", count: 2584 },
+        { rating: "2", count: 1124 },
+        { rating: "1", count: 602 }
+      ];
+      
+      const sentimentTrends = [
+        { date: "Jan", Positive: 65, Neutral: 25, Negative: 10 },
+        { date: "Feb", Positive: 68, Neutral: 22, Negative: 10 },
+        { date: "Mar", Positive: 70, Neutral: 21, Negative: 9 },
+        { date: "Apr", Positive: 72, Neutral: 20, Negative: 8 },
+        { date: "May", Positive: 73, Neutral: 19, Negative: 8 },
+        { date: "Jun", Positive: 75, Neutral: 18, Negative: 7 },
+        { date: "Jul", Positive: 77, Neutral: 17, Negative: 6 },
+        { date: "Aug", Positive: 78, Neutral: 16, Negative: 6 },
+        { date: "Sep", Positive: 80, Neutral: 15, Negative: 5 },
+        { date: "Oct", Positive: 82, Neutral: 14, Negative: 4 },
+        { date: "Nov", Positive: 85, Neutral: 11, Negative: 4 },
+      ];
+      
+      const keyTopics = [
+        { name: "Customer Service", sentiment: 82 },
+        { name: "Price", sentiment: 65 },
+        { name: "Product Quality", sentiment: 88 },
+        { name: "Delivery Speed", sentiment: 74 },
+        { name: "Return Process", sentiment: 70 }
+      ];
+      
+      const responseTimeTrend = [
+        { date: "Jan", hours: 18 },
+        { date: "Feb", hours: 16 },
+        { date: "Mar", hours: 15 },
+        { date: "Apr", hours: 14 },
+        { date: "May", hours: 12 },
+        { date: "Jun", hours: 10 },
+        { date: "Jul", hours: 8 },
+        { date: "Aug", hours: 7 },
+        { date: "Sep", hours: 6 },
+        { date: "Oct", hours: 5 },
+        { date: "Nov", hours: 4 },
+      ];
+      
+      const interactionDistribution = [
+        { type: "Replies", count: 14520 },
+        { type: "Likes", count: 8246 },
+        { type: "Shares", count: 3154 },
+        { type: "Direct Messages", count: 1892 }
+      ];
+      
+      const ratingComparison = [
+        { name: "Your Business", rating: 4.2 },
+        { name: "Competitor A", rating: 3.8 },
+        { name: "Competitor B", rating: 4.0 },
+        { name: "Competitor C", rating: 3.5 },
+        { name: "Industry Average", rating: 3.7 }
+      ];
+      
+      const volumeComparison = [
+        { name: "Your Business", count: 18762 },
+        { name: "Competitor A", count: 12450 },
+        { name: "Competitor B", count: 14280 },
+        { name: "Competitor C", count: 9540 },
+        { name: "Industry Average", count: 13758 }
+      ];
+      
+      res.json({
+        overview,
+        reviewTrends,
+        ratingDistribution,
+        sentimentTrends,
+        keyTopics,
+        responseTimeTrend,
+        interactionDistribution,
+        ratingComparison,
+        volumeComparison
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Admin Customers List for Filters
+  app.get("/api/admin/customers/list", requireRole('admin'), async (req, res, next) => {
+    try {
+      // Sample customers list data
+      const customers = [
+        { id: 1, name: "Johnson & Partners Law Firm" },
+        { id: 2, name: "SmileBright Dental Clinic" },
+        { id: 3, name: "City Central Medical Center" },
+        { id: 4, name: "Peak Performance Physical Therapy" },
+        { id: 5, name: "Greenfield Financial Advisors" },
+        { id: 6, name: "Coast to Coast Accounting" },
+        { id: 7, name: "Tech Forward IT Consulting" },
+        { id: 8, name: "Mountain View Orthodontics" }
+      ];
+      
+      res.json(customers);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Location Analytics Data
+  app.get("/api/admin/analytics/locations", requireRole('admin'), async (req, res, next) => {
+    try {
+      const customerId = req.query.customer;
+      const timeRange = req.query.timeRange || "30days";
+      
+      if (customerId === "all") {
+        return res.status(400).json({ error: "Please select a specific customer" });
+      }
+      
+      // Sample location analytics data
+      const customerNames = [
+        "Johnson & Partners Law Firm",
+        "SmileBright Dental Clinic",
+        "City Central Medical Center",
+        "Peak Performance Physical Therapy",
+        "Greenfield Financial Advisors",
+        "Coast to Coast Accounting",
+        "Tech Forward IT Consulting",
+        "Mountain View Orthodontics"
+      ];
+      
+      const customerName = customerNames[Number(customerId) - 1] || "Unknown Customer";
+      
+      const totalLocations = Math.floor(Math.random() * 8) + 3;
+      const totalReviews = Math.floor(Math.random() * 2000) + 500;
+      const reviewChange = Math.floor(Math.random() * 30) + 5;
+      const averageRating = (Math.random() * 1.5) + 3.5;
+      const ratingChange = (Math.random() * 0.6) - 0.1;
+      const responseRate = Math.floor(Math.random() * 30) + 70;
+      const responseRateChange = Math.floor(Math.random() * 12) - 2;
+      
+      // Generate random locations
+      const cities = ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose"];
+      const areas = ["Downtown", "Uptown", "Westside", "Eastside", "Midtown", "North", "South", "Central", "Riverside", "Lakefront"];
+      
+      const locations = [];
+      const volumeByLocation = [];
+      const ratingByLocation = [];
+      
+      for (let i = 0; i < totalLocations; i++) {
+        const cityIndex = Math.floor(Math.random() * cities.length);
+        const areaIndex = Math.floor(Math.random() * areas.length);
+        const locationName = `${cities[cityIndex]} - ${areas[areaIndex]}`;
+        
+        const reviewCount = Math.floor(Math.random() * 500) + 50;
+        const rating = (Math.random() * 1.5) + 3.5;
+        const responseRate = Math.floor(Math.random() * 25) + 75;
+        const sentiment = Math.floor(Math.random() * 30) + 65;
+        const trend = Math.floor(Math.random() * 30) - 10;
+        
+        locations.push({
+          id: i + 1,
+          name: locationName,
+          reviewCount,
+          rating,
+          responseRate,
+          sentiment,
+          trend
+        });
+        
+        volumeByLocation.push({
+          name: locationName,
+          count: reviewCount
+        });
+        
+        ratingByLocation.push({
+          name: locationName,
+          rating: rating
+        });
+      }
+      
+      res.json({
+        customerName,
+        totalLocations,
+        totalReviews,
+        reviewChange,
+        averageRating,
+        ratingChange,
+        responseRate,
+        responseRateChange,
+        locations,
+        volumeByLocation,
+        ratingByLocation
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Reports API
+  app.get("/api/admin/reports", requireRole('admin'), async (req, res, next) => {
+    try {
+      const timeRange = req.query.timeRange || "30days";
+      const reportType = req.query.type || "all";
+      const searchTerm = req.query.search || "";
+      
+      // Sample reports data
+      const reports = [
+        {
+          id: 1,
+          name: "Monthly Performance Report - November 2023",
+          type: "performance",
+          created: "Nov 30, 2023",
+          size: "1.4 MB",
+          format: "pdf"
+        },
+        {
+          id: 2,
+          name: "Quarterly Sentiment Analysis - Q3 2023",
+          type: "sentiment",
+          created: "Oct 5, 2023",
+          size: "2.8 MB",
+          format: "excel"
+        },
+        {
+          id: 3,
+          name: "Competitor Analysis Report - Q4 2023",
+          type: "competitive",
+          created: "Nov 15, 2023",
+          size: "3.2 MB",
+          format: "pdf"
+        },
+        {
+          id: 4,
+          name: "Financial Performance Summary - November 2023",
+          type: "financial",
+          created: "Nov 28, 2023",
+          size: "1.1 MB",
+          format: "excel"
+        },
+        {
+          id: 5,
+          name: "Custom KPI Dashboard - Q4 2023",
+          type: "custom",
+          created: "Nov 10, 2023",
+          size: "1.7 MB",
+          format: "pdf"
+        }
+      ];
+      
+      // Filter by type if needed
+      let filteredReports = reports;
+      if (reportType !== "all") {
+        filteredReports = reports.filter(report => report.type === reportType);
+      }
+      
+      // Filter by search term if provided
+      if (searchTerm) {
+        const term = searchTerm.toString().toLowerCase();
+        filteredReports = filteredReports.filter(report => 
+          report.name.toLowerCase().includes(term) || 
+          report.type.toLowerCase().includes(term)
+        );
+      }
+      
+      res.json({
+        reports: filteredReports,
+        total: reports.length,
+        filtered: filteredReports.length
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/admin/reports/scheduled", requireRole('admin'), async (req, res, next) => {
+    try {
+      // Sample scheduled reports data
+      const schedules = [
+        {
+          id: 1,
+          name: "Monthly Performance Summary",
+          description: "Comprehensive review of platform performance",
+          frequency: "Monthly (1st)",
+          recipients: "3 recipients",
+          lastGenerated: "Nov 1, 2023",
+          status: "active"
+        },
+        {
+          id: 2,
+          name: "Weekly Reviews Digest",
+          description: "Summary of new reviews and response metrics",
+          frequency: "Weekly (Monday)",
+          recipients: "5 recipients",
+          lastGenerated: "Nov 27, 2023",
+          status: "active"
+        },
+        {
+          id: 3,
+          name: "Quarterly Business Intelligence",
+          description: "In-depth analysis of business trends and metrics",
+          frequency: "Quarterly",
+          recipients: "7 recipients",
+          lastGenerated: "Oct 1, 2023",
+          status: "active"
+        },
+        {
+          id: 4,
+          name: "Competitor Benchmark Report",
+          description: "Comparison with key competitors",
+          frequency: "Monthly (15th)",
+          recipients: "4 recipients",
+          lastGenerated: "Nov 15, 2023",
+          status: "paused"
+        }
+      ];
+      
+      res.json({
+        schedules,
+        total: schedules.length
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/admin/reports/templates", requireRole('admin'), async (req, res, next) => {
+    try {
+      // Sample report templates data
+      const templates = [
+        {
+          id: 1,
+          name: "Executive Dashboard",
+          description: "High-level metrics for executive review",
+          type: "executive",
+          sections: "5",
+          isDefault: true
+        },
+        {
+          id: 2,
+          name: "Performance Analytics",
+          description: "Detailed performance metrics and trends",
+          type: "performance",
+          sections: "8",
+          isDefault: false
+        },
+        {
+          id: 3,
+          name: "Sentiment Analysis",
+          description: "Customer sentiment trends and insights",
+          type: "sentiment",
+          sections: "6",
+          isDefault: false
+        },
+        {
+          id: 4,
+          name: "User Engagement Report",
+          description: "User interaction and engagement metrics",
+          type: "user",
+          sections: "7",
+          isDefault: false
+        },
+        {
+          id: 5,
+          name: "Financial Summary",
+          description: "Revenue and financial performance",
+          type: "executive",
+          sections: "4",
+          isDefault: false
+        }
+      ];
+      
+      res.json({
+        templates,
+        total: templates.length
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // Admin-only routes for user management
   app.get("/api/admin/users", requireRole('admin'), async (req, res, next) => {
     try {
