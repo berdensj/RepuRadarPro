@@ -19,6 +19,15 @@ import ReviewRequestsPage from "@/pages/review-requests-page";
 import ProfilePage from "@/pages/profile-page";
 import HelpPage from "@/pages/help-page";
 import SubscriptionPage from "@/pages/subscription-page";
+import ReportsPage from "@/pages/reports-page";
+import WorkflowsPage from "@/pages/workflows-page";
+import TemplatesPage from "@/pages/templates-page";
+import ImportExportPage from "@/pages/import-export-page";
+import ActivityLogsPage from "@/pages/activity-logs-page";
+import CommunicationsPage from "@/pages/communications-page";
+import ApiAccessPage from "@/pages/api-access-page";
+import WhiteLabelPage from "@/pages/white-label-page";
+import DashboardBuilderPage from "@/pages/dashboard-builder-page";
 import AdminDashboardPage from "@/pages/admin/dashboard-page";
 import AdminUsersPage from "@/pages/admin/users-page";
 import AdminFinancialPage from "@/pages/admin/financial-page";
@@ -40,6 +49,15 @@ function Router() {
       <ProtectedRoute path="/review-requests" component={ReviewRequestsPage} />
       <ProtectedRoute path="/competitors" component={CompetitorsPage} />
       <ProtectedRoute path="/integrations" component={IntegrationsPage} />
+      <ProtectedRoute path="/reports" component={ReportsPage} />
+      <ProtectedRoute path="/communications" component={CommunicationsPage} />
+      <ProtectedRoute path="/import-export" component={ImportExportPage} />
+      <ProtectedRoute path="/workflows" component={WorkflowsPage} />
+      <ProtectedRoute path="/activity-logs" component={ActivityLogsPage} />
+      <ProtectedRoute path="/dashboard-builder" component={DashboardBuilderPage} />
+      <ProtectedRoute path="/templates" component={TemplatesPage} />
+      <ProtectedRoute path="/api-access" component={ApiAccessPage} />
+      <ProtectedRoute path="/white-label" component={WhiteLabelPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/subscription" component={SubscriptionPage} />

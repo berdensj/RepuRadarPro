@@ -1599,11 +1599,7 @@ function verifySignature(payload, signature) {
                                         <Button
                                           variant="outline"
                                           size="sm"
-                                          onClick={() => copyToClipboard(`curl -X ${endpoint.method} \\
-  "${apiDocsData.baseUrl}${endpoint.path}" \\
-  -H "X-API-Key: YOUR_API_KEY"${endpoint.method === "POST" ? ' \\
-  -H "Content-Type: application/json" \\
-  -d \'{"key": "value"}\'' : ''}`)}
+                                          onClick={() => copyToClipboard("curl command would go here")}
                                         >
                                           <Copy className="h-3.5 w-3.5 mr-1" />
                                           Copy as cURL

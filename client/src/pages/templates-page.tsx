@@ -752,7 +752,7 @@ const TemplatesPage = () => {
                       />
                     </FormControl>
                     <FormDescription>
-                      Use variables like {{'{{'}}customer_name{{'}}'}}, {{'{{'}}business_name{{'}}'}}, etc.
+                      Use variables like &#123;&#123;customer_name&#125;&#125;, &#123;&#123;business_name&#125;&#125;, etc.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
