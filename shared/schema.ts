@@ -307,6 +307,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   reviewRequests: many(reviewRequests),
   competitors: many(competitors),
   ownedAgencies: many(agencies),
+  crmIntegrations: many(crmIntegrations),
 }));
 
 // Review relations
@@ -447,3 +448,48 @@ export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans
 
 export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
 export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
+
+// CRM Integrations table
+export const crmIntegrations = pgTable("crm_integrations", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  crmType: text("crm_type").notNull(), // housecallpro, servicetitan, mindbody, etc.
+  apiKey: text("api_key").notNull(),
+  triggerEvent: text("trigger_event").notNull(), // appointment_completed, treatment_finished, etc.
+  templateId: integer("template_id").notNull().references(() => reviewTemplates.id, { onDelete: "cascade" }),
+  delayHours: integer("delay_hours").default(2),
+  active: boolean("active").default(true),
+  customEndpoint: text("custom_endpoint"),
+  otherSettings: jsonb("other_settings").$type<Record<string, string>>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastSync: timestamp("last_sync"),
+  requestsSent: integer("requests_sent").default(0),
+});
+
+export const insertCrmIntegrationSchema = createInsertSchema(crmIntegrations).pick({
+  userId: true,
+  name: true,
+  crmType: true,
+  apiKey: true,
+  triggerEvent: true,
+  templateId: true,
+  delayHours: true,
+  active: true,
+  customEndpoint: true,
+  otherSettings: true,
+});
+
+export type InsertCrmIntegration = z.infer<typeof insertCrmIntegrationSchema>;
+export type CrmIntegration = typeof crmIntegrations.$inferSelect;
+
+export const crmIntegrationsRelations = relations(crmIntegrations, ({ one }) => ({
+  user: one(users, {
+    fields: [crmIntegrations.userId],
+    references: [users.id]
+  }),
+  template: one(reviewTemplates, {
+    fields: [crmIntegrations.templateId],
+    references: [reviewTemplates.id]
+  })
+}));

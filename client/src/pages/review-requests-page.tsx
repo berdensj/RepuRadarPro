@@ -1531,9 +1531,21 @@ const ReviewRequestsPage = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
+                              {/* Field Service & Contractor Platforms */}
                               <SelectItem value="housecallpro">HouseCall Pro</SelectItem>
                               <SelectItem value="servicetitan">ServiceTitan</SelectItem>
                               <SelectItem value="jobber">Jobber</SelectItem>
+                              
+                              {/* Salon & Spa Platforms */}
+                              <SelectItem value="mindbody">Mindbody</SelectItem>
+                              <SelectItem value="booker">Booker by MINDBODY</SelectItem>
+                              <SelectItem value="vagaro">Vagaro</SelectItem>
+                              <SelectItem value="schedulicity">Schedulicity</SelectItem>
+                              
+                              {/* Payment & POS Platforms */}
+                              <SelectItem value="square">Square</SelectItem>
+                              
+                              {/* General CRMs */}
                               <SelectItem value="salesforce">Salesforce</SelectItem>
                               <SelectItem value="zoho">Zoho CRM</SelectItem>
                               <SelectItem value="podium">Podium</SelectItem>
@@ -1577,10 +1589,17 @@ const ReviewRequestsPage = () => {
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
+                              {/* General Triggers */}
                               <SelectItem value="appointment_completed">Appointment Completed</SelectItem>
                               <SelectItem value="invoice_paid">Invoice Paid</SelectItem>
                               <SelectItem value="service_completed">Service Completed</SelectItem>
                               <SelectItem value="customer_created">Customer Created</SelectItem>
+                              
+                              {/* Spa & Salon Specific Triggers */}
+                              <SelectItem value="treatment_finished">Treatment Finished</SelectItem>
+                              <SelectItem value="checkout_complete">Checkout Complete</SelectItem>
+                              <SelectItem value="membership_renewed">Membership Renewed</SelectItem>
+                              
                               <SelectItem value="other">Custom Event</SelectItem>
                             </SelectContent>
                           </Select>
@@ -1756,45 +1775,66 @@ const ReviewRequestsPage = () => {
           </Dialog>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Home Service CRMs */}
             <Card>
               <CardHeader className="pb-2">
                 <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center mb-2">
                   <Building className="h-4 w-4 text-blue-700" />
                 </div>
-                <CardTitle className="text-base">HouseCall Pro</CardTitle>
+                <CardTitle className="text-base">Home Services</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Connect with HouseCall Pro to automatically send review requests when jobs are completed or invoices are paid.
+                <p className="text-sm text-muted-foreground mb-2">
+                  Connect platforms for contractors and home service businesses:
                 </p>
+                <ul className="text-sm text-muted-foreground list-disc pl-4 space-y-1">
+                  <li>HouseCall Pro</li>
+                  <li>ServiceTitan</li>
+                  <li>Jobber</li>
+                </ul>
               </CardContent>
             </Card>
             
+            {/* Medspa/Salon CRMs */}
             <Card>
               <CardHeader className="pb-2">
-                <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center mb-2">
-                  <Calendar className="h-4 w-4 text-amber-700" />
+                <div className="h-8 w-8 rounded-lg bg-purple-100 flex items-center justify-center mb-2">
+                  <Calendar className="h-4 w-4 text-purple-700" />
                 </div>
-                <CardTitle className="text-base">ServiceTitan</CardTitle>
+                <CardTitle className="text-base">Spa & Salon</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Integrate with ServiceTitan to send review requests after customer appointments are completed.
+                <p className="text-sm text-muted-foreground mb-2">
+                  Integrate with popular medspa and salon management systems:
                 </p>
+                <ul className="text-sm text-muted-foreground list-disc pl-4 space-y-1">
+                  <li>Mindbody</li>
+                  <li>Booker by MINDBODY</li>
+                  <li>Vagaro</li>
+                  <li>Schedulicity</li>
+                  <li>Square</li>
+                </ul>
               </CardContent>
             </Card>
             
+            {/* Other CRMs */}
             <Card>
               <CardHeader className="pb-2">
                 <div className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center mb-2">
                   <GanttChart className="h-4 w-4 text-green-700" />
                 </div>
-                <CardTitle className="text-base">Other CRMs</CardTitle>
+                <CardTitle className="text-base">General CRMs</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">
-                  Connect with other CRM platforms like Salesforce, Zoho, or any custom API that supports webhooks.
+                <p className="text-sm text-muted-foreground mb-2">
+                  Connect with general-purpose CRM platforms:
                 </p>
+                <ul className="text-sm text-muted-foreground list-disc pl-4 space-y-1">
+                  <li>Salesforce</li>
+                  <li>Zoho CRM</li>
+                  <li>Podium</li>
+                  <li>Custom integrations via API</li>
+                </ul>
               </CardContent>
             </Card>
           </div>
