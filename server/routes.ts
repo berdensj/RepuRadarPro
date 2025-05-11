@@ -3,9 +3,15 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { z } from "zod";
-import { insertReviewSchema, insertAlertSchema, insertMetricsSchema, insertReviewRequestSchema } from "@shared/schema";
+import { 
+  insertReviewSchema, 
+  insertAlertSchema, 
+  insertMetricsSchema, 
+  insertReviewRequestSchema,
+  insertLocationSchema
+} from "@shared/schema";
 import { generateAIReply } from "./lib/openai";
-import { requireRole } from "./middleware/rbac";
+import { requireRole, attachPermissions } from "./middleware/rbac";
 
 // Import external services
 import { importGooglePlacesReviews } from "./services/google-places";
@@ -22,6 +28,9 @@ import {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
   setupAuth(app);
+
+  // Attach permissions to requests
+  app.use(attachPermissions);
 
   // API routes
   // Reviews
@@ -528,6 +537,136 @@ export async function registerRoutes(app: Express): Promise<Server> {
     (req, res, next) => verifyWebhookSignature(req, res, next, 'apple'),
     (req, res) => handleReviewWebhook(req, res, 'apple')
   );
+  
+  // Locations endpoints
+  app.get("/api/locations", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const locations = await storage.getLocations(userId);
+      
+      res.json(locations);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.post("/api/locations", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const validatedData = insertLocationSchema.parse({
+        ...req.body,
+        userId
+      });
+      
+      const location = await storage.createLocation(validatedData);
+      res.status(201).json(location);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/locations/:id", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const locationId = Number(req.params.id);
+      const location = await storage.getLocation(locationId);
+      
+      if (!location) {
+        return res.status(404).json({ message: "Location not found" });
+      }
+      
+      // Check if the location belongs to the user (unless admin or staff with permissions)
+      if (location.userId !== req.user!.id && !req.permissions?.canViewAllLocations) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      res.json(location);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.patch("/api/locations/:id", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const locationId = Number(req.params.id);
+      const location = await storage.getLocation(locationId);
+      
+      if (!location) {
+        return res.status(404).json({ message: "Location not found" });
+      }
+      
+      // Check if the location belongs to the user (unless admin or staff with permissions)
+      if (location.userId !== req.user!.id && !req.permissions?.canViewAllLocations) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const updatedLocation = await storage.updateLocation(locationId, req.body);
+      res.json(updatedLocation);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.delete("/api/locations/:id", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const locationId = Number(req.params.id);
+      const location = await storage.getLocation(locationId);
+      
+      if (!location) {
+        return res.status(404).json({ message: "Location not found" });
+      }
+      
+      // Check if the location belongs to the user (unless admin with permissions)
+      if (location.userId !== req.user!.id && !req.permissions?.canManageIntegrations) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      await storage.deleteLocation(locationId);
+      res.status(204).send();
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Staff-specific routes for locations
+  app.get("/api/staff/locations", requireRole('staff'), async (req, res, next) => {
+    try {
+      const locations = await storage.getAllLocations();
+      res.json(locations);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Permissions endpoint
+  app.get("/api/permissions", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      // Permissions are attached to the request by the attachPermissions middleware
+      res.json(req.permissions || {
+        canManageUsers: false,
+        canManageStaff: false,
+        canViewAllLocations: false,
+        canEditSettings: false,
+        canDeleteReviews: false,
+        canManageIntegrations: false,
+        canViewReports: false,
+        canBulkEditReviews: false,
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
 
   // Admin-only routes for user management
   app.get("/api/admin/users", requireRole('admin'), async (req, res, next) => {
