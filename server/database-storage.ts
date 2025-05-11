@@ -25,7 +25,10 @@ import {
   type InsertCompetitor,
   competitorReports,
   agencies,
-  agencyClients
+  agencyClients,
+  crmIntegrations,
+  type CrmIntegration,
+  type InsertCrmIntegration
 } from "@shared/schema";
 import { IStorage } from "./storage";
 import { db } from "./db";
@@ -555,5 +558,49 @@ export class DatabaseStorage implements IStorage {
       negativeReviews,
       recentTrend,
     };
+  }
+
+  // CRM Integration methods
+  async getCrmIntegrations(userId: number): Promise<CrmIntegration[]> {
+    return db
+      .select()
+      .from(crmIntegrations)
+      .where(eq(crmIntegrations.userId, userId));
+  }
+
+  async getCrmIntegration(id: number): Promise<CrmIntegration | undefined> {
+    const [integration] = await db
+      .select()
+      .from(crmIntegrations)
+      .where(eq(crmIntegrations.id, id));
+    
+    return integration;
+  }
+
+  async createCrmIntegration(insertIntegration: InsertCrmIntegration): Promise<CrmIntegration> {
+    const [integration] = await db
+      .insert(crmIntegrations)
+      .values(insertIntegration)
+      .returning();
+    
+    return integration;
+  }
+
+  async updateCrmIntegration(id: number, partial: Partial<CrmIntegration>): Promise<CrmIntegration> {
+    const [updatedIntegration] = await db
+      .update(crmIntegrations)
+      .set(partial)
+      .where(eq(crmIntegrations.id, id))
+      .returning();
+    
+    if (!updatedIntegration) {
+      throw new Error(`CRM Integration with id ${id} not found`);
+    }
+    
+    return updatedIntegration;
+  }
+
+  async deleteCrmIntegration(id: number): Promise<void> {
+    await db.delete(crmIntegrations).where(eq(crmIntegrations.id, id));
   }
 }
