@@ -39,13 +39,13 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { icon: UserCog, label: "Customer Management", href: "/admin/customers" },
     { icon: ClipboardCheck, label: "Customer Onboarding", href: "/admin/onboarding" },
     { icon: Users, label: "User Management", href: "/admin/users" },
+    { icon: BarChart2, label: "Analytics", href: "/admin/analytics" },
+    { icon: FileText, label: "Reports", href: "/admin/reports" },
     { icon: DollarSign, label: "Financial", href: "/admin/financial" },
     { icon: Server, label: "System Health", href: "/admin/system" },
     { icon: Home, label: "Return to Dashboard", href: "/" },
-    // Disabled menu items - these pages aren't implemented yet
-    // { icon: BarChart2, label: "Analytics", href: "/admin/analytics" },
+    // Disabled menu items - these pages aren't fully implemented yet
     // { icon: BellRing, label: "Notifications", href: "/admin/notifications" },
-    // { icon: FileText, label: "Reports", href: "/admin/reports" },
     // { icon: Settings, label: "Admin Settings", href: "/admin/settings" },
     // { icon: BadgeCheck, label: "Subscription Plans", href: "/admin/plans" },
   ];

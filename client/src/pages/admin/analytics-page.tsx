@@ -247,9 +247,9 @@ export default function AdminAnalyticsPage() {
                   ) : (
                     <BarChart
                       data={analyticsData?.ratingDistribution || []}
-                      xField="rating"
-                      yField="count"
-                      color="#8884d8"
+                      xKey="rating"
+                      yKeys={["count"]}
+                      colors={["#8884d8"]}
                     />
                   )}
                 </CardContent>
