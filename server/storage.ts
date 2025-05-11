@@ -32,7 +32,7 @@ export interface IStorage {
   createAlert(alert: InsertAlert): Promise<Alert>;
   markAlertAsRead(id: number): Promise<Alert>;
 
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
 }
 
 export class MemStorage implements IStorage {
@@ -200,4 +200,10 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Import the database storage implementation
+import { DatabaseStorage } from "./database-storage";
+
+// Use DatabaseStorage instead of MemStorage for production
+// Comment the line below and uncomment the one after it to switch to in-memory storage for development
+// export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
