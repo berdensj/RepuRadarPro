@@ -100,11 +100,11 @@ export default function AuthPage() {
               <div>
                 <form onSubmit={onLoginSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">Email or Username</Label>
                     <Input 
                       id="email" 
-                      type="email" 
-                      placeholder="you@example.com" 
+                      type="text" 
+                      placeholder="you@example.com or username" 
                       value={loginEmail} 
                       onChange={(e) => setLoginEmail(e.target.value)} 
                     />
