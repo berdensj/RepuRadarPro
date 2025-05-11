@@ -50,6 +50,7 @@ interface User {
   plan: string;
   createdAt: string;
   profilePicture?: string | null;
+  locationCount?: number; // Number of locations this user has
 }
 
 export default function AdminUsersPage() {
@@ -57,6 +58,7 @@ export default function AdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [locationFilter, setLocationFilter] = useState("all"); // Add state for location filtering
   
   const { data: users, isLoading } = useQuery<User[]>({
     queryKey: ["/api/admin/users"],
@@ -82,7 +84,14 @@ export default function AdminUsersPage() {
       // Filter by role
       const matchesRole = roleFilter === "all" || user.role === roleFilter;
       
-      return matchesSearch && matchesRole;
+      // Filter by location count
+      const matchesLocationFilter = 
+        locationFilter === "all" || 
+        (locationFilter === "multi" && (user.locationCount || 0) > 1) ||
+        (locationFilter === "single" && (user.locationCount || 0) === 1) ||
+        (locationFilter === "none" && (user.locationCount || 0) === 0);
+      
+      return matchesSearch && matchesRole && matchesLocationFilter;
     })
     .sort((a, b) => {
       if (sortBy === "createdAt") {
@@ -141,6 +150,18 @@ export default function AdminUsersPage() {
               </SelectContent>
             </Select>
             
+            <Select value={locationFilter} onValueChange={setLocationFilter}>
+              <SelectTrigger className="w-full md:w-[170px]">
+                <SelectValue placeholder="Filter by locations" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Locations</SelectItem>
+                <SelectItem value="multi">Multi-Location</SelectItem>
+                <SelectItem value="single">Single Location</SelectItem>
+                <SelectItem value="none">No Locations</SelectItem>
+              </SelectContent>
+            </Select>
+            
             <Button variant="outline" className="md:w-auto">
               <Download className="mr-2 h-4 w-4" />
               Export
@@ -195,6 +216,15 @@ export default function AdminUsersPage() {
                     <TableHead>
                       <div 
                         className="flex items-center cursor-pointer"
+                        onClick={() => toggleSort("locationCount")}
+                      >
+                        Locations
+                        <ArrowUpDown className="ml-2 h-4 w-4" />
+                      </div>
+                    </TableHead>
+                    <TableHead>
+                      <div 
+                        className="flex items-center cursor-pointer"
                         onClick={() => toggleSort("isActive")}
                       >
                         Status
@@ -218,6 +248,7 @@ export default function AdminUsersPage() {
                     Array.from({ length: 5 }).map((_, i) => (
                       <TableRow key={i}>
                         <TableCell><Skeleton className="h-8 w-[180px]" /></TableCell>
+                        <TableCell><Skeleton className="h-8 w-20" /></TableCell>
                         <TableCell><Skeleton className="h-8 w-20" /></TableCell>
                         <TableCell><Skeleton className="h-8 w-20" /></TableCell>
                         <TableCell><Skeleton className="h-8 w-20" /></TableCell>
@@ -269,6 +300,21 @@ export default function AdminUsersPage() {
                             <Badge className="bg-green-600">Professional</Badge>
                           ) : (
                             <Badge variant="outline">Free</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {(user.locationCount || 0) > 1 ? (
+                            <Badge className="bg-blue-600">
+                              {user.locationCount} locations
+                            </Badge>
+                          ) : (user.locationCount || 0) === 1 ? (
+                            <Badge variant="outline" className="border-green-500 text-green-600">
+                              1 location
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="border-slate-500 text-slate-600">
+                              None
+                            </Badge>
                           )}
                         </TableCell>
                         <TableCell>
