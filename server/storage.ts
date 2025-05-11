@@ -165,6 +165,17 @@ export class MemStorage implements IStorage {
   async getAllUsers(): Promise<User[]> {
     return Array.from(this.users.values());
   }
+  
+  // Location methods
+  async getLocations(userId: number): Promise<Location[]> {
+    return Array.from(this.locations.values()).filter(
+      (location) => location.userId === userId
+    );
+  }
+  
+  async getAllLocations(): Promise<Location[]> {
+    return Array.from(this.locations.values());
+  }
 
   // Review methods
   async getReviewsByUserId(userId: number): Promise<Review[]> {
@@ -285,7 +296,15 @@ export class MemStorage implements IStorage {
 
   async createAlert(insertAlert: InsertAlert): Promise<Alert> {
     const id = this.alertCurrentId++;
-    const alert: Alert = { ...insertAlert, id };
+    // Ensure all required fields are present with proper types
+    const alert: Alert = {
+      id,
+      userId: insertAlert.userId,
+      alertType: insertAlert.alertType,
+      content: insertAlert.content,
+      date: new Date(), // Always create with a valid date
+      isRead: false // Always create as unread
+    };
     this.alerts.set(id, alert);
     return alert;
   }

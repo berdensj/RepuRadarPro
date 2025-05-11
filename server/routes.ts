@@ -980,12 +980,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/users", requireRole('admin'), async (req, res, next) => {
     try {
       const users = await storage.getAllUsers();
+      const allLocations = await storage.getAllLocations();
       
-      // Remove sensitive information
-      const safeUsers = users.map(user => {
+      // Remove sensitive information and add location counts
+      const safeUsers = await Promise.all(users.map(async user => {
         const { password, ...userWithoutPassword } = user;
-        return userWithoutPassword;
-      });
+        
+        // Count locations for this user
+        const locationCount = allLocations.filter(location => location.userId === user.id).length;
+        
+        return {
+          ...userWithoutPassword,
+          locationCount
+        };
+      }));
       
       res.json(safeUsers);
     } catch (error) {
