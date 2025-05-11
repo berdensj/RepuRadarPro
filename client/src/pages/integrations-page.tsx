@@ -40,7 +40,14 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Location } from '@shared/schema';
+// Define the Location interface here
+interface Location {
+  id: number;
+  userId: number;
+  name: string;
+  address?: string;
+  phone?: string;
+}
 
 // Form schemas for each integration
 const googlePlacesSchema = z.object({
