@@ -73,9 +73,20 @@ export function Sidebar({ className }: SidebarProps) {
             <ChartLine className="h-5 w-5 mr-2" />
             RepuRadar
           </div>
-          <Button variant="ghost" size="sm" onClick={toggleMobileMenu}>
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+          <div className="flex items-center">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleLogout}
+              disabled={logoutMutation.isPending}
+              className="mr-1"
+            >
+              <LogOut className="h-5 w-5" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={toggleMobileMenu}>
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </Button>
+          </div>
         </div>
         
         {/* Desktop Logo */}
@@ -114,7 +125,7 @@ export function Sidebar({ className }: SidebarProps) {
         </nav>
         
         {/* User Profile */}
-        <div className={cn("hidden lg:block mt-auto pt-4 border-t border-slate-200", isMobile && mobileMenuOpen && "block mt-4")}>
+        <div className={cn("mt-auto pt-4 border-t border-slate-200", isMobile && !mobileMenuOpen && "hidden")}>
           <div className="flex items-center px-4 py-2">
             <Avatar className="h-9 w-9 mr-3">
               {user?.profilePicture ? (
