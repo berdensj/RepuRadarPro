@@ -18,6 +18,7 @@ import CompetitorsPage from "@/pages/competitors-page";
 import ReviewRequestsPage from "@/pages/review-requests-page";
 import ProfilePage from "@/pages/profile-page";
 import HelpPage from "@/pages/help-page";
+import AdminDashboardPage from "@/pages/admin-dashboard-page";
 import { Route } from "wouter";
 
 function Router() {

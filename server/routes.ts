@@ -668,6 +668,314 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Dashboard API endpoints
+  app.get("/api/admin/dashboard", requireRole('admin'), async (req, res, next) => {
+    try {
+      const { timeRange = '30days' } = req.query;
+      
+      // In a real app, this would fetch real dashboard data based on the time range
+      // For now, we'll return sample data
+      const dashboardData = {
+        metrics: {
+          activeUsers: 2845,
+          activeUsersChange: 12.6,
+          revenue: 24512,
+          revenueChange: 8.2,
+          retentionRate: 94.3,
+          retentionChange: 1.8,
+          newSignups: 385,
+          signupsChange: -5.3
+        },
+        planDistribution: [
+          { name: 'Free', value: 65 },
+          { name: 'Pro', value: 27 },
+          { name: 'Business', value: 8 },
+        ],
+        revenueData: [
+          { month: 'Jan', revenue: 15400, users: 1820 },
+          { month: 'Feb', revenue: 17200, users: 2010 },
+          { month: 'Mar', revenue: 19100, users: 2180 },
+          { month: 'Apr', revenue: 21500, users: 2340 },
+          { month: 'May', revenue: 22800, users: 2520 },
+          { month: 'Jun', revenue: 24100, users: 2710 },
+          { month: 'Jul', revenue: 25400, users: 2845 },
+        ]
+      };
+      
+      res.json(dashboardData);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/admin/users/stats", requireRole('admin'), async (req, res, next) => {
+    try {
+      const { timeRange = '30days' } = req.query;
+      
+      // Sample user statistics
+      const userStats = {
+        total: 2845,
+        newUsers: {
+          count: 385,
+          change: -5.3
+        },
+        churn: {
+          count: 72,
+          rate: 2.5,
+          change: 0.3
+        },
+        planDistribution: [
+          { name: 'Free', value: 65 },
+          { name: 'Pro', value: 27 },
+          { name: 'Business', value: 8 },
+        ],
+        userGrowth: [
+          { month: 'Jan', newUsers: 280, churn: 42 },
+          { month: 'Feb', newUsers: 310, churn: 48 },
+          { month: 'Mar', newUsers: 340, churn: 52 },
+          { month: 'Apr', newUsers: 370, churn: 58 },
+          { month: 'May', newUsers: 390, churn: 62 },
+          { month: 'Jun', newUsers: 410, churn: 65 },
+          { month: 'Jul', newUsers: 385, churn: 72 },
+        ],
+        acquisitionSources: [
+          { name: 'Organic Search', value: 40 },
+          { name: 'Direct', value: 25 },
+          { name: 'Referral', value: 15 },
+          { name: 'Social Media', value: 12 },
+          { name: 'Paid Ads', value: 8 },
+        ]
+      };
+      
+      res.json(userStats);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/admin/users/recent", requireRole('admin'), async (req, res, next) => {
+    try {
+      // In a real app, we would fetch the most recent users
+      // Sample data for recent users
+      const recentUsers = [
+        {
+          id: 1001,
+          username: 'sarahjohnson',
+          email: 'sarah@example.com',
+          fullName: 'Sarah Johnson',
+          plan: 'Pro',
+          joinedAt: new Date().toISOString(),
+          status: 'active'
+        },
+        {
+          id: 1002,
+          username: 'michaelclark',
+          email: 'mike@example.com',
+          fullName: 'Michael Clark',
+          plan: 'Free',
+          joinedAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+          status: 'active'
+        },
+        {
+          id: 1003,
+          username: 'dentalcare',
+          email: 'admin@dentalcare.com',
+          fullName: 'Dental Care Inc.',
+          plan: 'Business',
+          joinedAt: new Date(Date.now() - 2 * 86400000).toISOString(), // 2 days ago
+          status: 'active'
+        }
+      ];
+      
+      res.json(recentUsers);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/admin/financial", requireRole('admin'), async (req, res, next) => {
+    try {
+      const { timeRange = '30days' } = req.query;
+      
+      // Sample financial data
+      const financialData = {
+        mrr: 24512,
+        mrrChange: 8.2,
+        arr: 294144,
+        arrChange: 12.4,
+        arpu: 8.62,
+        arpuChange: 3.1,
+        ltv: 412,
+        ltvChange: 5.7,
+        cac: 52,
+        ltvCacRatio: 7.9,
+        revenueBreakdown: [
+          { month: 'Jan', free: 0, pro: 9200, business: 6200 },
+          { month: 'Feb', free: 0, pro: 10100, business: 7100 },
+          { month: 'Mar', free: 0, pro: 11300, business: 7800 },
+          { month: 'Apr', free: 0, pro: 12600, business: 8900 },
+          { month: 'May', free: 0, pro: 13400, business: 9400 },
+          { month: 'Jun', free: 0, pro: 14100, business: 10000 },
+          { month: 'Jul', free: 0, pro: 14700, business: 10700 },
+        ],
+        revenueForecast: [
+          { month: 'Aug', revenue: 26800, projected: true },
+          { month: 'Sep', revenue: 28200, projected: true },
+          { month: 'Oct', revenue: 29600, projected: true },
+          { month: 'Nov', revenue: 31000, projected: true },
+          { month: 'Dec', revenue: 33500, projected: true },
+          { month: 'Jan', revenue: 35000, projected: true },
+        ],
+        planPricing: {
+          free: 0,
+          pro: 49,
+          business: 149,
+          enterprise: 499
+        }
+      };
+      
+      res.json(financialData);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/admin/transactions/recent", requireRole('admin'), async (req, res, next) => {
+    try {
+      // Sample recent transactions
+      const recentTransactions = [
+        {
+          id: 'txn_1001',
+          userId: 1001,
+          customerName: 'Sarah Johnson',
+          amount: 49.00,
+          date: new Date().toISOString(),
+          status: 'completed',
+          plan: 'Pro'
+        },
+        {
+          id: 'txn_1002',
+          userId: 1003,
+          customerName: 'Dental Care Inc.',
+          amount: 149.00,
+          date: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+          status: 'completed',
+          plan: 'Business'
+        },
+        {
+          id: 'txn_1003',
+          userId: 1004,
+          customerName: 'Robert Smith',
+          amount: 49.00,
+          date: new Date(Date.now() - 3 * 86400000).toISOString(), // 3 days ago
+          status: 'completed',
+          plan: 'Pro'
+        }
+      ];
+      
+      res.json(recentTransactions);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/admin/system-health", requireRole('admin'), async (req, res, next) => {
+    try {
+      // Sample system health data
+      const systemHealth = {
+        status: 'operational',
+        lastIncident: new Date(Date.now() - 13 * 86400000).toISOString(), // 13 days ago
+        apiPerformance: {
+          getRequests: 78, // in ms
+          postRequests: 124, // in ms
+          aiGeneration: 890 // in ms
+        },
+        errorRate: 0.5, // percentage
+        serverResources: {
+          cpu: 42, // percentage
+          memory: 68, // percentage
+          disk: 54, // percentage
+          network: 35 // percentage
+        },
+        databaseMetrics: {
+          size: 12.8, // in GB
+          queryPerformance: 42, // in ms
+          connections: 32,
+          maxConnections: 50,
+          tableSizes: {
+            reviews: 8.2, // in GB
+            users: 1.4, // in GB
+            locations: 0.8, // in GB
+            metrics: 1.8, // in GB
+            other: 0.6 // in GB
+          }
+        },
+        externalServices: [
+          {
+            name: 'Google Places API',
+            status: 'operational',
+            latency: 214, // in ms
+            lastCheck: new Date(Date.now() - 2 * 60000).toISOString() // 2 minutes ago
+          },
+          {
+            name: 'Yelp API',
+            status: 'operational',
+            latency: 287, // in ms
+            lastCheck: new Date(Date.now() - 4 * 60000).toISOString() // 4 minutes ago
+          },
+          {
+            name: 'Facebook Graph API',
+            status: 'operational',
+            latency: 312, // in ms
+            lastCheck: new Date(Date.now() - 3 * 60000).toISOString() // 3 minutes ago
+          },
+          {
+            name: 'OpenAI API',
+            status: 'operational',
+            latency: 587, // in ms
+            lastCheck: new Date(Date.now() - 1 * 60000).toISOString() // 1 minute ago
+          },
+          {
+            name: 'Apple Maps API',
+            status: 'degraded',
+            latency: 645, // in ms
+            lastCheck: new Date(Date.now() - 5 * 60000).toISOString() // 5 minutes ago
+          }
+        ],
+        systemEvents: [
+          {
+            id: 'evt_1001',
+            timestamp: new Date(Date.now() - 9 * 3600000).toISOString(), // 9 hours ago
+            type: 'deployment',
+            description: 'Deployed v2.8.3: Added Apple Maps integration and fixed review fetching issues.'
+          },
+          {
+            id: 'evt_1002',
+            timestamp: new Date(Date.now() - 1 * 86400000 - 3 * 3600000).toISOString(), // 1 day and 3 hours ago
+            type: 'incident',
+            description: 'Temporary API latency increase due to database maintenance. Resolved within 28 minutes.'
+          },
+          {
+            id: 'evt_1003',
+            timestamp: new Date(Date.now() - 2 * 86400000).toISOString(), // 2 days ago
+            type: 'scaling',
+            description: 'Added additional database read replicas to handle increased traffic.'
+          },
+          {
+            id: 'evt_1004',
+            timestamp: new Date(Date.now() - 4 * 86400000).toISOString(), // 4 days ago
+            type: 'deployment',
+            description: 'Deployed v2.8.2: Enhanced AI response generation and competitor analysis features.'
+          }
+        ]
+      };
+      
+      res.json(systemHealth);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // Admin-only routes for user management
   app.get("/api/admin/users", requireRole('admin'), async (req, res, next) => {
     try {

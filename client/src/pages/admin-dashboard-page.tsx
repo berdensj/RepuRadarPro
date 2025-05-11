@@ -53,8 +53,9 @@ import {
   Download, 
   Calendar, 
   Layers, 
-  Link, 
-  Loader2 
+  Link as LinkIcon, 
+  Loader2,
+  CheckCircle
 } from 'lucide-react';
 import {
   BarChart,
@@ -1309,7 +1310,7 @@ const AdminDashboardPage = () => {
                   <div>
                     <div className="flex justify-between mb-1">
                       <div className="text-sm font-medium flex items-center">
-                        <Link className="h-4 w-4 mr-1" />
+                        <LinkIcon className="h-4 w-4 mr-1" />
                         Integration Issues
                       </div>
                       <div className="text-sm font-medium">32%</div>
@@ -1478,7 +1479,7 @@ const AdminDashboardPage = () => {
               <CardContent>
                 <div className="text-center py-4">
                   <div className="inline-flex items-center justify-center rounded-full p-4 bg-green-100">
-                    <CheckCircle2 className="h-12 w-12 text-green-600" />
+                    <CheckCircle className="h-12 w-12 text-green-600" />
                   </div>
                   <h3 className="mt-2 text-xl font-semibold text-green-600">All Systems Online</h3>
                   <p className="text-sm text-muted-foreground mt-1">Last incident: 13 days ago</p>
