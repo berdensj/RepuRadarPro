@@ -54,7 +54,16 @@ import {
   X, 
   Edit, 
   Copy,
-  Trash2
+  Trash2,
+  Link,
+  Calendar,
+  Coins,
+  ShieldCheck,
+  Plug,
+  RotateCw,
+  Settings,
+  Building,
+  GanttChart
 } from 'lucide-react';
 import { 
   AlertDialog,
@@ -106,6 +115,19 @@ const templateFormSchema = z.object({
   isDefault: z.boolean().default(false),
 });
 
+// Define CRM integration schema
+const crmIntegrationSchema = z.object({
+  name: z.string().min(1, 'Integration name is required'),
+  crmType: z.enum(['housecallpro', 'servicetitan', 'salesforce', 'zoho', 'jobber', 'podium', 'mindbody', 'booker', 'square', 'schedulicity', 'vagaro', 'other']),
+  apiKey: z.string().min(1, 'API key is required'),
+  triggerEvent: z.enum(['appointment_completed', 'invoice_paid', 'service_completed', 'customer_created', 'treatment_finished', 'checkout_complete', 'membership_renewed', 'other']),
+  templateId: z.string().min(1, 'Template is required'),
+  delayHours: z.number().min(0).max(72).default(2),
+  active: z.boolean().default(true),
+  customEndpoint: z.string().optional(),
+  otherSettings: z.record(z.string()).optional(),
+});
+
 type ReviewRequest = {
   id: number;
   userId: number;
@@ -132,16 +154,38 @@ type ReviewTemplate = {
   createdAt: string;
 };
 
+type CRMIntegration = {
+  id: number;
+  userId: number;
+  name: string;
+  crmType: 'housecallpro' | 'servicetitan' | 'salesforce' | 'zoho' | 'jobber' | 'podium' | 'other';
+  apiKey: string;
+  triggerEvent: 'appointment_completed' | 'invoice_paid' | 'service_completed' | 'customer_created' | 'other';
+  templateId: number;
+  delayHours: number;
+  active: boolean;
+  customEndpoint?: string;
+  otherSettings?: Record<string, string>;
+  createdAt: string;
+  lastSync?: string;
+  requestsSent: number;
+};
+
 const ReviewRequestsPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [addRequestOpen, setAddRequestOpen] = useState(false);
   const [addTemplateOpen, setAddTemplateOpen] = useState(false);
+  const [addIntegrationOpen, setAddIntegrationOpen] = useState(false);
   const [deletingRequest, setDeletingRequest] = useState<number | null>(null);
   const [deletingTemplate, setDeletingTemplate] = useState<number | null>(null);
+  const [deletingIntegration, setDeletingIntegration] = useState<number | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<ReviewTemplate | null>(null);
+  const [editingIntegration, setEditingIntegration] = useState<CRMIntegration | null>(null);
   const [selectedTab, setSelectedTab] = useState('requests');
   const [templateType, setTemplateType] = useState<'email' | 'sms'>('email');
+  const [selectedIntegration, setSelectedIntegration] = useState<string | null>(null);
+  const [showTestIntegrationDialog, setShowTestIntegrationDialog] = useState(false);
 
   // Fetch review requests
   const { data: reviewRequests, isLoading: requestsLoading } = useQuery({
@@ -169,6 +213,21 @@ const ReviewRequestsPage = () => {
       return res.json();
     },
   });
+  
+  // Fetch CRM integrations
+  const { data: crmIntegrations, isLoading: integrationsLoading } = useQuery({
+    queryKey: ['/api/crm-integrations'],
+    queryFn: async () => {
+      try {
+        const res = await apiRequest('GET', '/api/crm-integrations');
+        return res.json();
+      } catch (error) {
+        // If the endpoint doesn't exist yet, return empty array
+        console.error("Failed to fetch CRM integrations:", error);
+        return [];
+      }
+    },
+  });
 
   // Form setup
   const requestForm = useForm<z.infer<typeof requestFormSchema>>({
@@ -192,6 +251,21 @@ const ReviewRequestsPage = () => {
       subject: '',
       content: '',
       isDefault: false,
+    },
+  });
+  
+  const integrationForm = useForm<z.infer<typeof crmIntegrationSchema>>({
+    resolver: zodResolver(crmIntegrationSchema),
+    defaultValues: {
+      name: '',
+      crmType: 'housecallpro',
+      apiKey: '',
+      triggerEvent: 'service_completed',
+      templateId: '',
+      delayHours: 2,
+      active: true,
+      customEndpoint: '',
+      otherSettings: {},
     },
   });
 
@@ -376,6 +450,123 @@ const ReviewRequestsPage = () => {
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
+  };
+
+  // Add CRM Integration Mutation
+  const addIntegrationMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof crmIntegrationSchema>) => {
+      const res = await apiRequest('POST', '/api/crm-integrations', values);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Integration Added',
+        description: 'The CRM integration has been set up successfully.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/crm-integrations'] });
+      integrationForm.reset();
+      setAddIntegrationOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: `Failed to create integration: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Update CRM Integration Mutation
+  const updateIntegrationMutation = useMutation({
+    mutationFn: async ({ id, values }: { id: number, values: z.infer<typeof crmIntegrationSchema> }) => {
+      const res = await apiRequest('PATCH', `/api/crm-integrations/${id}`, values);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Integration Updated',
+        description: 'The CRM integration has been updated successfully.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/crm-integrations'] });
+      integrationForm.reset();
+      setEditingIntegration(null);
+      setAddIntegrationOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: `Failed to update integration: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Delete CRM Integration Mutation
+  const deleteIntegrationMutation = useMutation({
+    mutationFn: async (integrationId: number) => {
+      await apiRequest('DELETE', `/api/crm-integrations/${integrationId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Integration Deleted',
+        description: 'The CRM integration has been removed successfully.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/crm-integrations'] });
+      setDeletingIntegration(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: `Failed to delete integration: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Test Integration Mutation
+  const testIntegrationMutation = useMutation({
+    mutationFn: async (integrationId: number) => {
+      const res = await apiRequest('POST', `/api/crm-integrations/${integrationId}/test`);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Test Successful',
+        description: 'Successfully connected to the CRM platform.',
+      });
+      setShowTestIntegrationDialog(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Connection Failed',
+        description: `Could not connect to the CRM: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  const onIntegrationSubmit = (values: z.infer<typeof crmIntegrationSchema>) => {
+    if (editingIntegration) {
+      updateIntegrationMutation.mutate({ id: editingIntegration.id, values });
+    } else {
+      addIntegrationMutation.mutate(values);
+    }
+  };
+
+  const handleEditIntegration = (integration: CRMIntegration) => {
+    setEditingIntegration(integration);
+    integrationForm.reset({
+      name: integration.name,
+      crmType: integration.crmType,
+      apiKey: integration.apiKey,
+      triggerEvent: integration.triggerEvent,
+      templateId: integration.templateId.toString(),
+      delayHours: integration.delayHours,
+      active: integration.active,
+      customEndpoint: integration.customEndpoint || '',
+      otherSettings: integration.otherSettings || {},
+    });
+    setAddIntegrationOpen(true);
   };
 
   const handleTemplateTypeChange = (type: 'email' | 'sms') => {
@@ -726,6 +917,7 @@ const ReviewRequestsPage = () => {
         <TabsList className="mb-6">
           <TabsTrigger value="requests">Review Requests</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
+          <TabsTrigger value="integrations">CRM Integrations</TabsTrigger>
         </TabsList>
         
         {/* Review Requests Tab */}
@@ -1132,6 +1324,477 @@ const ReviewRequestsPage = () => {
                   <li className="text-sm">Avoid using all caps or excessive punctuation</li>
                   <li className="text-sm">Include an opt-out option for compliance</li>
                 </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+        
+        {/* CRM Integrations Tab */}
+        <TabsContent value="integrations" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>CRM Integrations</CardTitle>
+              <CardDescription>
+                Automatically send review requests based on events in your CRM platform
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {integrationsLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : crmIntegrations && crmIntegrations.length > 0 ? (
+                <div className="rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Integration Name</TableHead>
+                        <TableHead>Platform</TableHead>
+                        <TableHead>Trigger</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Last Sync</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {crmIntegrations.map((integration: CRMIntegration) => (
+                        <TableRow key={integration.id}>
+                          <TableCell className="font-medium">{integration.name}</TableCell>
+                          <TableCell>
+                            <Badge variant="outline" className="capitalize">
+                              {integration.crmType.replace(/([A-Z])/g, ' $1').toLowerCase()}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="capitalize">
+                            {integration.triggerEvent.replace(/_/g, ' ')}
+                          </TableCell>
+                          <TableCell>
+                            {integration.active ? (
+                              <Badge className="bg-green-100 text-green-800">Active</Badge>
+                            ) : (
+                              <Badge variant="outline">Disabled</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            {integration.lastSync ? (
+                              <div className="flex items-center">
+                                <Clock className="mr-1 h-3 w-3 text-muted-foreground" />
+                                <span className="text-sm text-muted-foreground">
+                                  {new Date(integration.lastSync).toLocaleDateString()}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-sm text-muted-foreground">Never</span>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center space-x-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => handleEditIntegration(integration)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => {
+                                  setSelectedIntegration(integration.id.toString());
+                                  setShowTestIntegrationDialog(true);
+                                }}
+                              >
+                                <RotateCw className="h-4 w-4" />
+                              </Button>
+                              
+                              <AlertDialog 
+                                open={deletingIntegration === integration.id} 
+                                onOpenChange={(open) => {
+                                  if (!open) setDeletingIntegration(null);
+                                }}
+                              >
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="sm" onClick={() => setDeletingIntegration(integration.id)}>
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Delete Integration</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Are you sure you want to delete this CRM integration? This action cannot be undone.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction 
+                                      className="bg-red-600 text-white hover:bg-red-700" 
+                                      onClick={() => deleteIntegrationMutation.mutate(integration.id)}
+                                    >
+                                      {deleteIntegrationMutation.isPending ? 
+                                        <Loader2 className="h-4 w-4 animate-spin mr-2" /> : 
+                                        null
+                                      }
+                                      Delete
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              ) : (
+                <div className="text-center py-8 space-y-3">
+                  <div className="mx-auto bg-muted rounded-full w-12 h-12 flex items-center justify-center">
+                    <Plug className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium">No CRM integrations yet</h3>
+                  <p className="text-muted-foreground max-w-md mx-auto">
+                    Automate your review requests by connecting your CRM platform.
+                    Set triggers based on customer interactions to send review requests.
+                  </p>
+                  <Button 
+                    onClick={() => {
+                      integrationForm.reset();
+                      setEditingIntegration(null);
+                      setAddIntegrationOpen(true);
+                    }}
+                    className="mt-2"
+                  >
+                    <PlusCircle className="mr-2 h-4 w-4" /> 
+                    Connect CRM Platform
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+            {crmIntegrations && crmIntegrations.length > 0 && (
+              <CardFooter className="justify-end">
+                <Button 
+                  onClick={() => {
+                    integrationForm.reset();
+                    setEditingIntegration(null);
+                    setAddIntegrationOpen(true);
+                  }}
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" /> Add New Integration
+                </Button>
+              </CardFooter>
+            )}
+          </Card>
+          
+          {/* CRM Integration Dialog */}
+          <Dialog open={addIntegrationOpen} onOpenChange={setAddIntegrationOpen}>
+            <DialogContent className="sm:max-w-[650px]">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingIntegration ? 'Edit CRM Integration' : 'Connect CRM Platform'}
+                </DialogTitle>
+                <DialogDescription>
+                  {editingIntegration 
+                    ? 'Update your CRM integration settings.'
+                    : 'Connect your CRM platform to automatically send review requests based on customer interactions.'}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <Form {...integrationForm}>
+                <form onSubmit={integrationForm.handleSubmit(onIntegrationSubmit)} className="space-y-4">
+                  <FormField
+                    control={integrationForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Integration Name*</FormLabel>
+                        <FormControl>
+                          <Input placeholder="E.g., HouseCallPro Customer Reviews" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={integrationForm.control}
+                      name="crmType"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>CRM Platform*</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="housecallpro">HouseCall Pro</SelectItem>
+                              <SelectItem value="servicetitan">ServiceTitan</SelectItem>
+                              <SelectItem value="jobber">Jobber</SelectItem>
+                              <SelectItem value="salesforce">Salesforce</SelectItem>
+                              <SelectItem value="zoho">Zoho CRM</SelectItem>
+                              <SelectItem value="podium">Podium</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={integrationForm.control}
+                      name="apiKey"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>API Key/Token*</FormLabel>
+                          <FormControl>
+                            <Input type="password" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Find this in your CRM platform's developer settings
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={integrationForm.control}
+                      name="triggerEvent"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Trigger Event*</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="appointment_completed">Appointment Completed</SelectItem>
+                              <SelectItem value="invoice_paid">Invoice Paid</SelectItem>
+                              <SelectItem value="service_completed">Service Completed</SelectItem>
+                              <SelectItem value="customer_created">Customer Created</SelectItem>
+                              <SelectItem value="other">Custom Event</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={integrationForm.control}
+                      name="templateId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Review Template*</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a template" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {reviewTemplates && reviewTemplates.map((template: ReviewTemplate) => (
+                                <SelectItem key={template.id} value={template.id.toString()}>
+                                  {template.name} ({template.type})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={integrationForm.control}
+                      name="delayHours"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Delay (Hours)</FormLabel>
+                          <FormControl>
+                            <Input 
+                              type="number"
+                              min={0}
+                              max={72}
+                              {...field} 
+                              onChange={e => field.onChange(parseInt(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormDescription>
+                            Hours to wait after the trigger event before sending the request
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={integrationForm.control}
+                      name="active"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 p-4 border rounded-md">
+                          <FormControl>
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 mt-1"
+                              checked={field.value}
+                              onChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Enable Integration</FormLabel>
+                            <FormDescription>
+                              When enabled, review requests will be sent automatically
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  
+                  {integrationForm.watch('crmType') === 'other' && (
+                    <FormField
+                      control={integrationForm.control}
+                      name="customEndpoint"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Custom API Endpoint</FormLabel>
+                          <FormControl>
+                            <Input placeholder="https://api.example.com/webhook" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            For custom CRM integrations, specify the API endpoint
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                  
+                  <DialogFooter className="mt-6">
+                    <Button type="submit" disabled={addIntegrationMutation.isPending || updateIntegrationMutation.isPending}>
+                      {(addIntegrationMutation.isPending || updateIntegrationMutation.isPending) && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      {editingIntegration ? 'Update Integration' : 'Connect Platform'}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+          
+          {/* Test Integration Dialog */}
+          <Dialog open={showTestIntegrationDialog} onOpenChange={setShowTestIntegrationDialog}>
+            <DialogContent className="sm:max-w-[500px]">
+              <DialogHeader>
+                <DialogTitle>Test CRM Connection</DialogTitle>
+                <DialogDescription>
+                  Verify your CRM integration is working correctly.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium">Ready to test your integration</h4>
+                  <p className="text-sm text-muted-foreground">
+                    This will send a test request to your CRM platform to verify the connection.
+                    No review requests will be sent to customers.
+                  </p>
+                </div>
+                
+                <div className="border rounded-lg p-4 bg-muted/50">
+                  <div className="flex items-center space-x-4">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <Plug className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-medium">
+                        {crmIntegrations?.find((i: CRMIntegration) => 
+                          i.id.toString() === selectedIntegration
+                        )?.name || 'CRM Integration'}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {crmIntegrations?.find((i: CRMIntegration) => 
+                          i.id.toString() === selectedIntegration
+                        )?.crmType.replace(/([A-Z])/g, ' $1').split(' ').map(word => 
+                          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                        ).join(' ') || 'Unknown platform'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowTestIntegrationDialog(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={() => {
+                    const integrationId = parseInt(selectedIntegration || '0');
+                    if (integrationId > 0) {
+                      testIntegrationMutation.mutate(integrationId);
+                    }
+                  }}
+                  disabled={testIntegrationMutation.isPending}
+                >
+                  {testIntegrationMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Test Connection
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="h-8 w-8 rounded-lg bg-blue-100 flex items-center justify-center mb-2">
+                  <Building className="h-4 w-4 text-blue-700" />
+                </div>
+                <CardTitle className="text-base">HouseCall Pro</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Connect with HouseCall Pro to automatically send review requests when jobs are completed or invoices are paid.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center mb-2">
+                  <Calendar className="h-4 w-4 text-amber-700" />
+                </div>
+                <CardTitle className="text-base">ServiceTitan</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Integrate with ServiceTitan to send review requests after customer appointments are completed.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="h-8 w-8 rounded-lg bg-green-100 flex items-center justify-center mb-2">
+                  <GanttChart className="h-4 w-4 text-green-700" />
+                </div>
+                <CardTitle className="text-base">Other CRMs</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">
+                  Connect with other CRM platforms like Salesforce, Zoho, or any custom API that supports webhooks.
+                </p>
               </CardContent>
             </Card>
           </div>
