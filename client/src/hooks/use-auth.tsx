@@ -9,10 +9,22 @@ import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
+type Permissions = {
+  canManageUsers: boolean;
+  canManageStaff: boolean;
+  canViewAllLocations: boolean;
+  canEditSettings: boolean;
+  canDeleteReviews: boolean;
+  canManageIntegrations: boolean;
+  canViewReports: boolean;
+  canBulkEditReviews: boolean;
+};
+
 type AuthContextType = {
   user: User | null;
   isLoading: boolean;
   error: Error | null;
+  permissions: Permissions | null;
   loginMutation: UseMutationResult<User, Error, LoginData>;
   logoutMutation: UseMutationResult<void, Error, void>;
   registerMutation: UseMutationResult<User, Error, RegisterData>;
@@ -45,6 +57,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   } = useQuery<User | undefined, Error>({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
+  });
+
+  // Fetch user permissions
+  const { data: permissions } = useQuery<Permissions | undefined, Error>({
+    queryKey: ["/api/permissions"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    enabled: !!user,
   });
 
   const loginMutation = useMutation({
@@ -115,6 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: user ?? null,
         isLoading,
         error,
+        permissions: permissions ?? null,
         loginMutation,
         logoutMutation,
         registerMutation,

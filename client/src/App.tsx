@@ -12,6 +12,7 @@ import ReviewsPage from "@/pages/reviews-page";
 import AlertsPage from "@/pages/alerts-page";
 import ResponsesPage from "@/pages/responses-page";
 import AnalyticsPage from "@/pages/analytics-page";
+import SettingsPage from "@/pages/settings-page";
 import { Route } from "wouter";
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
       <ProtectedRoute path="/alerts" component={AlertsPage} />
       <ProtectedRoute path="/responses" component={ResponsesPage} />
       <ProtectedRoute path="/analytics" component={AnalyticsPage} />
+      <ProtectedRoute path="/settings" component={SettingsPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
