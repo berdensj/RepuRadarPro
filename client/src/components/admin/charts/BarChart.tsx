@@ -69,7 +69,9 @@ export default function BarChart({
         // Multi-series chart with explicit fields
         return yKeys.map((key, index) => ({
           label: labels && labels.length > index ? labels[index] : key,
-          data: data.map(item => item[key]),
+          data: data.map(item => item[key as keyof typeof item] !== undefined 
+            ? item[key as keyof typeof item] 
+            : 0),
           backgroundColor: colors[index % colors.length],
           borderColor: colors[index % colors.length],
           borderWidth: 1,
@@ -79,7 +81,9 @@ export default function BarChart({
         const barColor = color || colors[0];
         return [{
           label: yField,
-          data: data.map(item => item[yField as keyof typeof item]),
+          data: data.map(item => item[yField as keyof typeof item] !== undefined 
+            ? item[yField as keyof typeof item] 
+            : 0),
           backgroundColor: barColor,
           borderColor: barColor,
           borderWidth: 1,
@@ -96,11 +100,13 @@ export default function BarChart({
       }
     };
     
+    const datasets = getDatasets();
+    
     return {
       labels: xLabels,
       datasets,
     };
-  }, [data, xKey, yKeys, labels, colors, xFormatter]);
+  }, [data, xKey, xField, yKeys, yField, color, labels, colors, xFormatter]);
   
   const options: ChartOptions<'bar'> = {
     responsive: true,

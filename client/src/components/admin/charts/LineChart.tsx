@@ -118,7 +118,7 @@ export default function LineChart({
       labels: xLabels,
       datasets,
     };
-  }, [data, xKey, yKeys, labels, colors, xFormatter]);
+  }, [data, xKey, xField, yKeys, yField, categories, labels, colors, xFormatter]);
   
   const options: ChartOptions<'line'> = {
     responsive: true,
