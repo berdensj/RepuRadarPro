@@ -18,7 +18,10 @@ import CompetitorsPage from "@/pages/competitors-page";
 import ReviewRequestsPage from "@/pages/review-requests-page";
 import ProfilePage from "@/pages/profile-page";
 import HelpPage from "@/pages/help-page";
-import AdminDashboardPage from "@/pages/admin-dashboard-page";
+import AdminDashboardPage from "@/pages/admin/dashboard-page";
+import AdminUsersPage from "@/pages/admin/users-page";
+import AdminFinancialPage from "@/pages/admin/financial-page";
+import AdminSystemPage from "@/pages/admin/system-page";
 import { Route } from "wouter";
 
 function Router() {
