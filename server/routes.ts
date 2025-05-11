@@ -24,6 +24,15 @@ import {
   verifyFacebookWebhook,
   handleReviewWebhook 
 } from "./services/webhooks";
+import {
+  initializeSubscriptionPlans,
+  startTrial,
+  updateSubscription,
+  cancelSubscription,
+  hasFeatureAccess,
+  hasReachedLocationLimit,
+  hasValidSubscription
+} from "./services/subscription";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -2193,6 +2202,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: "client",
           password: "client123"
         }
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Subscription plans endpoints
+  app.get("/api/subscription-plans", async (req, res, next) => {
+    try {
+      // Initialize subscription plans if they don't exist
+      const plans = await initializeSubscriptionPlans();
+      res.json(plans.flat()); // Flatten array of arrays if any
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.post("/api/subscribe", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const { planId, isAnnual = false } = req.body;
+      
+      if (!planId) {
+        return res.status(400).json({ message: "Plan ID is required" });
+      }
+      
+      const updatedUser = await updateSubscription(userId, planId, isAnnual);
+      
+      // In a real application with Stripe integration, you might return a checkout URL
+      // For this demo, we'll just return the updated user
+      res.json(updatedUser);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.post("/api/start-trial", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const { planName = 'Pro' } = req.body;
+      
+      const updatedUser = await startTrial(userId, planName);
+      res.json(updatedUser);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.post("/api/cancel-subscription", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const updatedUser = await cancelSubscription(userId);
+      res.json(updatedUser);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/subscription", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Return subscription details
+      res.json({
+        plan: user.plan,
+        status: user.subscriptionStatus,
+        trialEndsAt: user.trialEndsAt,
+        subscriptionEndsAt: user.subscriptionEndsAt,
+        isValid: await hasValidSubscription(userId),
       });
     } catch (error) {
       next(error);
