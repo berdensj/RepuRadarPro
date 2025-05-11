@@ -40,7 +40,7 @@ export class MemStorage implements IStorage {
   private reviews: Map<number, Review>;
   private metricsMap: Map<number, Metrics>;
   private alerts: Map<number, Alert>;
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
   
   private userCurrentId: number;
   private reviewCurrentId: number;
