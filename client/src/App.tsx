@@ -13,6 +13,11 @@ import AlertsPage from "@/pages/alerts-page";
 import ResponsesPage from "@/pages/responses-page";
 import AnalyticsPage from "@/pages/analytics-page";
 import SettingsPage from "@/pages/settings-page";
+import IntegrationsPage from "@/pages/integrations-page";
+import CompetitorsPage from "@/pages/competitors-page";
+import ReviewRequestsPage from "@/pages/review-requests-page";
+import ProfilePage from "@/pages/profile-page";
+import HelpPage from "@/pages/help-page";
 import { Route } from "wouter";
 
 function Router() {
@@ -23,7 +28,12 @@ function Router() {
       <ProtectedRoute path="/alerts" component={AlertsPage} />
       <ProtectedRoute path="/responses" component={ResponsesPage} />
       <ProtectedRoute path="/analytics" component={AnalyticsPage} />
+      <ProtectedRoute path="/review-requests" component={ReviewRequestsPage} />
+      <ProtectedRoute path="/competitors" component={CompetitorsPage} />
+      <ProtectedRoute path="/integrations" component={IntegrationsPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
+      <ProtectedRoute path="/profile" component={ProfilePage} />
+      <ProtectedRoute path="/help" component={HelpPage} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>

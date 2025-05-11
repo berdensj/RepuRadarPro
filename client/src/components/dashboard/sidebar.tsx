@@ -3,7 +3,23 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { BarChart2, Bell, ChartPieIcon, ChartLine, LogOut, Menu, MessageSquare, Settings, Star, X } from "lucide-react";
+import { 
+  BarChart2, 
+  Bell, 
+  ChartPieIcon, 
+  ChartLine, 
+  LogOut, 
+  Menu, 
+  MessageSquare, 
+  Settings, 
+  Star, 
+  X,
+  Plug,
+  Send,
+  UsersRound,
+  User,
+  HelpCircle
+} from "lucide-react";
 import { useLocation } from "wouter";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -22,8 +38,13 @@ export function Sidebar({ className }: SidebarProps) {
     { icon: Star, label: "Reviews", href: "/reviews" },
     { icon: Bell, label: "Alerts", href: "/alerts" },
     { icon: MessageSquare, label: "AI Responses", href: "/responses" },
+    { icon: Send, label: "Review Requests", href: "/review-requests" },
+    { icon: UsersRound, label: "Competitors", href: "/competitors" },
     { icon: ChartPieIcon, label: "Analytics", href: "/analytics" },
+    { icon: Plug, label: "Integrations", href: "/integrations" },
     { icon: Settings, label: "Settings", href: "/settings" },
+    { icon: User, label: "Profile", href: "/profile" },
+    { icon: HelpCircle, label: "Help & Support", href: "/help" },
   ];
   
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
