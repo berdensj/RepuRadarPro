@@ -1,31 +1,67 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 import path from "path";
-import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
+import { fileURLToPath } from "url";
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     react(),
-    runtimeErrorOverlay(),
-    ...(process.env.NODE_ENV !== "production" &&
-    process.env.REPL_ID !== undefined
-      ? [
-          await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
-          ),
-        ]
-      : []),
+    tailwindcss(),
+    // Add any additional plugins here
   ],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "attached_assets"),
+      "@": path.resolve(__dirname, "./src"),
+      "@assets": path.resolve(__dirname, "./src/assets"),
+      "@components": path.resolve(__dirname, "./src/components"),
+      "@hooks": path.resolve(__dirname, "./src/hooks"),
+      "@lib": path.resolve(__dirname, "./src/lib"),
+      "@pages": path.resolve(__dirname, "./src/pages"),
+      "@shared": path.resolve(__dirname, "../shared"),
     },
   },
-  root: path.resolve(import.meta.dirname, "client"),
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:5000",
+        changeOrigin: true,
+      },
+      "/ws": {
+        target: "ws://localhost:5000",
+        ws: true,
+      },
+    },
+  },
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
-    emptyOutDir: true,
+    outDir: "dist",
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ['react', 'react-dom'],
+          ui: [
+            '@radix-ui/react-accordion',
+            '@radix-ui/react-alert-dialog',
+            '@radix-ui/react-avatar',
+            '@radix-ui/react-checkbox',
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-label',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-select',
+            '@radix-ui/react-separator',
+            '@radix-ui/react-slot',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-toast',
+          ],
+          charts: ['chart.js', 'react-chartjs-2', 'recharts'],
+        },
+      },
+    },
   },
 });
