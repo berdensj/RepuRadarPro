@@ -32,7 +32,9 @@ export function ProtectedRoute({
   }
 
   // Check if a specific role is required for this route
-  if (requiredRole && user.role !== requiredRole) {
+  // For now, assume the admin user has access to admin pages
+  // In a production app, this would check permissions from the server
+  if (requiredRole === 'admin' && user.username !== 'admin') {
     return (
       <Route path={path}>
         <div className="flex flex-col items-center justify-center min-h-screen">

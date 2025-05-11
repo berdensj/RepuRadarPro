@@ -63,12 +63,12 @@ export default function AdminDashboardPage() {
   });
 
   // Fetch user stats
-  const { data: userStats, isLoading: isLoadingUserStats } = useQuery({
+  const { data: userStats = {}, isLoading: isLoadingUserStats } = useQuery({
     queryKey: ["/api/admin/users/stats"],
   });
 
   // Fetch financial data
-  const { data: financialData, isLoading: isLoadingFinancial } = useQuery({
+  const { data: financialData = {}, isLoading: isLoadingFinancial } = useQuery({
     queryKey: ["/api/admin/financial"],
   });
 
@@ -592,12 +592,12 @@ export default function AdminDashboardPage() {
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{formatCurrency(financialData?.arr || 0)}</div>
+                      <div className="text-2xl font-bold">{formatCurrency(financialData.arr || 0)}</div>
                       <div className="flex items-center pt-1 text-xs text-muted-foreground">
                         <span className="flex items-center text-xs font-medium">
-                          {getTrendIcon(financialData?.arrChange || 0)}
-                          <span className={(financialData?.arrChange || 0) >= 0 ? "text-green-500" : "text-red-500"}>
-                            {formatPercentage(financialData?.arrChange || 0)}
+                          {getTrendIcon(financialData.arrChange || 0)}
+                          <span className={(financialData.arrChange || 0) >= 0 ? "text-green-500" : "text-red-500"}>
+                            {formatPercentage(financialData.arrChange || 0)}
                           </span>
                         </span>
                         <span className="ml-1">vs previous year</span>
