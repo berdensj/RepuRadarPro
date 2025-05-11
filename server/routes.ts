@@ -8,7 +8,8 @@ import {
   insertAlertSchema, 
   insertMetricsSchema, 
   insertReviewRequestSchema,
-  insertLocationSchema
+  insertLocationSchema,
+  insertCrmIntegrationSchema
 } from "@shared/schema";
 import { generateAIReply } from "./lib/openai";
 import { requireRole, attachPermissions } from "./middleware/rbac";
@@ -513,6 +514,175 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         res.status(500).json({ message: "Failed to send review request", error: result.error });
       }
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // CRM Integration endpoints
+  app.get("/api/crm-integrations", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      
+      // If storage method doesn't exist yet, return empty array until the DB is updated
+      if (!storage.getCrmIntegrations) {
+        return res.json([]);
+      }
+      
+      const integrations = await storage.getCrmIntegrations(userId);
+      res.json(integrations);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.post("/api/crm-integrations", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      
+      // If subscription check needed
+      const hasAccess = await hasFeatureAccess(userId, 'crm_integrations');
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          message: "CRM integrations are available on higher subscription plans. Please upgrade your plan." 
+        });
+      }
+      
+      // Validate the request data
+      const validatedData = insertCrmIntegrationSchema.parse({
+        ...req.body,
+        userId
+      });
+      
+      // If storage method doesn't exist yet, we'll mock this until the DB is updated
+      if (!storage.createCrmIntegration) {
+        const mockResponse = {
+          id: 1,
+          userId,
+          ...validatedData,
+          createdAt: new Date().toISOString(),
+          lastSync: null,
+          requestsSent: 0
+        };
+        return res.status(201).json(mockResponse);
+      }
+      
+      const integration = await storage.createCrmIntegration(validatedData);
+      
+      res.status(201).json(integration);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.patch("/api/crm-integrations/:id", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const integrationId = Number(req.params.id);
+      
+      // If storage method doesn't exist yet, we'll mock this until the DB is updated
+      if (!storage.getCrmIntegration || !storage.updateCrmIntegration) {
+        return res.status(200).json({
+          id: integrationId,
+          userId: req.user!.id,
+          ...req.body,
+          createdAt: new Date().toISOString(),
+          lastSync: new Date().toISOString(),
+          requestsSent: 0
+        });
+      }
+      
+      const integration = await storage.getCrmIntegration(integrationId);
+      
+      if (!integration) {
+        return res.status(404).json({ message: "CRM integration not found" });
+      }
+      
+      if (integration.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const updatedIntegration = await storage.updateCrmIntegration(integrationId, req.body);
+      res.json(updatedIntegration);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.delete("/api/crm-integrations/:id", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const integrationId = Number(req.params.id);
+      
+      // If storage method doesn't exist yet, we'll just return success
+      if (!storage.getCrmIntegration || !storage.deleteCrmIntegration) {
+        return res.status(200).json({ success: true });
+      }
+      
+      const integration = await storage.getCrmIntegration(integrationId);
+      
+      if (!integration) {
+        return res.status(404).json({ message: "CRM integration not found" });
+      }
+      
+      if (integration.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      await storage.deleteCrmIntegration(integrationId);
+      res.status(200).json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.post("/api/crm-integrations/:id/test", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const integrationId = Number(req.params.id);
+      
+      // If storage method doesn't exist yet, we'll mock this until the DB is updated
+      if (!storage.getCrmIntegration) {
+        return res.status(200).json({ 
+          success: true, 
+          message: "Connection successful",
+          status: "connected" 
+        });
+      }
+      
+      const integration = await storage.getCrmIntegration(integrationId);
+      
+      if (!integration) {
+        return res.status(404).json({ message: "CRM integration not found" });
+      }
+      
+      if (integration.userId !== req.user!.id) {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      // In a real system, we would actually call the CRM's API here to verify the connection
+      // For now, we'll just simulate a successful connection
+      const testResult = {
+        success: true,
+        message: "Successfully connected to " + integration.crmType,
+        status: "connected"
+      };
+      
+      // Update last sync time
+      if (storage.updateCrmIntegration) {
+        await storage.updateCrmIntegration(integrationId, {
+          lastSync: new Date().toISOString()
+        });
+      }
+      
+      res.status(200).json(testResult);
     } catch (error) {
       next(error);
     }

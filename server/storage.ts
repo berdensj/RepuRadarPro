@@ -3,7 +3,8 @@ import {
   reviews, type Review, type InsertReview, 
   metrics, type Metrics, type InsertMetrics, 
   alerts, type Alert, type InsertAlert,
-  locations, type Location, type InsertLocation
+  locations, type Location, type InsertLocation,
+  crmIntegrations, type CrmIntegration, type InsertCrmIntegration
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -43,6 +44,13 @@ export interface IStorage {
   getAlertsByUserId(userId: number, limit?: number): Promise<Alert[]>;
   createAlert(alert: InsertAlert): Promise<Alert>;
   markAlertAsRead(id: number): Promise<Alert>;
+  
+  // CRM Integration methods
+  getCrmIntegrations(userId: number): Promise<CrmIntegration[]>;
+  getCrmIntegration(id: number): Promise<CrmIntegration | undefined>;
+  createCrmIntegration(integration: InsertCrmIntegration): Promise<CrmIntegration>;
+  updateCrmIntegration(id: number, integration: Partial<CrmIntegration>): Promise<CrmIntegration>;
+  deleteCrmIntegration(id: number): Promise<void>;
 
   sessionStore: session.Store;
 }
@@ -53,6 +61,7 @@ export class MemStorage implements IStorage {
   private metricsMap: Map<number, Metrics>;
   private alerts: Map<number, Alert>;
   private locations: Map<number, Location>;
+  private crmIntegrations: Map<number, CrmIntegration>;
   sessionStore: session.Store;
   
   private userCurrentId: number;
@@ -60,6 +69,7 @@ export class MemStorage implements IStorage {
   private metricsCurrentId: number;
   private alertCurrentId: number;
   private locationCurrentId: number;
+  private crmIntegrationCurrentId: number;
 
   constructor() {
     this.users = new Map();
@@ -67,12 +77,14 @@ export class MemStorage implements IStorage {
     this.metricsMap = new Map();
     this.alerts = new Map();
     this.locations = new Map();
+    this.crmIntegrations = new Map();
     
     this.userCurrentId = 1;
     this.reviewCurrentId = 1;
     this.metricsCurrentId = 1;
     this.alertCurrentId = 1;
     this.locationCurrentId = 1;
+    this.crmIntegrationCurrentId = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
@@ -320,6 +332,44 @@ export class MemStorage implements IStorage {
     const updated = { ...alert, isRead: true };
     this.alerts.set(id, updated);
     return updated;
+  }
+  
+  // CRM Integration methods
+  async getCrmIntegrations(userId: number): Promise<CrmIntegration[]> {
+    return Array.from(this.crmIntegrations.values()).filter(
+      (integration) => integration.userId === userId
+    );
+  }
+
+  async getCrmIntegration(id: number): Promise<CrmIntegration | undefined> {
+    return this.crmIntegrations.get(id);
+  }
+
+  async createCrmIntegration(insertIntegration: InsertCrmIntegration): Promise<CrmIntegration> {
+    const id = this.crmIntegrationCurrentId++;
+    const integration: CrmIntegration = {
+      ...insertIntegration,
+      id,
+      createdAt: new Date(),
+      lastSync: null,
+      requestsSent: 0
+    };
+    this.crmIntegrations.set(id, integration);
+    return integration;
+  }
+
+  async updateCrmIntegration(id: number, partial: Partial<CrmIntegration>): Promise<CrmIntegration> {
+    const integration = this.crmIntegrations.get(id);
+    if (!integration) {
+      throw new Error(`CRM Integration with id ${id} not found`);
+    }
+    const updated = { ...integration, ...partial };
+    this.crmIntegrations.set(id, updated);
+    return updated;
+  }
+
+  async deleteCrmIntegration(id: number): Promise<void> {
+    this.crmIntegrations.delete(id);
   }
 }
 
