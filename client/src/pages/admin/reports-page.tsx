@@ -167,7 +167,7 @@ export default function AdminReportsPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {(reportsData?.reports || []).map((report, i) => (
+                      {(reportsData?.reports || []).map((report: { name: string, type: string, created: string, size: string, format: string }, i: number) => (
                         <TableRow key={i}>
                           <TableCell>
                             <Checkbox />
@@ -244,7 +244,7 @@ export default function AdminReportsPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {(scheduledReports?.schedules || []).map((schedule, i) => (
+                      {(scheduledReports?.schedules || []).map((schedule: { name: string, description: string, frequency: string, recipients: string, lastGenerated: string, status: string }, i: number) => (
                         <TableRow key={i}>
                           <TableCell>
                             <Checkbox />

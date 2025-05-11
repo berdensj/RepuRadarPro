@@ -289,7 +289,7 @@ export default function AdminAnalyticsPage() {
                             <Skeleton className="h-10 w-full" />
                           </>
                         ) : (
-                          analyticsData?.keyTopics?.map((topic, i) => (
+                          analyticsData?.keyTopics?.map((topic: { name: string, sentiment: number }, i: number) => (
                             <div key={i} className="flex items-center justify-between">
                               <span className="font-medium">{topic.name}</span>
                               <div className="flex items-center gap-2">
@@ -616,9 +616,9 @@ export default function AdminAnalyticsPage() {
                         <CardContent className="h-80">
                           <BarChart
                             data={customerLocationsData?.volumeByLocation || []}
-                            xField="name"
-                            yField="count"
-                            color="#3b82f6"
+                            xKey="name"
+                            yKeys={["count"]}
+                            colors={["#3b82f6"]}
                           />
                         </CardContent>
                       </Card>
@@ -630,9 +630,9 @@ export default function AdminAnalyticsPage() {
                         <CardContent className="h-80">
                           <BarChart
                             data={customerLocationsData?.ratingByLocation || []}
-                            xField="name"
-                            yField="rating"
-                            color="#10b981"
+                            xKey="name"
+                            yKeys={["rating"]}
+                            colors={["#10b981"]}
                           />
                         </CardContent>
                       </Card>
