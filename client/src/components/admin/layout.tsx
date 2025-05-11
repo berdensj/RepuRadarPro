@@ -40,13 +40,14 @@ export function AdminLayout({ children }: AdminLayoutProps) {
     { icon: ClipboardCheck, label: "Customer Onboarding", href: "/admin/onboarding" },
     { icon: Users, label: "User Management", href: "/admin/users" },
     { icon: DollarSign, label: "Financial", href: "/admin/financial" },
-    { icon: BarChart2, label: "Analytics", href: "/admin/analytics" },
-    { icon: BellRing, label: "Notifications", href: "/admin/notifications" },
-    { icon: FileText, label: "Reports", href: "/admin/reports" },
     { icon: Server, label: "System Health", href: "/admin/system" },
-    { icon: Settings, label: "Admin Settings", href: "/admin/settings" },
-    { icon: BadgeCheck, label: "Subscription Plans", href: "/admin/plans" },
     { icon: Home, label: "Return to Dashboard", href: "/" },
+    // Disabled menu items - these pages aren't implemented yet
+    // { icon: BarChart2, label: "Analytics", href: "/admin/analytics" },
+    // { icon: BellRing, label: "Notifications", href: "/admin/notifications" },
+    // { icon: FileText, label: "Reports", href: "/admin/reports" },
+    // { icon: Settings, label: "Admin Settings", href: "/admin/settings" },
+    // { icon: BadgeCheck, label: "Subscription Plans", href: "/admin/plans" },
   ];
   
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
