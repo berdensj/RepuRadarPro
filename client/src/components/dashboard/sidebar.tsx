@@ -18,7 +18,8 @@ import {
   Send,
   UsersRound,
   User,
-  HelpCircle
+  HelpCircle,
+  ShieldCheck
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -33,7 +34,7 @@ export function Sidebar({ className }: SidebarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isMobile = useIsMobile();
   
-  const navItems = [
+  const baseNavItems = [
     { icon: BarChart2, label: "Dashboard", href: "/" },
     { icon: Star, label: "Reviews", href: "/reviews" },
     { icon: Bell, label: "Alerts", href: "/alerts" },
@@ -46,6 +47,16 @@ export function Sidebar({ className }: SidebarProps) {
     { icon: User, label: "Profile", href: "/profile" },
     { icon: HelpCircle, label: "Help & Support", href: "/help" },
   ];
+  
+  // Admin-only navigation items
+  const adminNavItems = [
+    { icon: ShieldCheck, label: "Admin Dashboard", href: "/admin" },
+  ];
+  
+  // Combine nav items based on user role
+  const navItems = user?.role === 'admin' 
+    ? [...baseNavItems, ...adminNavItems] 
+    : baseNavItems;
   
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
   

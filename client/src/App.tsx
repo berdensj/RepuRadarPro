@@ -35,6 +35,7 @@ function Router() {
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/help" component={HelpPage} />
+      <ProtectedRoute path="/admin" component={AdminDashboardPage} requiredRole="admin" />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
