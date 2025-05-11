@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -40,7 +40,8 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-// Define the Location interface here
+
+// Define the Location interface
 interface Location {
   id: number;
   userId: number;
@@ -52,28 +53,24 @@ interface Location {
 // Form schemas for each integration
 const googlePlacesSchema = z.object({
   placeId: z.string().min(1, 'Google Place ID is required'),
-  apiKey: z.string().min(1, 'API Key is required'),
-  locationId: z.string().optional()
+  apiKey: z.string().min(1, 'API Key is required')
 });
 
 const yelpSchema = z.object({
   businessId: z.string().min(1, 'Yelp Business ID is required'),
-  apiKey: z.string().min(1, 'API Key is required'),
-  locationId: z.string().optional()
+  apiKey: z.string().min(1, 'API Key is required')
 });
 
 const facebookSchema = z.object({
   pageId: z.string().min(1, 'Facebook Page ID is required'),
-  accessToken: z.string().min(1, 'Access Token is required'),
-  locationId: z.string().optional()
+  accessToken: z.string().min(1, 'Access Token is required')
 });
 
 const appleMapsSchema = z.object({
   placeId: z.string().min(1, 'Apple Maps Place ID is required'),
   teamId: z.string().min(1, 'Team ID is required'),
   keyId: z.string().min(1, 'Key ID is required'),
-  privateKey: z.string().min(1, 'Private Key is required'),
-  locationId: z.string().optional()
+  privateKey: z.string().min(1, 'Private Key is required')
 });
 
 type IntegrationStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -81,6 +78,9 @@ type IntegrationStatus = 'idle' | 'loading' | 'success' | 'error';
 const IntegrationsPage = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  // Add state for selected location
+  const [selectedLocation, setSelectedLocation] = useState<string>("all");
   
   // Integration status states
   const [googleStatus, setGoogleStatus] = useState<IntegrationStatus>('idle');
@@ -108,8 +108,7 @@ const IntegrationsPage = () => {
     resolver: zodResolver(googlePlacesSchema),
     defaultValues: {
       placeId: '',
-      apiKey: '',
-      locationId: 'all'
+      apiKey: ''
     }
   });
 
@@ -117,8 +116,7 @@ const IntegrationsPage = () => {
     resolver: zodResolver(yelpSchema),
     defaultValues: {
       businessId: '',
-      apiKey: '',
-      locationId: 'all'
+      apiKey: ''
     }
   });
 
@@ -126,8 +124,7 @@ const IntegrationsPage = () => {
     resolver: zodResolver(facebookSchema),
     defaultValues: {
       pageId: '',
-      accessToken: '',
-      locationId: 'all'
+      accessToken: ''
     }
   });
 
@@ -137,15 +134,23 @@ const IntegrationsPage = () => {
       placeId: '',
       teamId: '',
       keyId: '',
-      privateKey: '',
-      locationId: 'all'
+      privateKey: ''
     }
   });
+
+  // Get selected location name for display
+  const getSelectedLocationName = () => {
+    if (selectedLocation === "all") return "All Locations";
+    const location = locations.find((loc: Location) => String(loc.id) === selectedLocation);
+    return location ? location.name : "Unknown Location";
+  };
 
   // Mutations
   const googleMutation = useMutation({
     mutationFn: async (values: z.infer<typeof googlePlacesSchema>) => {
-      const res = await apiRequest('POST', '/api/integrations/google-places/import', values);
+      // Add location to the payload
+      const payload = { ...values, locationId: selectedLocation === "all" ? null : selectedLocation };
+      const res = await apiRequest('POST', '/api/integrations/google-places/import', payload);
       return res.json();
     },
     onMutate: () => {
@@ -172,7 +177,9 @@ const IntegrationsPage = () => {
 
   const yelpMutation = useMutation({
     mutationFn: async (values: z.infer<typeof yelpSchema>) => {
-      const res = await apiRequest('POST', '/api/integrations/yelp/import', values);
+      // Add location to the payload
+      const payload = { ...values, locationId: selectedLocation === "all" ? null : selectedLocation };
+      const res = await apiRequest('POST', '/api/integrations/yelp/import', payload);
       return res.json();
     },
     onMutate: () => {
@@ -199,7 +206,9 @@ const IntegrationsPage = () => {
 
   const facebookMutation = useMutation({
     mutationFn: async (values: z.infer<typeof facebookSchema>) => {
-      const res = await apiRequest('POST', '/api/integrations/facebook/import', values);
+      // Add location to the payload
+      const payload = { ...values, locationId: selectedLocation === "all" ? null : selectedLocation };
+      const res = await apiRequest('POST', '/api/integrations/facebook/import', payload);
       return res.json();
     },
     onMutate: () => {
@@ -226,7 +235,9 @@ const IntegrationsPage = () => {
 
   const appleMutation = useMutation({
     mutationFn: async (values: z.infer<typeof appleMapsSchema>) => {
-      const res = await apiRequest('POST', '/api/integrations/apple-maps/import', values);
+      // Add location to the payload
+      const payload = { ...values, locationId: selectedLocation === "all" ? null : selectedLocation };
+      const res = await apiRequest('POST', '/api/integrations/apple-maps/import', payload);
       return res.json();
     },
     onMutate: () => {
@@ -274,6 +285,44 @@ const IntegrationsPage = () => {
       <p className="text-muted-foreground">
         Connect your business profiles from various platforms to import and track reviews.
       </p>
+      
+      {/* Location Selector */}
+      <div className="bg-card p-4 rounded-lg border border-border shadow-sm">
+        <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+          <div>
+            <h2 className="text-lg font-medium">Select Location</h2>
+            <p className="text-muted-foreground text-sm">
+              Choose which location to import reviews for
+            </p>
+          </div>
+          <div className="w-full md:w-64">
+            <Select
+              value={selectedLocation}
+              onValueChange={setSelectedLocation}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select a location" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Locations</SelectItem>
+                {locations.map((location: Location) => (
+                  <SelectItem key={location.id} value={String(location.id)}>
+                    {location.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        
+        {selectedLocation !== "all" && (
+          <div className="mt-4 p-3 bg-muted/50 rounded-md">
+            <p className="text-sm">
+              <span className="font-medium">Selected Location:</span> {getSelectedLocationName()}
+            </p>
+          </div>
+        )}
+      </div>
 
       <Tabs defaultValue="google">
         <TabsList className="mb-6">
@@ -289,7 +338,7 @@ const IntegrationsPage = () => {
             <CardHeader>
               <CardTitle>Google Places Integration</CardTitle>
               <CardDescription>
-                Import reviews from your Google Business Profile.
+                Import reviews from your Google Business Profile for {selectedLocation === "all" ? "all locations" : getSelectedLocationName()}.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -349,38 +398,6 @@ const IntegrationsPage = () => {
                     )}
                   />
 
-                  <FormField
-                    control={googleForm.control}
-                    name="locationId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a location" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="all">All Locations</SelectItem>
-                            {locations.map((location: Location) => (
-                              <SelectItem key={location.id} value={String(location.id)}>
-                                {location.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Link these reviews to a specific location
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   <Button 
                     type="submit" 
                     disabled={googleStatus === 'loading'}
@@ -409,7 +426,7 @@ const IntegrationsPage = () => {
             <CardHeader>
               <CardTitle>Yelp Integration</CardTitle>
               <CardDescription>
-                Import and monitor reviews from your Yelp Business page.
+                Import and monitor reviews from your Yelp Business page for {selectedLocation === "all" ? "all locations" : getSelectedLocationName()}.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -468,38 +485,6 @@ const IntegrationsPage = () => {
                       </FormItem>
                     )}
                   />
-                  
-                  <FormField
-                    control={yelpForm.control}
-                    name="locationId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a location" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="all">All Locations</SelectItem>
-                            {locations.map((location: Location) => (
-                              <SelectItem key={location.id} value={String(location.id)}>
-                                {location.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Link these reviews to a specific location
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <Button 
                     type="submit" 
@@ -529,7 +514,7 @@ const IntegrationsPage = () => {
             <CardHeader>
               <CardTitle>Facebook Integration</CardTitle>
               <CardDescription>
-                Connect your Facebook business page to import reviews.
+                Connect your Facebook business page to import reviews for {selectedLocation === "all" ? "all locations" : getSelectedLocationName()}.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -588,38 +573,6 @@ const IntegrationsPage = () => {
                       </FormItem>
                     )}
                   />
-                  
-                  <FormField
-                    control={facebookForm.control}
-                    name="locationId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a location" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="all">All Locations</SelectItem>
-                            {locations.map((location: Location) => (
-                              <SelectItem key={location.id} value={String(location.id)}>
-                                {location.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Link these reviews to a specific location
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
 
                   <Button 
                     type="submit" 
@@ -649,7 +602,7 @@ const IntegrationsPage = () => {
             <CardHeader>
               <CardTitle>Apple Maps Integration</CardTitle>
               <CardDescription>
-                Import reviews from your Apple Maps Connect business listing.
+                Import reviews from your Apple Maps Connect business listing for {selectedLocation === "all" ? "all locations" : getSelectedLocationName()}.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -741,38 +694,6 @@ const IntegrationsPage = () => {
                         </FormControl>
                         <FormDescription>
                           The contents of your private key file
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={appleForm.control}
-                    name="locationId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a location" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="all">All Locations</SelectItem>
-                            {locations.map((location: Location) => (
-                              <SelectItem key={location.id} value={String(location.id)}>
-                                {location.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Link these reviews to a specific location
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
