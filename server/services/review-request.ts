@@ -86,14 +86,16 @@ export async function sendSmsReviewRequest(
     // Create simple SMS message
     const message = `Hi ${customerName}, thank you for choosing ${businessName}! We'd love to hear your feedback. Please leave a review at: ${reviewLink}`;
     
+    // Create form data for Twilio API
+    const params = new URLSearchParams();
+    params.append('To', to);
+    params.append('From', twilioClient.phoneNumber || '');
+    params.append('Body', message);
+    
     // Make request to Twilio API
     const response = await axios.post(
       `https://api.twilio.com/2010-04-01/Accounts/${twilioClient.accountSid}/Messages.json`,
-      new URLSearchParams({
-        To: to,
-        From: twilioClient.phoneNumber,
-        Body: message,
-      }),
+      params,
       {
         auth: {
           username: twilioClient.accountSid,

@@ -82,7 +82,17 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userCurrentId++;
-    const user: User = { ...insertUser, id };
+    const user: User = { 
+      ...insertUser, 
+      id,
+      // Ensure all required fields are present
+      role: 'user',
+      isActive: true,
+      createdAt: new Date(),
+      // Handle nullable fields with defaults
+      profilePicture: insertUser.profilePicture || null,
+      plan: insertUser.plan || 'free'
+    };
     this.users.set(id, user);
     return user;
   }
@@ -100,7 +110,19 @@ export class MemStorage implements IStorage {
 
   async createReview(insertReview: InsertReview): Promise<Review> {
     const id = this.reviewCurrentId++;
-    const review: Review = { ...insertReview, id };
+    const review: Review = { 
+      ...insertReview, 
+      id,
+      // Ensure all required fields are present
+      date: insertReview.date || new Date(),
+      locationId: insertReview.locationId || null,
+      isResolved: insertReview.isResolved ?? false,
+      // Handle nullable fields with defaults
+      response: insertReview.response || null,
+      externalId: insertReview.externalId || null,
+      sentimentScore: insertReview.sentimentScore || null,
+      keywords: insertReview.keywords || null
+    };
     this.reviews.set(id, review);
     return review;
   }
@@ -154,7 +176,17 @@ export class MemStorage implements IStorage {
 
   async createMetrics(insertMetrics: InsertMetrics): Promise<Metrics> {
     const id = this.metricsCurrentId++;
-    const metrics: Metrics = { ...insertMetrics, id };
+    const metrics: Metrics = { 
+      ...insertMetrics, 
+      id,
+      // Ensure all required fields are present
+      date: insertMetrics.date || new Date(),
+      // Handle nullable fields with defaults
+      averageRating: insertMetrics.averageRating || null,
+      totalReviews: insertMetrics.totalReviews || null,
+      positivePercentage: insertMetrics.positivePercentage || null,
+      keywordTrends: insertMetrics.keywordTrends || null
+    };
     this.metricsMap.set(id, metrics);
     return metrics;
   }
