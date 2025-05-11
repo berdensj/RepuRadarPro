@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/use-auth';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import React, { useState } from "react";
+import { Helmet } from "react-helmet";
+import { useQuery } from "@tanstack/react-query";
+import { Sidebar } from "@/components/dashboard/sidebar";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,26 +10,13 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 import {
   Form,
   FormControl,
@@ -38,803 +25,1595 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { useToast } from '@/hooks/use-toast';
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Loader2, PlusCircle, Trash2, UserCog } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import {
+  AlertCircle,
+  AtSign,
+  Bell,
+  BellOff,
+  Calendar,
+  Check,
+  Clock,
+  Edit,
+  Globe,
+  Lock,
+  LogOut,
+  Mail,
+  MessageSquare,
+  Moon,
+  Save,
+  Settings as SettingsIcon,
+  Shield,
+  Smartphone,
+  Star,
+  Sun,
+  User,
+  UserPlus,
+} from "lucide-react";
+import { queryClient } from "@/lib/queryClient";
 
-// Define zod schema for location form
-const locationFormSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  address: z.string().optional(),
+// Types and schemas
+interface NotificationSettings {
+  email: {
+    enabled: boolean;
+    newReviews: boolean;
+    reviewResponses: boolean;
+    alerts: boolean;
+    reportReady: boolean;
+    weeklyDigest: boolean;
+    marketingUpdates: boolean;
+    time: string;
+    weekday: string;
+  };
+  mobile: {
+    enabled: boolean;
+    newReviews: boolean;
+    reviewResponses: boolean;
+    alerts: boolean;
+    reportReady: boolean;
+  };
+  browser: {
+    enabled: boolean;
+    newReviews: boolean;
+    reviewResponses: boolean;
+    alerts: boolean;
+  };
+}
+
+interface UserSettings {
+  theme: "light" | "dark" | "system";
+  language: string;
+  timezone: string;
+  dateFormat: string;
+  timeFormat: "12h" | "24h";
+}
+
+interface SecuritySettings {
+  twoFactorEnabled: boolean;
+  lastPasswordChange: string;
+  activeSessions: {
+    device: string;
+    location: string;
+    lastActive: string;
+    current: boolean;
+  }[];
+  loginHistory: {
+    date: string;
+    ip: string;
+    device: string;
+    location: string;
+    status: "success" | "failed";
+  }[];
+}
+
+// Form schemas
+const notificationsFormSchema = z.object({
+  email: z.object({
+    enabled: z.boolean(),
+    newReviews: z.boolean(),
+    reviewResponses: z.boolean(),
+    alerts: z.boolean(),
+    reportReady: z.boolean(),
+    weeklyDigest: z.boolean(),
+    marketingUpdates: z.boolean(),
+    time: z.string(),
+    weekday: z.string(),
+  }),
+  mobile: z.object({
+    enabled: z.boolean(),
+    newReviews: z.boolean(),
+    reviewResponses: z.boolean(),
+    alerts: z.boolean(),
+    reportReady: z.boolean(),
+  }),
+  browser: z.object({
+    enabled: z.boolean(),
+    newReviews: z.boolean(),
+    reviewResponses: z.boolean(),
+    alerts: z.boolean(),
+  }),
+});
+
+const profileFormSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Please enter a valid email"),
   phone: z.string().optional(),
-  googlePlaceId: z.string().optional(),
-  yelpBusinessId: z.string().optional(),
-  facebookPageId: z.string().optional(),
-  applePlaceId: z.string().optional(),
+  jobTitle: z.string().optional(),
+  company: z.string().optional(),
+  bio: z.string().optional(),
 });
 
-// Define zod schema for user form 
-const userFormSchema = z.object({
-  username: z.string().min(3, 'Username must be at least 3 characters'),
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  fullName: z.string().min(1, 'Full name is required'),
-  role: z.enum(['admin', 'staff', 'user']),
+const preferencesFormSchema = z.object({
+  theme: z.enum(["light", "dark", "system"]),
+  language: z.string(),
+  timezone: z.string(),
+  dateFormat: z.string(),
+  timeFormat: z.enum(["12h", "24h"]),
 });
 
-type Location = {
-  id: number;
-  name: string;
-  address: string | null;
-  phone: string | null;
-  googlePlaceId: string | null;
-  yelpBusinessId: string | null;
-  facebookPageId?: string | null;
-  applePlaceId?: string | null;
-};
-
-type User = {
-  id: number;
-  username: string;
-  email: string;
-  fullName: string;
-  role: string;
-  isActive: boolean;
-};
+const passwordFormSchema = z.object({
+  currentPassword: z.string().min(8, "Password must be at least 8 characters"),
+  newPassword: z.string().min(8, "Password must be at least 8 characters"),
+  confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
+});
 
 const SettingsPage = () => {
-  const { user, permissions } = useAuth();
+  const [activeTab, setActiveTab] = useState("notifications");
   const { toast } = useToast();
-  const [addLocationOpen, setAddLocationOpen] = useState(false);
-  const [addUserOpen, setAddUserOpen] = useState(false);
-  const [deletingLocation, setDeletingLocation] = useState<number | null>(null);
-  const [roleDialogOpen, setRoleDialogOpen] = useState<number | null>(null);
-  const [statusDialogOpen, setStatusDialogOpen] = useState<number | null>(null);
 
-  // Fetch all locations, either for specific user or all (for admin/staff)
-  const { data: locations, isLoading: locationsLoading } = useQuery({
-    queryKey: ['/api/locations'],
+  // Fetch notification settings
+  const {
+    data: notificationSettings,
+    isLoading: isLoadingNotifications,
+    error: notificationsError,
+  } = useQuery({
+    queryKey: ["/api/settings/notifications"],
     queryFn: async () => {
-      const endpoint = permissions?.canViewAllLocations 
-        ? '/api/staff/locations' 
-        : '/api/locations';
-      
-      const res = await apiRequest('GET', endpoint);
-      return res.json();
+      // Mock data
+      const settings: NotificationSettings = {
+        email: {
+          enabled: true,
+          newReviews: true,
+          reviewResponses: true,
+          alerts: true,
+          reportReady: true,
+          weeklyDigest: true,
+          marketingUpdates: false,
+          time: "09:00",
+          weekday: "monday",
+        },
+        mobile: {
+          enabled: true,
+          newReviews: true,
+          reviewResponses: false,
+          alerts: true,
+          reportReady: false,
+        },
+        browser: {
+          enabled: true,
+          newReviews: true,
+          reviewResponses: true,
+          alerts: true,
+        },
+      };
+
+      return settings;
     },
   });
 
-  // Fetch all users (admin only)
-  const { data: users, isLoading: usersLoading } = useQuery({
-    queryKey: ['/api/admin/users'],
+  // Fetch user profile data
+  const {
+    data: profileData,
+    isLoading: isLoadingProfile,
+    error: profileError,
+  } = useQuery({
+    queryKey: ["/api/user/profile"],
     queryFn: async () => {
-      const res = await apiRequest('GET', '/api/admin/users');
-      return res.json();
+      // Mock data
+      return {
+        name: "Alex Johnson",
+        email: "alex.johnson@example.com",
+        phone: "+1 (555) 123-4567",
+        jobTitle: "Marketing Manager",
+        company: "Acme Inc.",
+        bio: "Marketing professional with 8+ years experience managing brand reputation and customer engagement strategies.",
+        avatarUrl: "https://i.pravatar.cc/150?img=3"
+      };
     },
-    enabled: !!permissions?.canManageUsers,
   });
 
-  // Add Location Form
-  const locationForm = useForm<z.infer<typeof locationFormSchema>>({
-    resolver: zodResolver(locationFormSchema),
+  // Fetch user preferences
+  const {
+    data: userPreferences,
+    isLoading: isLoadingPreferences,
+    error: preferencesError,
+  } = useQuery({
+    queryKey: ["/api/settings/preferences"],
+    queryFn: async () => {
+      // Mock data
+      const settings: UserSettings = {
+        theme: "system",
+        language: "en-US",
+        timezone: "America/New_York",
+        dateFormat: "MM/DD/YYYY",
+        timeFormat: "12h",
+      };
+
+      return settings;
+    },
+  });
+
+  // Fetch security settings
+  const {
+    data: securitySettings,
+    isLoading: isLoadingSecurity,
+    error: securityError,
+  } = useQuery({
+    queryKey: ["/api/settings/security"],
+    queryFn: async () => {
+      // Mock data
+      const settings: SecuritySettings = {
+        twoFactorEnabled: true,
+        lastPasswordChange: "2025-04-15T10:30:00",
+        activeSessions: [
+          {
+            device: "Chrome on Windows",
+            location: "New York, USA",
+            lastActive: "2025-05-11T11:30:00",
+            current: true,
+          },
+          {
+            device: "Safari on iPhone",
+            location: "New York, USA",
+            lastActive: "2025-05-10T18:45:00",
+            current: false,
+          },
+        ],
+        loginHistory: [
+          {
+            date: "2025-05-11T11:30:00",
+            ip: "192.168.1.1",
+            device: "Chrome on Windows",
+            location: "New York, USA",
+            status: "success",
+          },
+          {
+            date: "2025-05-10T18:45:00",
+            ip: "192.168.1.2",
+            device: "Safari on iPhone",
+            location: "New York, USA",
+            status: "success",
+          },
+          {
+            date: "2025-05-08T14:20:00",
+            ip: "192.168.1.1",
+            device: "Chrome on Windows",
+            location: "New York, USA",
+            status: "success",
+          },
+          {
+            date: "2025-05-07T08:15:00",
+            ip: "203.0.113.1",
+            device: "Firefox on Windows",
+            location: "Chicago, USA",
+            status: "failed",
+          },
+        ],
+      };
+
+      return settings;
+    },
+  });
+
+  // Notifications form
+  const notificationsForm = useForm<z.infer<typeof notificationsFormSchema>>({
+    resolver: zodResolver(notificationsFormSchema),
     defaultValues: {
-      name: '',
-      address: '',
-      phone: '',
-      googlePlaceId: '',
-      yelpBusinessId: '',
-      facebookPageId: '',
-      applePlaceId: '',
+      email: {
+        enabled: true,
+        newReviews: true,
+        reviewResponses: true,
+        alerts: true,
+        reportReady: true,
+        weeklyDigest: true,
+        marketingUpdates: false,
+        time: "09:00",
+        weekday: "monday",
+      },
+      mobile: {
+        enabled: true,
+        newReviews: true,
+        reviewResponses: false,
+        alerts: true,
+        reportReady: false,
+      },
+      browser: {
+        enabled: true,
+        newReviews: true,
+        reviewResponses: true,
+        alerts: true,
+      },
     },
   });
 
-  // Add User Form
-  const userForm = useForm<z.infer<typeof userFormSchema>>({
-    resolver: zodResolver(userFormSchema),
+  // Profile form
+  const profileForm = useForm<z.infer<typeof profileFormSchema>>({
+    resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      username: '',
-      email: '',
-      password: '',
-      fullName: '',
-      role: 'user',
+      name: "",
+      email: "",
+      phone: "",
+      jobTitle: "",
+      company: "",
+      bio: "",
     },
   });
 
-  // Add Location Mutation
-  const addLocationMutation = useMutation({
-    mutationFn: async (values: z.infer<typeof locationFormSchema>) => {
-      const res = await apiRequest('POST', '/api/locations', values);
-      return res.json();
+  // Preferences form
+  const preferencesForm = useForm<z.infer<typeof preferencesFormSchema>>({
+    resolver: zodResolver(preferencesFormSchema),
+    defaultValues: {
+      theme: "system",
+      language: "en-US",
+      timezone: "America/New_York",
+      dateFormat: "MM/DD/YYYY",
+      timeFormat: "12h",
     },
-    onSuccess: () => {
-      toast({
-        title: 'Location Added',
-        description: 'The location has been added successfully.',
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
-      locationForm.reset();
-      setAddLocationOpen(false);
+  });
+
+  // Password form
+  const passwordForm = useForm<z.infer<typeof passwordFormSchema>>({
+    resolver: zodResolver(passwordFormSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     },
-    onError: (error: Error) => {
-      toast({
-        title: 'Error',
-        description: `Failed to add location: ${error.message}`,
-        variant: 'destructive',
+  });
+
+  // Set form defaults from fetched data
+  React.useEffect(() => {
+    if (notificationSettings) {
+      notificationsForm.reset(notificationSettings);
+    }
+
+    if (profileData) {
+      profileForm.reset({
+        name: profileData.name,
+        email: profileData.email,
+        phone: profileData.phone,
+        jobTitle: profileData.jobTitle,
+        company: profileData.company,
+        bio: profileData.bio,
       });
     }
-  });
 
-  // Delete Location Mutation
-  const deleteLocationMutation = useMutation({
-    mutationFn: async (locationId: number) => {
-      await apiRequest('DELETE', `/api/locations/${locationId}`);
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Location Deleted',
-        description: 'The location has been deleted successfully.',
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
-      setDeletingLocation(null);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Error',
-        description: `Failed to delete location: ${error.message}`,
-        variant: 'destructive',
-      });
+    if (userPreferences) {
+      preferencesForm.reset(userPreferences);
     }
-  });
+  }, [
+    notificationSettings, 
+    profileData, 
+    userPreferences, 
+    notificationsForm, 
+    profileForm, 
+    preferencesForm
+  ]);
 
-  // Add User Mutation
-  const addUserMutation = useMutation({
-    mutationFn: async (values: z.infer<typeof userFormSchema>) => {
-      const res = await apiRequest('POST', '/api/register', values);
-      return res.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: 'User Added',
-        description: 'The user has been added successfully.',
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      userForm.reset();
-      setAddUserOpen(false);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Error',
-        description: `Failed to add user: ${error.message}`,
-        variant: 'destructive',
-      });
-    }
-  });
-
-  // Update User Role Mutation
-  const updateUserRoleMutation = useMutation({
-    mutationFn: async ({ userId, role }: { userId: number, role: string }) => {
-      const res = await apiRequest('PATCH', `/api/admin/users/${userId}/role`, { role });
-      return res.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Role Updated',
-        description: 'The user role has been updated successfully.',
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      setRoleDialogOpen(null);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Error',
-        description: `Failed to update user role: ${error.message}`,
-        variant: 'destructive',
-      });
-    }
-  });
-
-  // Update User Status Mutation
-  const updateUserStatusMutation = useMutation({
-    mutationFn: async ({ userId, isActive }: { userId: number, isActive: boolean }) => {
-      const res = await apiRequest('PATCH', `/api/admin/users/${userId}/active`, { isActive });
-      return res.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Status Updated',
-        description: 'The user status has been updated successfully.',
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      setStatusDialogOpen(null);
-    },
-    onError: (error: Error) => {
-      toast({
-        title: 'Error',
-        description: `Failed to update user status: ${error.message}`,
-        variant: 'destructive',
-      });
-    }
-  });
-
-  const onLocationSubmit = (values: z.infer<typeof locationFormSchema>) => {
-    addLocationMutation.mutate(values);
+  const onNotificationsSubmit = (values: z.infer<typeof notificationsFormSchema>) => {
+    console.log("Updating notification settings:", values);
+    
+    toast({
+      title: "Notifications Updated",
+      description: "Your notification preferences have been saved.",
+    });
+    
+    // Refresh notifications data
+    queryClient.invalidateQueries({ queryKey: ["/api/settings/notifications"] });
   };
 
-  const onUserSubmit = (values: z.infer<typeof userFormSchema>) => {
-    addUserMutation.mutate(values);
+  const onProfileSubmit = (values: z.infer<typeof profileFormSchema>) => {
+    console.log("Updating profile:", values);
+    
+    toast({
+      title: "Profile Updated",
+      description: "Your profile information has been saved.",
+    });
+    
+    // Refresh profile data
+    queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
+  };
+
+  const onPreferencesSubmit = (values: z.infer<typeof preferencesFormSchema>) => {
+    console.log("Updating preferences:", values);
+    
+    toast({
+      title: "Preferences Updated",
+      description: "Your user preferences have been saved.",
+    });
+    
+    // Refresh preferences data
+    queryClient.invalidateQueries({ queryKey: ["/api/settings/preferences"] });
+  };
+
+  const onPasswordSubmit = (values: z.infer<typeof passwordFormSchema>) => {
+    console.log("Updating password:", values);
+    
+    toast({
+      title: "Password Updated",
+      description: "Your password has been changed successfully.",
+    });
+    
+    passwordForm.reset();
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-8">
-      <h1 className="text-3xl font-bold">Settings</h1>
-      <Tabs defaultValue="locations">
-        <TabsList className="mb-6">
-          <TabsTrigger value="locations">Locations</TabsTrigger>
-          {permissions?.canManageUsers && <TabsTrigger value="users">Users</TabsTrigger>}
-          <TabsTrigger value="account">Account</TabsTrigger>
-        </TabsList>
+    <>
+      <Helmet>
+        <title>Settings | RepuRadar</title>
+        <meta
+          name="description"
+          content="Manage your account settings and notification preferences."
+        />
+      </Helmet>
 
-        {/* Locations Tab */}
-        <TabsContent value="locations" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">Manage Locations</h2>
-            <Dialog open={addLocationOpen} onOpenChange={setAddLocationOpen}>
-              <DialogTrigger asChild>
-                <Button><PlusCircle className="mr-2 h-4 w-4" /> Add Location</Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
-                <DialogHeader>
-                  <DialogTitle>Add New Location</DialogTitle>
-                  <DialogDescription>
-                    Add the details of your business location here.
-                  </DialogDescription>
-                </DialogHeader>
-                <Form {...locationForm}>
-                  <form onSubmit={locationForm.handleSubmit(onLocationSubmit)} className="space-y-4">
-                    <FormField
-                      control={locationForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Location Name*</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Main Office" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+      <div className="min-h-screen flex flex-col lg:flex-row">
+        <Sidebar />
+
+        <main className="flex-1 p-4 lg:p-6 bg-slate-50 min-h-screen">
+          <div className="max-w-7xl mx-auto">
+            {/* Header */}
+            <header className="mb-6">
+              <h1 className="text-2xl font-semibold text-slate-800">Account Settings</h1>
+              <p className="text-slate-500">
+                Manage your profile, preferences, and notification settings
+              </p>
+            </header>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              {/* Settings Tabs */}
+              <div className="col-span-1">
+                <Card>
+                  <CardContent className="p-0">
+                    <nav className="flex flex-col">
+                      <button 
+                        className={`flex items-center gap-2 p-3 text-sm border-l-2 hover:bg-slate-50 ${
+                          activeTab === "notifications" 
+                            ? "border-l-blue-600 bg-slate-50 font-medium text-slate-900" 
+                            : "border-l-transparent text-slate-600"
+                        }`}
+                        onClick={() => setActiveTab("notifications")}
+                      >
+                        <Bell className="h-4 w-4" />
+                        Notifications
+                      </button>
+                      <button 
+                        className={`flex items-center gap-2 p-3 text-sm border-l-2 hover:bg-slate-50 ${
+                          activeTab === "profile" 
+                            ? "border-l-blue-600 bg-slate-50 font-medium text-slate-900" 
+                            : "border-l-transparent text-slate-600"
+                        }`}
+                        onClick={() => setActiveTab("profile")}
+                      >
+                        <User className="h-4 w-4" />
+                        Profile
+                      </button>
+                      <button 
+                        className={`flex items-center gap-2 p-3 text-sm border-l-2 hover:bg-slate-50 ${
+                          activeTab === "preferences" 
+                            ? "border-l-blue-600 bg-slate-50 font-medium text-slate-900" 
+                            : "border-l-transparent text-slate-600"
+                        }`}
+                        onClick={() => setActiveTab("preferences")}
+                      >
+                        <SettingsIcon className="h-4 w-4" />
+                        Preferences
+                      </button>
+                      <button 
+                        className={`flex items-center gap-2 p-3 text-sm border-l-2 hover:bg-slate-50 ${
+                          activeTab === "security" 
+                            ? "border-l-blue-600 bg-slate-50 font-medium text-slate-900" 
+                            : "border-l-transparent text-slate-600"
+                        }`}
+                        onClick={() => setActiveTab("security")}
+                      >
+                        <Shield className="h-4 w-4" />
+                        Security
+                      </button>
+                    </nav>
+                  </CardContent>
+                </Card>
+
+                <Card className="mt-4">
+                  <CardContent className="p-4">
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <div className="h-20 w-20 rounded-full bg-slate-100 flex items-center justify-center mb-3">
+                        {profileData?.avatarUrl ? (
+                          <img
+                            src={profileData.avatarUrl}
+                            alt={profileData.name}
+                            className="h-20 w-20 rounded-full object-cover"
+                          />
+                        ) : (
+                          <User className="h-8 w-8 text-slate-400" />
+                        )}
+                      </div>
+                      <h3 className="font-medium text-slate-900">
+                        {profileData?.name || "User Name"}
+                      </h3>
+                      <p className="text-sm text-slate-500 mt-1">
+                        {profileData?.email || "user@example.com"}
+                      </p>
+                      {profileData?.jobTitle && (
+                        <Badge variant="outline" className="mt-2">
+                          {profileData.jobTitle}
+                        </Badge>
                       )}
-                    />
-                    <FormField
-                      control={locationForm.control}
-                      name="address"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Address</FormLabel>
-                          <FormControl>
-                            <Input placeholder="123 Main St, City, State, ZIP" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={locationForm.control}
-                      name="phone"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Phone Number</FormLabel>
-                          <FormControl>
-                            <Input placeholder="555-123-4567" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <h3 className="text-lg font-semibold pt-4">Review Platform IDs</h3>
-                    <FormField
-                      control={locationForm.control}
-                      name="googlePlaceId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Google Place ID</FormLabel>
-                          <FormControl>
-                            <Input placeholder="ChIJrTLr-GyuEmsRBfy61i59si0" {...field} />
-                          </FormControl>
-                          <FormDescription>Used to fetch Google reviews</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={locationForm.control}
-                      name="yelpBusinessId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Yelp Business ID</FormLabel>
-                          <FormControl>
-                            <Input placeholder="xyz-cafe-san-francisco" {...field} />
-                          </FormControl>
-                          <FormDescription>Used to fetch Yelp reviews</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={locationForm.control}
-                      name="facebookPageId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Facebook Page ID</FormLabel>
-                          <FormControl>
-                            <Input placeholder="123456789012345" {...field} />
-                          </FormControl>
-                          <FormDescription>Used to fetch Facebook reviews</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={locationForm.control}
-                      name="applePlaceId"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Apple Maps Place ID</FormLabel>
-                          <FormControl>
-                            <Input placeholder="abcdef123456" {...field} />
-                          </FormControl>
-                          <FormDescription>Used to fetch Apple Maps reviews</FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <DialogFooter>
-                      <Button type="submit" disabled={addLocationMutation.isPending}>
-                        {addLocationMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Add Location
+                      <Button variant="outline" className="mt-4 w-full" size="sm">
+                        <LogOut className="h-4 w-4 mr-2" />
+                        Sign Out
                       </Button>
-                    </DialogFooter>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          {locationsLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            </div>
-          ) : locations && locations.length > 0 ? (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Address</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Connected Platforms</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {locations.map((location: Location) => (
-                    <TableRow key={location.id}>
-                      <TableCell className="font-medium">{location.name}</TableCell>
-                      <TableCell>{location.address || "—"}</TableCell>
-                      <TableCell>{location.phone || "—"}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-wrap gap-1">
-                          {location.googlePlaceId && <Badge>Google</Badge>}
-                          {location.yelpBusinessId && <Badge>Yelp</Badge>}
-                          {location.facebookPageId && <Badge>Facebook</Badge>}
-                          {location.applePlaceId && <Badge>Apple Maps</Badge>}
-                          {!location.googlePlaceId && !location.yelpBusinessId && 
-                           !location.facebookPageId && !location.applePlaceId && "—"}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <AlertDialog 
-                          open={deletingLocation === location.id} 
-                          onOpenChange={(open) => !open && setDeletingLocation(null)}
-                        >
-                          <AlertDialogTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => setDeletingLocation(location.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will permanently delete the location "{location.name}" and all associated data.
-                                This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => deleteLocationMutation.mutate(location.id)}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                {deleteLocationMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle>No Locations Found</CardTitle>
-                <CardDescription>
-                  You haven't added any locations yet. Add your first location to start tracking reviews.
-                </CardDescription>
-              </CardHeader>
-              <CardFooter>
-                <Button onClick={() => setAddLocationOpen(true)}>
-                  <PlusCircle className="mr-2 h-4 w-4" /> Add Your First Location
-                </Button>
-              </CardFooter>
-            </Card>
-          )}
-        </TabsContent>
-
-        {/* Users Tab - Only visible to admins */}
-        {permissions?.canManageUsers && (
-          <TabsContent value="users" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Manage Users</h2>
-              <Dialog open={addUserOpen} onOpenChange={setAddUserOpen}>
-                <DialogTrigger asChild>
-                  <Button><PlusCircle className="mr-2 h-4 w-4" /> Add User</Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[500px]">
-                  <DialogHeader>
-                    <DialogTitle>Add New User</DialogTitle>
-                    <DialogDescription>
-                      Create a new user account with appropriate permissions.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <Form {...userForm}>
-                    <form onSubmit={userForm.handleSubmit(onUserSubmit)} className="space-y-4">
-                      <FormField
-                        control={userForm.control}
-                        name="username"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Username*</FormLabel>
-                            <FormControl>
-                              <Input placeholder="johndoe" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={userForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email*</FormLabel>
-                            <FormControl>
-                              <Input type="email" placeholder="john.doe@example.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={userForm.control}
-                        name="fullName"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Full Name*</FormLabel>
-                            <FormControl>
-                              <Input placeholder="John Doe" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={userForm.control}
-                        name="password"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Password*</FormLabel>
-                            <FormControl>
-                              <Input type="password" placeholder="••••••••" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={userForm.control}
-                        name="role"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Role*</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select a role" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                <SelectItem value="admin">Admin</SelectItem>
-                                <SelectItem value="staff">Staff</SelectItem>
-                                <SelectItem value="user">User</SelectItem>
-                              </SelectContent>
-                            </Select>
-                            <FormDescription>
-                              Admin: Full access to all features
-                              <br />
-                              Staff: Can manage locations and reviews
-                              <br />
-                              User: Basic access to own data
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <DialogFooter>
-                        <Button type="submit" disabled={addUserMutation.isPending}>
-                          {addUserMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                          Add User
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </Form>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            {usersLoading ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            ) : users && users.length > 0 ? (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Username</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {users.map((user: User) => (
-                      <TableRow key={user.id} className={!user.isActive ? "opacity-50" : ""}>
-                        <TableCell className="font-medium">{user.fullName}</TableCell>
-                        <TableCell>{user.username}</TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          <Badge variant={user.role === 'admin' ? "default" : 
-                                        user.role === 'staff' ? "outline" : "secondary"}>
-                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={user.isActive ? "success" : "destructive"}>
-                            {user.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex space-x-2">
-                            {/* Change Role Dialog */}
-                            <Dialog open={roleDialogOpen === user.id} onOpenChange={(open) => !open && setRoleDialogOpen(null)}>
-                              <DialogTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => setRoleDialogOpen(user.id)}
-                                  disabled={user.id === user?.id}
-                                >
-                                  <UserCog className="h-4 w-4" />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                  <DialogTitle>Change User Role</DialogTitle>
-                                  <DialogDescription>
-                                    Update the role for user {user.fullName}.
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                  <div className="space-y-2">
-                                    <h3 className="text-sm font-medium">Current Role: {user.role}</h3>
-                                    <div className="grid grid-cols-3 gap-2">
-                                      <Button 
-                                        variant={user.role === 'admin' ? 'default' : 'outline'} 
-                                        onClick={() => updateUserRoleMutation.mutate({ userId: user.id, role: 'admin' })}
+
+              {/* Settings Content */}
+              <div className="lg:col-span-3">
+                {/* Notifications Tab */}
+                {activeTab === "notifications" && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Notification Settings</CardTitle>
+                        <CardDescription>
+                          Configure how and when you want to receive notifications
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {isLoadingNotifications ? (
+                          <div className="flex justify-center p-8">
+                            <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                          </div>
+                        ) : notificationsError ? (
+                          <div className="p-4 border rounded-md bg-red-50 text-red-800">
+                            Failed to load notification settings. Please try again.
+                          </div>
+                        ) : (
+                          <Form {...notificationsForm}>
+                            <form
+                              onSubmit={notificationsForm.handleSubmit(onNotificationsSubmit)}
+                              className="space-y-6"
+                            >
+                              {/* Email Notifications */}
+                              <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Mail className="h-5 w-5 text-blue-500" />
+                                    <h3 className="text-lg font-medium">Email Notifications</h3>
+                                  </div>
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="email.enabled"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center gap-2 space-y-0">
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                          />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          {field.value ? "Enabled" : "Disabled"}
+                                        </FormLabel>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                                
+                                <div className="space-y-2 border-l-2 border-slate-100 pl-4">
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="email.newReviews"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <FormLabel className="font-normal">New reviews</FormLabel>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("email.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="email.reviewResponses"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <FormLabel className="font-normal">
+                                          Review responses
+                                        </FormLabel>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("email.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="email.alerts"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <FormLabel className="font-normal">Important alerts</FormLabel>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("email.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="email.reportReady"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <FormLabel className="font-normal">
+                                          Report ready notifications
+                                        </FormLabel>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("email.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <Separator className="my-3" />
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="email.weeklyDigest"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <div>
+                                          <FormLabel className="font-normal">
+                                            Weekly digest
+                                          </FormLabel>
+                                          <FormDescription>
+                                            Weekly summary of your review activity
+                                          </FormDescription>
+                                        </div>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("email.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                  {notificationsForm.watch("email.weeklyDigest") && (
+                                    <div className="grid grid-cols-2 gap-4 mt-2">
+                                      <FormField
+                                        control={notificationsForm.control}
+                                        name="email.weekday"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>Day of week</FormLabel>
+                                            <Select
+                                              onValueChange={field.onChange}
+                                              defaultValue={field.value}
+                                              disabled={!notificationsForm.watch("email.enabled")}
+                                            >
+                                              <FormControl>
+                                                <SelectTrigger>
+                                                  <SelectValue placeholder="Select day" />
+                                                </SelectTrigger>
+                                              </FormControl>
+                                              <SelectContent>
+                                                <SelectItem value="monday">Monday</SelectItem>
+                                                <SelectItem value="tuesday">Tuesday</SelectItem>
+                                                <SelectItem value="wednesday">Wednesday</SelectItem>
+                                                <SelectItem value="thursday">Thursday</SelectItem>
+                                                <SelectItem value="friday">Friday</SelectItem>
+                                                <SelectItem value="saturday">Saturday</SelectItem>
+                                                <SelectItem value="sunday">Sunday</SelectItem>
+                                              </SelectContent>
+                                            </Select>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                      <FormField
+                                        control={notificationsForm.control}
+                                        name="email.time"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>Time</FormLabel>
+                                            <FormControl>
+                                              <Input
+                                                type="time"
+                                                {...field}
+                                                disabled={!notificationsForm.watch("email.enabled")}
+                                              />
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+                                    </div>
+                                  )}
+                                  <Separator className="my-3" />
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="email.marketingUpdates"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <div>
+                                          <FormLabel className="font-normal">
+                                            Marketing updates
+                                          </FormLabel>
+                                          <FormDescription>
+                                            News, tips and product updates from RepuRadar
+                                          </FormDescription>
+                                        </div>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("email.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Mobile Notifications */}
+                              <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Smartphone className="h-5 w-5 text-blue-500" />
+                                    <h3 className="text-lg font-medium">
+                                      Mobile Push Notifications
+                                    </h3>
+                                  </div>
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="mobile.enabled"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center gap-2 space-y-0">
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                          />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          {field.value ? "Enabled" : "Disabled"}
+                                        </FormLabel>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                                
+                                <div className="space-y-2 border-l-2 border-slate-100 pl-4">
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="mobile.newReviews"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <FormLabel className="font-normal">New reviews</FormLabel>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("mobile.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="mobile.reviewResponses"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <FormLabel className="font-normal">
+                                          Review responses
+                                        </FormLabel>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("mobile.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="mobile.alerts"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <FormLabel className="font-normal">Important alerts</FormLabel>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("mobile.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="mobile.reportReady"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <FormLabel className="font-normal">
+                                          Report ready notifications
+                                        </FormLabel>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("mobile.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Browser Notifications */}
+                              <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <Globe className="h-5 w-5 text-blue-500" />
+                                    <h3 className="text-lg font-medium">
+                                      Browser Notifications
+                                    </h3>
+                                  </div>
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="browser.enabled"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center gap-2 space-y-0">
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                          />
+                                        </FormControl>
+                                        <FormLabel className="font-normal">
+                                          {field.value ? "Enabled" : "Disabled"}
+                                        </FormLabel>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                                
+                                <div className="space-y-2 border-l-2 border-slate-100 pl-4">
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="browser.newReviews"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <FormLabel className="font-normal">New reviews</FormLabel>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("browser.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="browser.reviewResponses"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <FormLabel className="font-normal">
+                                          Review responses
+                                        </FormLabel>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("browser.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <FormField
+                                    control={notificationsForm.control}
+                                    name="browser.alerts"
+                                    render={({ field }) => (
+                                      <FormItem className="flex items-center justify-between space-y-0">
+                                        <FormLabel className="font-normal">Important alerts</FormLabel>
+                                        <FormControl>
+                                          <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                            disabled={!notificationsForm.watch("browser.enabled")}
+                                          />
+                                        </FormControl>
+                                      </FormItem>
+                                    )}
+                                  />
+                                </div>
+                              </div>
+
+                              <div className="flex justify-end">
+                                <Button type="submit">Save Notification Settings</Button>
+                              </div>
+                            </form>
+                          </Form>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Profile Tab */}
+                {activeTab === "profile" && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Profile Information</CardTitle>
+                        <CardDescription>
+                          Update your account information and personal details
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {isLoadingProfile ? (
+                          <div className="flex justify-center p-8">
+                            <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                          </div>
+                        ) : profileError ? (
+                          <div className="p-4 border rounded-md bg-red-50 text-red-800">
+                            Failed to load profile data. Please try again.
+                          </div>
+                        ) : (
+                          <Form {...profileForm}>
+                            <form
+                              onSubmit={profileForm.handleSubmit(onProfileSubmit)}
+                              className="space-y-4"
+                            >
+                              <div className="flex items-center gap-4 mb-6">
+                                <div className="h-20 w-20 rounded-full bg-slate-100 flex items-center justify-center relative">
+                                  {profileData?.avatarUrl ? (
+                                    <img
+                                      src={profileData.avatarUrl}
+                                      alt={profileData.name}
+                                      className="h-20 w-20 rounded-full object-cover"
+                                    />
+                                  ) : (
+                                    <User className="h-8 w-8 text-slate-400" />
+                                  )}
+                                  <Button
+                                    size="icon"
+                                    variant="outline"
+                                    className="absolute -bottom-2 -right-2 h-7 w-7 rounded-full"
+                                  >
+                                    <Edit className="h-3.5 w-3.5" />
+                                  </Button>
+                                </div>
+                                <div>
+                                  <h3 className="font-medium text-slate-900">Profile Photo</h3>
+                                  <p className="text-sm text-slate-500">
+                                    Upload a photo to personalize your account
+                                  </p>
+                                  <div className="flex gap-2 mt-2">
+                                    <Button size="sm" variant="outline">
+                                      Upload
+                                    </Button>
+                                    <Button size="sm" variant="ghost">
+                                      Remove
+                                    </Button>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                  control={profileForm.control}
+                                  name="name"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Full Name</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="Your name" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={profileForm.control}
+                                  name="email"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Email Address</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="your.email@example.com" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={profileForm.control}
+                                  name="phone"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Phone Number</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="+1 (555) 123-4567" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={profileForm.control}
+                                  name="jobTitle"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Job Title</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="Marketing Manager" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+
+                                <FormField
+                                  control={profileForm.control}
+                                  name="company"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Company</FormLabel>
+                                      <FormControl>
+                                        <Input placeholder="Company name" {...field} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+
+                              <FormField
+                                control={profileForm.control}
+                                name="bio"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Bio</FormLabel>
+                                    <FormControl>
+                                      <Textarea
+                                        placeholder="A brief description about yourself"
+                                        className="min-h-[100px]"
+                                        {...field}
+                                      />
+                                    </FormControl>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <div className="flex justify-end">
+                                <Button type="submit">Save Profile</Button>
+                              </div>
+                            </form>
+                          </Form>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Preferences Tab */}
+                {activeTab === "preferences" && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>User Preferences</CardTitle>
+                        <CardDescription>
+                          Customize your experience with language, theme, and regional settings
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {isLoadingPreferences ? (
+                          <div className="flex justify-center p-8">
+                            <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                          </div>
+                        ) : preferencesError ? (
+                          <div className="p-4 border rounded-md bg-red-50 text-red-800">
+                            Failed to load preferences. Please try again.
+                          </div>
+                        ) : (
+                          <Form {...preferencesForm}>
+                            <form
+                              onSubmit={preferencesForm.handleSubmit(onPreferencesSubmit)}
+                              className="space-y-6"
+                            >
+                              <FormField
+                                control={preferencesForm.control}
+                                name="theme"
+                                render={({ field }) => (
+                                  <FormItem>
+                                    <FormLabel>Theme</FormLabel>
+                                    <div className="space-y-2">
+                                      <RadioGroup
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        className="grid grid-cols-3 gap-4"
                                       >
-                                        Admin
-                                      </Button>
-                                      <Button 
-                                        variant={user.role === 'staff' ? 'default' : 'outline'} 
-                                        onClick={() => updateUserRoleMutation.mutate({ userId: user.id, role: 'staff' })}
+                                        <FormItem>
+                                          <FormLabel className="[&:has([data-state=checked])>div]:border-blue-500">
+                                            <FormControl>
+                                              <RadioGroupItem value="light" className="sr-only" />
+                                            </FormControl>
+                                            <div className="border-2 rounded-md p-4 cursor-pointer hover:border-blue-300 flex flex-col items-center gap-2">
+                                              <Sun className="h-6 w-6 text-amber-500" />
+                                              <div className="font-medium text-center">Light</div>
+                                            </div>
+                                          </FormLabel>
+                                        </FormItem>
+                                        <FormItem>
+                                          <FormLabel className="[&:has([data-state=checked])>div]:border-blue-500">
+                                            <FormControl>
+                                              <RadioGroupItem value="dark" className="sr-only" />
+                                            </FormControl>
+                                            <div className="border-2 rounded-md p-4 cursor-pointer hover:border-blue-300 flex flex-col items-center gap-2">
+                                              <Moon className="h-6 w-6 text-indigo-500" />
+                                              <div className="font-medium text-center">Dark</div>
+                                            </div>
+                                          </FormLabel>
+                                        </FormItem>
+                                        <FormItem>
+                                          <FormLabel className="[&:has([data-state=checked])>div]:border-blue-500">
+                                            <FormControl>
+                                              <RadioGroupItem value="system" className="sr-only" />
+                                            </FormControl>
+                                            <div className="border-2 rounded-md p-4 cursor-pointer hover:border-blue-300 flex flex-col items-center gap-2">
+                                              <SettingsIcon className="h-6 w-6 text-slate-500" />
+                                              <div className="font-medium text-center">System</div>
+                                            </div>
+                                          </FormLabel>
+                                        </FormItem>
+                                      </RadioGroup>
+                                    </div>
+                                    <FormMessage />
+                                  </FormItem>
+                                )}
+                              />
+
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <FormField
+                                  control={preferencesForm.control}
+                                  name="language"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Language</FormLabel>
+                                      <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
                                       >
-                                        Staff
-                                      </Button>
-                                      <Button 
-                                        variant={user.role === 'user' ? 'default' : 'outline'} 
-                                        onClick={() => updateUserRoleMutation.mutate({ userId: user.id, role: 'user' })}
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Select language" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="en-US">English (US)</SelectItem>
+                                          <SelectItem value="en-GB">English (UK)</SelectItem>
+                                          <SelectItem value="es-ES">Spanish</SelectItem>
+                                          <SelectItem value="fr-FR">French</SelectItem>
+                                          <SelectItem value="de-DE">German</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={preferencesForm.control}
+                                  name="timezone"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Timezone</FormLabel>
+                                      <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
                                       >
-                                        User
-                                      </Button>
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Select timezone" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="America/New_York">
+                                            Eastern Time (ET)
+                                          </SelectItem>
+                                          <SelectItem value="America/Chicago">
+                                            Central Time (CT)
+                                          </SelectItem>
+                                          <SelectItem value="America/Denver">
+                                            Mountain Time (MT)
+                                          </SelectItem>
+                                          <SelectItem value="America/Los_Angeles">
+                                            Pacific Time (PT)
+                                          </SelectItem>
+                                          <SelectItem value="Europe/London">
+                                            London (GMT)
+                                          </SelectItem>
+                                          <SelectItem value="Europe/Paris">
+                                            Paris (CET)
+                                          </SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={preferencesForm.control}
+                                  name="dateFormat"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Date Format</FormLabel>
+                                      <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Select date format" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                                          <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                                          <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                                          <SelectItem value="YYYY.MM.DD">YYYY.MM.DD</SelectItem>
+                                          <SelectItem value="DD.MM.YYYY">DD.MM.YYYY</SelectItem>
+                                          <SelectItem value="DD-MMM-YYYY">DD-MMM-YYYY</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                                <FormField
+                                  control={preferencesForm.control}
+                                  name="timeFormat"
+                                  render={({ field }) => (
+                                    <FormItem>
+                                      <FormLabel>Time Format</FormLabel>
+                                      <Select
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                      >
+                                        <FormControl>
+                                          <SelectTrigger>
+                                            <SelectValue placeholder="Select time format" />
+                                          </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                          <SelectItem value="12h">12-hour (1:30 PM)</SelectItem>
+                                          <SelectItem value="24h">24-hour (13:30)</SelectItem>
+                                        </SelectContent>
+                                      </Select>
+                                      <FormMessage />
+                                    </FormItem>
+                                  )}
+                                />
+                              </div>
+
+                              <div className="flex justify-end">
+                                <Button type="submit">Save Preferences</Button>
+                              </div>
+                            </form>
+                          </Form>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {/* Security Tab */}
+                {activeTab === "security" && (
+                  <div className="space-y-6">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Password</CardTitle>
+                        <CardDescription>
+                          Change your password or update security settings
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        <Form {...passwordForm}>
+                          <form
+                            onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
+                            className="space-y-4"
+                          >
+                            <FormField
+                              control={passwordForm.control}
+                              name="currentPassword"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Current Password</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Enter your current password"
+                                      type="password"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={passwordForm.control}
+                              name="newPassword"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>New Password</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Enter your new password"
+                                      type="password"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormDescription>
+                                    Password must be at least 8 characters long
+                                  </FormDescription>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <FormField
+                              control={passwordForm.control}
+                              name="confirmPassword"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Confirm New Password</FormLabel>
+                                  <FormControl>
+                                    <Input
+                                      placeholder="Confirm your new password"
+                                      type="password"
+                                      {...field}
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <div className="flex justify-end">
+                              <Button type="submit">Change Password</Button>
+                            </div>
+                          </form>
+                        </Form>
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Two-Factor Authentication</CardTitle>
+                        <CardDescription>
+                          Add an extra layer of security to your account
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {isLoadingSecurity ? (
+                          <div className="flex justify-center p-8">
+                            <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                          </div>
+                        ) : securityError ? (
+                          <div className="p-4 border rounded-md bg-red-50 text-red-800">
+                            Failed to load security settings. Please try again.
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-start gap-3">
+                              <div className={`p-2 rounded-md ${securitySettings?.twoFactorEnabled ? 'bg-green-100' : 'bg-slate-100'}`}>
+                                {securitySettings?.twoFactorEnabled ? (
+                                  <Shield className="h-5 w-5 text-green-600" />
+                                ) : (
+                                  <Shield className="h-5 w-5 text-slate-400" />
+                                )}
+                              </div>
+                              <div>
+                                <h3 className="font-medium">
+                                  {securitySettings?.twoFactorEnabled
+                                    ? "Two-factor authentication is enabled"
+                                    : "Two-factor authentication is disabled"}
+                                </h3>
+                                <p className="text-sm text-slate-500 mt-1">
+                                  {securitySettings?.twoFactorEnabled
+                                    ? "Your account is protected with an authentication app"
+                                    : "Add an extra layer of security by enabling 2FA"}
+                                </p>
+                              </div>
+                            </div>
+                            <Button variant={securitySettings?.twoFactorEnabled ? "ghost" : "default"}>
+                              {securitySettings?.twoFactorEnabled ? "Manage 2FA" : "Enable 2FA"}
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Active Sessions</CardTitle>
+                        <CardDescription>
+                          Manage your logged-in sessions across devices
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {isLoadingSecurity ? (
+                          <div className="flex justify-center p-8">
+                            <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                          </div>
+                        ) : securityError ? (
+                          <div className="p-4 border rounded-md bg-red-50 text-red-800">
+                            Failed to load security settings. Please try again.
+                          </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {securitySettings?.activeSessions.map((session, index) => (
+                              <div key={index} className="flex items-center justify-between border-b pb-3">
+                                <div className="flex items-start gap-3">
+                                  <div className="p-2 rounded-md bg-slate-100">
+                                    <Globe className="h-5 w-5 text-slate-600" />
+                                  </div>
+                                  <div>
+                                    <h3 className="font-medium flex items-center">
+                                      {session.device}
+                                      {session.current && (
+                                        <Badge className="ml-2 bg-green-500">Current</Badge>
+                                      )}
+                                    </h3>
+                                    <div className="text-sm text-slate-500 mt-1">
+                                      {session.location} • Last active {format(new Date(session.lastActive), "MMM d, yyyy 'at' h:mm a")}
                                     </div>
                                   </div>
                                 </div>
-                                <DialogFooter>
-                                  <Button variant="outline" onClick={() => setRoleDialogOpen(null)}>Cancel</Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-
-                            {/* Change Status Dialog */}
-                            <Dialog open={statusDialogOpen === user.id} onOpenChange={(open) => !open && setStatusDialogOpen(null)}>
-                              <DialogTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm"
-                                  onClick={() => setStatusDialogOpen(user.id)}
-                                  disabled={user.id === user?.id}
-                                >
-                                  <Switch checked={user.isActive} />
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="sm:max-w-[425px]">
-                                <DialogHeader>
-                                  <DialogTitle>Change User Status</DialogTitle>
-                                  <DialogDescription>
-                                    {user.isActive 
-                                      ? "Deactivating this user will prevent them from accessing the system."
-                                      : "Activating this user will restore their access to the system."}
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="py-6 flex items-center justify-center space-x-2">
-                                  <Switch 
-                                    checked={user.isActive}
-                                    onCheckedChange={(checked) => {
-                                      updateUserStatusMutation.mutate({ userId: user.id, isActive: checked });
-                                    }}
-                                  />
-                                  <span>{user.isActive ? "Active" : "Inactive"}</span>
-                                </div>
-                                <DialogFooter>
-                                  <Button variant="outline" onClick={() => setStatusDialogOpen(null)}>Cancel</Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
+                                {!session.current && (
+                                  <Button variant="ghost" size="sm">
+                                    <LogOut className="h-4 w-4 mr-2" />
+                                    Sign Out
+                                  </Button>
+                                )}
+                              </div>
+                            ))}
+                            <Button variant="outline" className="w-full">
+                              Sign Out All Other Sessions
+                            </Button>
                           </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <Card>
-                <CardHeader>
-                  <CardTitle>No Additional Users Found</CardTitle>
-                  <CardDescription>
-                    You haven't added any additional users yet. Add users to give them access to the system.
-                  </CardDescription>
-                </CardHeader>
-                <CardFooter>
-                  <Button onClick={() => setAddUserOpen(true)}>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Add User
-                  </Button>
-                </CardFooter>
-              </Card>
-            )}
-          </TabsContent>
-        )}
+                        )}
+                      </CardContent>
+                    </Card>
 
-        {/* Account Tab */}
-        <TabsContent value="account" className="space-y-6">
-          <h2 className="text-2xl font-bold">Account Settings</h2>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Information</CardTitle>
-              <CardDescription>
-                Update your personal information and account settings
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Full Name</h3>
-                  <p className="text-sm text-muted-foreground">{user?.fullName}</p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Email</h3>
-                  <p className="text-sm text-muted-foreground">{user?.email}</p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Username</h3>
-                  <p className="text-sm text-muted-foreground">{user?.username}</p>
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Role</h3>
-                  <p className="text-sm text-muted-foreground">
-                    <Badge variant={user?.role === 'admin' ? "default" : 
-                                    user?.role === 'staff' ? "outline" : "secondary"}>
-                      {user?.role.charAt(0).toUpperCase() + user?.role.slice(1)}
-                    </Badge>
-                  </p>
-                </div>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Login History</CardTitle>
+                        <CardDescription>
+                          Recent account activity and login attempts
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {isLoadingSecurity ? (
+                          <div className="flex justify-center p-8">
+                            <div className="animate-spin h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+                          </div>
+                        ) : securityError ? (
+                          <div className="p-4 border rounded-md bg-red-50 text-red-800">
+                            Failed to load security settings. Please try again.
+                          </div>
+                        ) : (
+                          <div className="rounded-md border">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Date & Time</TableHead>
+                                  <TableHead>Device</TableHead>
+                                  <TableHead className="hidden md:table-cell">Location</TableHead>
+                                  <TableHead className="hidden md:table-cell">IP Address</TableHead>
+                                  <TableHead>Status</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {securitySettings?.loginHistory.map((login, index) => (
+                                  <TableRow key={index}>
+                                    <TableCell>
+                                      {format(new Date(login.date), "MMM d, yyyy 'at' h:mm a")}
+                                    </TableCell>
+                                    <TableCell>{login.device}</TableCell>
+                                    <TableCell className="hidden md:table-cell">
+                                      {login.location}
+                                    </TableCell>
+                                    <TableCell className="hidden md:table-cell">
+                                      {login.ip}
+                                    </TableCell>
+                                    <TableCell>
+                                      {login.status === "success" ? (
+                                        <Badge className="bg-green-500">Success</Badge>
+                                      ) : (
+                                        <Badge variant="destructive">Failed</Badge>
+                                      )}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        )}
+                      </CardContent>
+                      <CardFooter>
+                        <Button variant="outline" size="sm" className="ml-auto">
+                          Download Full History
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </div>
+                )}
               </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline">Edit Profile</Button>
-            </CardFooter>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Change Password</CardTitle>
-              <CardDescription>
-                Update your password to maintain account security
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="current-password">Current Password</Label>
-                  <Input id="current-password" type="password" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="new-password">New Password</Label>
-                  <Input id="new-password" type="password" />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="confirm-password">Confirm New Password</Label>
-                  <Input id="confirm-password" type="password" />
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button>Change Password</Button>
-            </CardFooter>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </>
   );
 };
-
-// Add this to make TypeScript happy
-const Label = ({ htmlFor, children }: { htmlFor: string, children: React.ReactNode }) => (
-  <FormLabel htmlFor={htmlFor}>{children}</FormLabel>
-);
 
 export default SettingsPage;
