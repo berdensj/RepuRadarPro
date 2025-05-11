@@ -10,6 +10,7 @@ import { generateAIReply } from "./lib/openai";
 import { importGooglePlacesReviews } from "./services/google-places";
 import { importYelpReviews } from "./services/yelp";
 import { importFacebookReviews } from "./services/facebook";
+import { importAppleMapsReviews } from "./services/apple-maps";
 import { processReviewRequest } from "./services/review-request";
 import { 
   verifyWebhookSignature, 
@@ -411,6 +412,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Apple Maps reviews import
+  app.post("/api/integrations/apple-maps/import", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const { locationId, placeId, teamId, keyId, privateKey } = req.body;
+      
+      if (!placeId || !teamId || !keyId || !privateKey) {
+        return res.status(400).json({ 
+          message: "Missing required fields: placeId, teamId, keyId, and privateKey are required" 
+        });
+      }
+      
+      const authParams = { teamId, keyId, privateKey };
+      
+      const result = await importAppleMapsReviews(
+        userId,
+        locationId || null,
+        placeId,
+        authParams
+      );
+      
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
   // Review request endpoints
   app.post("/api/review-requests", async (req, res, next) => {
     try {
@@ -490,6 +520,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/webhooks/google", 
     (req, res, next) => verifyWebhookSignature(req, res, next, 'google'),
     (req, res) => handleReviewWebhook(req, res, 'google')
+  );
+  
+  // Apple Maps review notification webhook
+  app.post("/api/webhooks/apple", 
+    (req, res, next) => verifyWebhookSignature(req, res, next, 'apple'),
+    (req, res) => handleReviewWebhook(req, res, 'apple')
   );
 
   // Create HTTP server

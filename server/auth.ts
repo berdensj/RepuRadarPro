@@ -1,11 +1,12 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import { attachPermissions } from "./middleware/rbac";
 
 declare global {
   namespace Express {
@@ -45,6 +46,7 @@ export function setupAuth(app: Express) {
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
+  app.use(attachPermissions); // Add permissions to all routes
 
   passport.use(
     new LocalStrategy({
@@ -108,7 +110,7 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", (req, res, next) => {
-    passport.authenticate("local", (err, user, info) => {
+    passport.authenticate("local", (err: Error | null, user?: SelectUser, info?: { message: string }) => {
       if (err) return next(err);
       if (!user) return res.status(401).json({ message: "Invalid email or password" });
       

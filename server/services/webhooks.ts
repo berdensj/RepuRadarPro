@@ -8,7 +8,7 @@ export function verifyWebhookSignature(
   req: Request,
   res: Response,
   next: NextFunction,
-  provider: 'yelp' | 'google' | 'facebook'
+  provider: 'yelp' | 'google' | 'facebook' | 'apple'
 ) {
   try {
     const signature = req.headers['x-signature'] as string;
@@ -29,6 +29,9 @@ export function verifyWebhookSignature(
         break;
       case 'facebook':
         secret = process.env.FACEBOOK_WEBHOOK_SECRET;
+        break;
+      case 'apple':
+        secret = process.env.APPLE_WEBHOOK_SECRET;
         break;
     }
     
@@ -70,7 +73,7 @@ export function verifyFacebookWebhook(req: Request, res: Response) {
 export async function handleReviewWebhook(
   req: Request,
   res: Response,
-  provider: 'yelp' | 'google' | 'facebook'
+  provider: 'yelp' | 'google' | 'facebook' | 'apple'
 ) {
   try {
     const { 
@@ -110,6 +113,9 @@ export async function handleReviewWebhook(
         break;
       case 'facebook':
         review = processFacebookReview(reviewData, userId, locationId);
+        break;
+      case 'apple':
+        review = processAppleMapsReview(reviewData, userId, locationId);
         break;
       default:
         return res.status(400).json({ error: `Unsupported provider: ${provider}` });
@@ -201,5 +207,21 @@ function processFacebookReview(reviewData: any, userId: number, locationId?: num
     isResolved: false,
     externalId: `facebook-${reviewData.id}`,
     sentimentScore: ((rating - 1) / 4),
+  });
+}
+
+// Process review data from Apple Maps
+function processAppleMapsReview(reviewData: any, userId: number, locationId?: number) {
+  return insertReviewSchema.parse({
+    userId: Number(userId),
+    locationId: locationId ? Number(locationId) : null,
+    reviewerName: reviewData.reviewer?.name || 'Apple Maps User',
+    platform: 'Apple Maps',
+    rating: reviewData.rating,
+    reviewText: reviewData.text || '',
+    date: new Date(reviewData.dateCreated),
+    isResolved: false,
+    externalId: `apple-maps-${reviewData.id}`,
+    sentimentScore: ((reviewData.rating - 1) / 4),
   });
 }
