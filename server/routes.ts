@@ -797,18 +797,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { timeRange = '30days' } = req.query;
       
-      // Sample financial data
+      // Sample financial data - updated to match frontend expectations
       const financialData = {
         mrr: 24512,
         mrrChange: 8.2,
         arr: 294144,
         arrChange: 12.4,
-        arpu: 8.62,
-        arpuChange: 3.1,
         ltv: 412,
-        ltvChange: 5.7,
+        ltv_change: 5.7,
         cac: 52,
-        ltvCacRatio: 7.9,
+        cac_change: -2.3,
+        conversion_rate: 4.2,
+        conversion_change: 0.8,
+        revenue_by_plan: {
+          free: 0,
+          professional: 14700,
+          business: 9400,
+          enterprise: 5500
+        },
+        new_subscriptions: 142,
+        upgrades: 38,
+        cancellations: 22,
+        renewal_rate: 89.5,
+        // Keep these properties for other components that might need them
         revenueBreakdown: [
           { month: 'Jan', free: 0, pro: 9200, business: 6200 },
           { month: 'Feb', free: 0, pro: 10100, business: 7100 },
