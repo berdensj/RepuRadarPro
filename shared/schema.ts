@@ -12,7 +12,13 @@ export const users = pgTable("users", {
   fullName: text("full_name").notNull(),
   profilePicture: text("profile_picture"),
   companyLogo: text("company_logo"),
-  plan: text("plan").default("Free").notNull(),
+  // Subscription fields
+  plan: text("plan").default("Free").notNull(), // Basic, Pro, Enterprise
+  subscriptionStatus: text("subscription_status").default("trial").notNull(), // trial, active, canceled, expired
+  trialEndsAt: timestamp("trial_ends_at"),
+  subscriptionEndsAt: timestamp("subscription_ends_at"),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
   role: text("role").default("user").notNull(), // Options: admin, user, staff
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -26,6 +32,11 @@ export const insertUserSchema = createInsertSchema(users).pick({
   profilePicture: true,
   companyLogo: true,
   plan: true,
+  subscriptionStatus: true,
+  trialEndsAt: true,
+  subscriptionEndsAt: true,
+  stripeCustomerId: true,
+  stripeSubscriptionId: true,
 });
 
 // Review table
@@ -398,3 +409,41 @@ export const agencyClientsRelations = relations(agencyClients, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+// Subscription plans table
+export const subscriptionPlans = pgTable("subscription_plans", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(), // Free, Basic, Pro, Enterprise
+  displayName: text("display_name").notNull(), // Display name shown on pricing page
+  description: text("description").notNull(),
+  price: integer("price").notNull(), // Price in cents per month
+  annualPrice: integer("annual_price"), // Annual price in cents (optional)
+  trialDays: integer("trial_days").default(14).notNull(),
+  features: jsonb("features").notNull(), // Array of features
+  maxLocations: integer("max_locations").default(1).notNull(),
+  maxUsers: integer("max_users").default(1).notNull(),
+  isPopular: boolean("is_popular").default(false),
+  isAvailable: boolean("is_available").default(true).notNull(),
+  stripePriceId: text("stripe_price_id"), // For Stripe integration
+  stripeAnnualPriceId: text("stripe_annual_price_id"), // For annual billing
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertSubscriptionPlanSchema = createInsertSchema(subscriptionPlans).pick({
+  name: true,
+  displayName: true,
+  description: true,
+  price: true,
+  annualPrice: true,
+  trialDays: true,
+  features: true,
+  maxLocations: true,
+  maxUsers: true,
+  isPopular: true,
+  isAvailable: true,
+  stripePriceId: true,
+  stripeAnnualPriceId: true,
+});
+
+export type InsertSubscriptionPlan = z.infer<typeof insertSubscriptionPlanSchema>;
+export type SubscriptionPlan = typeof subscriptionPlans.$inferSelect;
