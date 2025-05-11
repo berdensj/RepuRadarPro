@@ -68,6 +68,19 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
+  
+  async updateUser(id: number, partial: Partial<User>): Promise<User> {
+    const [updated] = await db
+      .update(users)
+      .set(partial)
+      .where(eq(users.id, id))
+      .returning();
+    return updated;
+  }
+  
+  async getAllUsers(): Promise<User[]> {
+    return db.select().from(users);
+  }
 
   // Review methods
   async getReviewsByUserId(userId: number): Promise<Review[]> {
@@ -226,6 +239,10 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(locations)
       .where(eq(locations.userId, userId));
+  }
+  
+  async getAllLocations(): Promise<Location[]> {
+    return db.select().from(locations);
   }
 
   async getLocation(id: number): Promise<Location | undefined> {
