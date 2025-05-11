@@ -17,7 +17,9 @@ import {
   Home,
   LayoutDashboard,
   BellRing,
-  BadgeCheck
+  BadgeCheck,
+  UserCog,
+  ClipboardCheck
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -34,6 +36,8 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   
   const adminNavItems = [
     { icon: LayoutDashboard, label: "Admin Dashboard", href: "/admin" },
+    { icon: UserCog, label: "Customer Management", href: "/admin/customers" },
+    { icon: ClipboardCheck, label: "Customer Onboarding", href: "/admin/onboarding" },
     { icon: Users, label: "User Management", href: "/admin/users" },
     { icon: DollarSign, label: "Financial", href: "/admin/financial" },
     { icon: BarChart2, label: "Analytics", href: "/admin/analytics" },
