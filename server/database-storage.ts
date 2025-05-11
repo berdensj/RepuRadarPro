@@ -55,12 +55,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
+    // Case insensitive username lookup
+    const allUsers = await db.select().from(users);
+    const user = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
     return user;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.email, email));
+    // Case insensitive email lookup
+    const allUsers = await db.select().from(users);
+    const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
     return user;
   }
 
