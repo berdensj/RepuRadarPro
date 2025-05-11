@@ -20,7 +20,15 @@ import {
   User,
   HelpCircle,
   ShieldCheck,
-  CreditCard
+  CreditCard,
+  FileText,
+  LayoutDashboard,
+  FileCog,
+  Clock,
+  Import,
+  Workflow,
+  Paintbrush,
+  Code
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -29,25 +37,79 @@ interface SidebarProps {
   className?: string;
 }
 
+type NavItemType = {
+  icon: React.ComponentType<any>;
+  label: string;
+  href: string;
+};
+
+type SeparatorType = {
+  type: 'separator';
+  label: string;
+};
+
+type NavItem = NavItemType | SeparatorType;
+
 export function Sidebar({ className }: SidebarProps) {
   const { user, logoutMutation } = useAuth();
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const isMobile = useIsMobile();
   
-  const baseNavItems = [
+  // Group navigation items by category
+  const mainNavItems = [
     { icon: BarChart2, label: "Dashboard", href: "/" },
     { icon: Star, label: "Reviews", href: "/reviews" },
     { icon: Bell, label: "Alerts", href: "/alerts" },
     { icon: MessageSquare, label: "AI Responses", href: "/responses" },
     { icon: Send, label: "Review Requests", href: "/review-requests" },
-    { icon: UsersRound, label: "Competitors", href: "/competitors" },
+  ];
+  
+  const analyticsItems = [
     { icon: ChartPieIcon, label: "Analytics", href: "/analytics" },
+    { icon: FileText, label: "Reports", href: "/reports" },
+    { icon: UsersRound, label: "Competitors", href: "/competitors" },
+    { icon: LayoutDashboard, label: "Dashboard Builder", href: "/dashboard-builder" },
+  ];
+  
+  const managementItems = [
+    { icon: MessageSquare, label: "Communications", href: "/communications" },
+    { icon: Import, label: "Import/Export", href: "/import-export" },
+    { icon: Workflow, label: "Workflows", href: "/workflows" },
+    { icon: Clock, label: "Activity Logs", href: "/activity-logs" },
+    { icon: FileCog, label: "Templates", href: "/templates" },
+  ];
+  
+  const configItems = [
+    { icon: Code, label: "API Access", href: "/api-access" },
+    { icon: Paintbrush, label: "White Label", href: "/white-label" },
     { icon: Plug, label: "Integrations", href: "/integrations" },
     { icon: Settings, label: "Settings", href: "/settings" },
+  ];
+  
+  const accountItems = [
     { icon: User, label: "Profile", href: "/profile" },
     { icon: CreditCard, label: "Subscription", href: "/subscription" },
     { icon: HelpCircle, label: "Help & Support", href: "/help" },
+  ];
+  
+  // Create separator items with the correct type
+  const analyticsSeparator: SeparatorType = { type: 'separator', label: 'Analytics' };
+  const managementSeparator: SeparatorType = { type: 'separator', label: 'Management' };
+  const configSeparator: SeparatorType = { type: 'separator', label: 'Configuration' };
+  const accountSeparator: SeparatorType = { type: 'separator', label: 'Account' };
+  
+  // Combine all navigation items for rendering
+  const baseNavItems: NavItem[] = [
+    ...mainNavItems,
+    analyticsSeparator,
+    ...analyticsItems,
+    managementSeparator,
+    ...managementItems,
+    configSeparator,
+    ...configItems,
+    accountSeparator,
+    ...accountItems,
   ];
   
   // Admin-only navigation items
@@ -56,7 +118,7 @@ export function Sidebar({ className }: SidebarProps) {
   ];
   
   // Combine nav items based on user role
-  const navItems = user?.role === 'admin' 
+  const navItems: NavItem[] = user?.role === 'admin' 
     ? [...baseNavItems, ...adminNavItems] 
     : baseNavItems;
   
@@ -100,28 +162,55 @@ export function Sidebar({ className }: SidebarProps) {
         </div>
         
         {/* Nav Links */}
-        <nav className={cn("lg:block flex-grow", isMobile && !mobileMenuOpen && "hidden")}>
+        <nav className={cn("lg:block flex-grow overflow-y-auto", isMobile && !mobileMenuOpen && "hidden")}>
           <ul className="space-y-1">
-            {navItems.map((item) => {
-              const isActive = location === item.href;
-              const Icon = item.icon;
+            {navItems.map((item, index) => {
+              // Function to check if item is a separator
+              const isSeparator = (item: NavItem): item is SeparatorType => 
+                'type' in item && item.type === 'separator';
               
-              return (
-                <li key={item.href}>
-                  <a 
-                    href={item.href} 
-                    className={cn(
-                      "py-2 px-4 flex items-center text-sm font-medium rounded-md transition-colors",
-                      isActive 
-                        ? "bg-slate-100 text-primary" 
-                        : "text-slate-700 hover:bg-slate-100"
-                    )}
-                  >
-                    <Icon className="w-5 h-5 mr-3" />
-                    {item.label}
-                  </a>
-                </li>
-              );
+              // Function to check if item is a navigation item
+              const isNavItem = (item: NavItem): item is NavItemType => 
+                'href' in item && 'icon' in item;
+              
+              // Render separator
+              if (isSeparator(item)) {
+                return (
+                  <li key={`separator-${index}`} className="pt-3 pb-1">
+                    <div className="mx-4">
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        {item.label}
+                      </p>
+                      <div className="mt-1 border-t border-slate-200"></div>
+                    </div>
+                  </li>
+                );
+              }
+              
+              // Render regular nav item
+              if (isNavItem(item)) {
+                const isActive = location === item.href;
+                const Icon = item.icon;
+                
+                return (
+                  <li key={item.href}>
+                    <a 
+                      href={item.href} 
+                      className={cn(
+                        "py-2 px-4 flex items-center text-sm font-medium rounded-md transition-colors",
+                        isActive 
+                          ? "bg-slate-100 text-primary" 
+                          : "text-slate-700 hover:bg-slate-100"
+                      )}
+                    >
+                      <Icon className="w-5 h-5 mr-3" />
+                      {item.label}
+                    </a>
+                  </li>
+                );
+              }
+              
+              return null;
             })}
           </ul>
         </nav>
