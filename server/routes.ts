@@ -674,17 +674,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { timeRange = '30days' } = req.query;
       
       // In a real app, this would fetch real dashboard data based on the time range
-      // For now, we'll return sample data
+      // For now, we'll return sample data with structure matching frontend requirements
       const dashboardData = {
         metrics: {
           activeUsers: 2845,
-          activeUsersChange: 12.6,
+          activeUsersTrend: 12.6,
           revenue: 24512,
-          revenueChange: 8.2,
-          retentionRate: 94.3,
-          retentionChange: 1.8,
-          newSignups: 385,
-          signupsChange: -5.3
+          revenueTrend: 8.2,
+          accounts: 875,
+          accountsTrend: 4.7,
+          locations: 1240,
+          locationsTrend: 6.2
+        },
+        usage: {
+          reviews: 42750,
+          ai_responses: 18320,
+          review_requests: 9450,
+          api_calls: 156800
         },
         planDistribution: [
           { name: 'Free', value: 65 },
@@ -712,18 +718,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { timeRange = '30days' } = req.query;
       
-      // Sample user statistics
+      // Sample user statistics - updated to match frontend expectations
       const userStats = {
         total: 2845,
         newUsers: {
           count: 385,
-          change: -5.3
+          trend: -5.3
         },
-        churn: {
-          count: 72,
-          rate: 2.5,
-          change: 0.3
+        activeUsers: {
+          count: 2680,
+          trend: 4.2
         },
+        churnRate: 2.5,
         planDistribution: [
           { name: 'Free', value: 65 },
           { name: 'Pro', value: 27 },
