@@ -5,6 +5,7 @@ import { setupAuth } from "./auth";
 import { z } from "zod";
 import { insertReviewSchema, insertAlertSchema, insertMetricsSchema, insertReviewRequestSchema } from "@shared/schema";
 import { generateAIReply } from "./lib/openai";
+import { requireRole } from "./middleware/rbac";
 
 // Import external services
 import { importGooglePlacesReviews } from "./services/google-places";
@@ -528,6 +529,150 @@ export async function registerRoutes(app: Express): Promise<Server> {
     (req, res) => handleReviewWebhook(req, res, 'apple')
   );
 
+  // Admin-only routes for user management
+  app.get("/api/admin/users", requireRole('admin'), async (req, res, next) => {
+    try {
+      const users = await storage.getAllUsers();
+      
+      // Remove sensitive information
+      const safeUsers = users.map(user => {
+        const { password, ...userWithoutPassword } = user;
+        return userWithoutPassword;
+      });
+      
+      res.json(safeUsers);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/admin/users/:id", requireRole('admin'), async (req, res, next) => {
+    try {
+      const userId = Number(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Remove sensitive information
+      const { password, ...userWithoutPassword } = user;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.patch("/api/admin/users/:id/role", requireRole('admin'), async (req, res, next) => {
+    try {
+      const userId = Number(req.params.id);
+      const { role } = req.body;
+      
+      // Validate role
+      const validRoles = ['admin', 'staff', 'user'];
+      if (!validRoles.includes(role)) {
+        return res.status(400).json({ message: "Invalid role. Must be 'admin', 'staff', or 'user'" });
+      }
+      
+      // Don't allow admins to demote themselves
+      if (userId === req.user!.id && role !== 'admin') {
+        return res.status(403).json({ 
+          message: "Cannot change your own admin role" 
+        });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const updatedUser = await storage.updateUser(userId, { role });
+      
+      // Remove sensitive information
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.patch("/api/admin/users/:id/active", requireRole('admin'), async (req, res, next) => {
+    try {
+      const userId = Number(req.params.id);
+      const { isActive } = req.body;
+      
+      // Validate isActive
+      if (typeof isActive !== 'boolean') {
+        return res.status(400).json({ 
+          message: "Invalid isActive value. Must be a boolean" 
+        });
+      }
+      
+      // Don't allow admins to deactivate themselves
+      if (userId === req.user!.id && !isActive) {
+        return res.status(403).json({ 
+          message: "Cannot deactivate your own account" 
+        });
+      }
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      const updatedUser = await storage.updateUser(userId, { isActive });
+      
+      // Remove sensitive information
+      const { password, ...userWithoutPassword } = updatedUser;
+      
+      res.json(userWithoutPassword);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Staff-accessible routes
+  app.get("/api/staff/locations", requireRole('staff'), async (req, res, next) => {
+    try {
+      // Staff can view all locations
+      const locations = await storage.getAllLocations();
+      res.json(locations);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // User and above can see their own user info
+  app.get("/api/profile", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const userId = req.user!.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Remove sensitive information
+      const { password, ...userWithoutPassword } = user;
+      
+      // Include permissions in the profile response
+      const response = {
+        ...userWithoutPassword,
+        permissions: req.permissions
+      };
+      
+      res.json(response);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
   // Create HTTP server
   const httpServer = createServer(app);
   return httpServer;

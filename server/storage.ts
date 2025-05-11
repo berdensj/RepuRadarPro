@@ -1,4 +1,10 @@
-import { users, type User, type InsertUser, reviews, type Review, type InsertReview, metrics, type Metrics, type InsertMetrics, alerts, type Alert, type InsertAlert } from "@shared/schema";
+import { 
+  users, type User, type InsertUser, 
+  reviews, type Review, type InsertReview, 
+  metrics, type Metrics, type InsertMetrics, 
+  alerts, type Alert, type InsertAlert,
+  locations, type Location, type InsertLocation
+} from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
@@ -10,6 +16,12 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, user: Partial<User>): Promise<User>;
+  getAllUsers(): Promise<User[]>;
+  
+  // Location methods
+  getLocations(userId: number): Promise<Location[]>;
+  getAllLocations(): Promise<Location[]>;
 
   // Review methods
   getReviewsByUserId(userId: number): Promise<Review[]>;
@@ -40,23 +52,27 @@ export class MemStorage implements IStorage {
   private reviews: Map<number, Review>;
   private metricsMap: Map<number, Metrics>;
   private alerts: Map<number, Alert>;
+  private locations: Map<number, Location>;
   sessionStore: session.Store;
   
   private userCurrentId: number;
   private reviewCurrentId: number;
   private metricsCurrentId: number;
   private alertCurrentId: number;
+  private locationCurrentId: number;
 
   constructor() {
     this.users = new Map();
     this.reviews = new Map();
     this.metricsMap = new Map();
     this.alerts = new Map();
+    this.locations = new Map();
     
     this.userCurrentId = 1;
     this.reviewCurrentId = 1;
     this.metricsCurrentId = 1;
     this.alertCurrentId = 1;
+    this.locationCurrentId = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
@@ -95,6 +111,20 @@ export class MemStorage implements IStorage {
     };
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUser(id: number, partial: Partial<User>): Promise<User> {
+    const user = this.users.get(id);
+    if (!user) {
+      throw new Error(`User with id ${id} not found`);
+    }
+    const updated = { ...user, ...partial };
+    this.users.set(id, updated);
+    return updated;
+  }
+  
+  async getAllUsers(): Promise<User[]> {
+    return Array.from(this.users.values());
   }
 
   // Review methods
