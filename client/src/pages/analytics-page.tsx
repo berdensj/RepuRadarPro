@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { TrendGraph } from "@/components/dashboard/trend-graph";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -6,7 +6,7 @@ import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart, LineChart, PieChart, CandlestickChart, BarChart2, TrendingUp } from "lucide-react";
+import { BarChart, LineChart, PieChart, CandlestickChart, BarChart2, TrendingUp, Building2 } from "lucide-react";
 import { 
   Chart as ChartJS, 
   ArcElement, 
@@ -18,6 +18,8 @@ import {
 } from 'chart.js';
 import { Tooltip } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
+import { useQuery } from "@tanstack/react-query";
+import { Location } from "@shared/schema";
 
 ChartJS.register(
   ArcElement, 
@@ -32,6 +34,19 @@ ChartJS.register(
 export default function AnalyticsPage() {
   const isMobile = useIsMobile();
   const [periodFilter, setPeriodFilter] = useState("90");
+  const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
+  
+  // Fetch locations for the current user
+  const { data: locations = [], isLoading: isLoadingLocations } = useQuery<Location[]>({
+    queryKey: ["/api/locations"],
+  });
+  
+  // Use appropriate title based on selected location
+  const getLocationName = () => {
+    if (selectedLocationId === "all") return "All Locations";
+    const location = locations.find(loc => loc.id.toString() === selectedLocationId);
+    return location ? location.name : "Selected Location";
+  };
 
   // Sample data for charts
   const platformData = {
@@ -111,21 +126,42 @@ export default function AnalyticsPage() {
             <header className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
               <div>
                 <h1 className="text-2xl font-semibold text-slate-800">Analytics</h1>
-                <p className="text-slate-500">Detailed insights about your reputation</p>
+                <p className="text-slate-500">Insights for {getLocationName()}</p>
               </div>
               
-              <div className="mt-4 md:mt-0 flex items-center space-x-2">
-                <span className="text-sm text-slate-600">Period:</span>
-                <Select defaultValue={periodFilter} onValueChange={setPeriodFilter}>
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue placeholder="Select period" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="30">Last 30 Days</SelectItem>
-                    <SelectItem value="90">Last 90 Days</SelectItem>
-                    <SelectItem value="365">Last Year</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="mt-4 md:mt-0 flex flex-wrap items-center gap-4">
+                {locations.length > 1 && (
+                  <div className="flex items-center space-x-2">
+                    <Building2 className="h-4 w-4 text-slate-500" />
+                    <Select value={selectedLocationId} onValueChange={setSelectedLocationId}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select location" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Locations</SelectItem>
+                        {locations.map((location) => (
+                          <SelectItem key={location.id} value={location.id.toString()}>
+                            {location.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+                
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm text-slate-600">Period:</span>
+                  <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Select period" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="30">Last 30 Days</SelectItem>
+                      <SelectItem value="90">Last 90 Days</SelectItem>
+                      <SelectItem value="365">Last Year</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </header>
 
