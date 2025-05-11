@@ -1120,6 +1120,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Development-only route to create an admin user (NOT for production)
+  app.post('/api/dev/make-admin', async (req, res) => {
+    try {
+      if (process.env.NODE_ENV === 'production') {
+        return res.status(403).json({ error: 'This endpoint is not available in production' });
+      }
+      
+      const { userId } = req.body;
+      if (!userId) {
+        return res.status(400).json({ error: 'User ID is required' });
+      }
+      
+      const user = await storage.getUser(Number(userId));
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      
+      const updatedUser = await storage.updateUser(Number(userId), { role: 'admin' });
+      res.json({ success: true, user: updatedUser });
+    } catch (error) {
+      console.error('Error making user admin:', error);
+      res.status(500).json({ error: 'Failed to update user role' });
+    }
+  });
+  
   // Create HTTP server
   const httpServer = createServer(app);
   return httpServer;
