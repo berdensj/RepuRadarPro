@@ -77,6 +77,45 @@ export class MemStorage implements IStorage {
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
     });
+    
+    // Seed users including an admin
+    this._seedUsers();
+  }
+  
+  // Method to seed initial users
+  private _seedUsers() {
+    // Admin user
+    const adminUser: User = {
+      id: this.userCurrentId++,
+      username: 'admin',
+      password: '$2b$10$5QnkCEJKBTrfZS27qkZcU.tnULAjO4tmEt2s2XBuZIr6CYnigr96S', // hashed "admin123"
+      email: 'admin@repuradar.com',
+      fullName: 'System Administrator',
+      role: 'admin',
+      isActive: true,
+      createdAt: new Date(),
+      profilePicture: null,
+      plan: 'enterprise'
+    };
+    this.users.set(adminUser.id, adminUser);
+    
+    // Regular user (already seeded by registration)
+    const regularUser: User = {
+      id: this.userCurrentId++,
+      username: 'user',
+      password: '$2b$10$5QnkCEJKBTrfZS27qkZcU.tnULAjO4tmEt2s2XBuZIr6CYnigr96S', // hashed "user123"
+      email: 'user@example.com',
+      fullName: 'Regular User',
+      role: 'user',
+      isActive: true,
+      createdAt: new Date(),
+      profilePicture: null,
+      plan: 'free'
+    };
+    this.users.set(regularUser.id, regularUser);
+    
+    console.log('Seeded admin user with username: admin, password: admin123');
+    console.log('Seeded regular user with username: user, password: user123');
   }
 
   // User methods
