@@ -22,6 +22,8 @@ import AdminDashboardPage from "@/pages/admin/dashboard-page";
 import AdminUsersPage from "@/pages/admin/users-page";
 import AdminFinancialPage from "@/pages/admin/financial-page";
 import AdminSystemPage from "@/pages/admin/system-page";
+import AdminCustomersPage from "@/pages/admin/customers-page";
+import OnboardingPage from "@/pages/admin/onboarding-page";
 import { Route } from "wouter";
 
 function Router() {
@@ -42,6 +44,8 @@ function Router() {
       <ProtectedRoute path="/admin/users" component={AdminUsersPage} requiredRole="admin" />
       <ProtectedRoute path="/admin/financial" component={AdminFinancialPage} requiredRole="admin" />
       <ProtectedRoute path="/admin/system" component={AdminSystemPage} requiredRole="admin" />
+      <ProtectedRoute path="/admin/customers" component={AdminCustomersPage} requiredRole="admin" />
+      <ProtectedRoute path="/admin/onboarding" component={OnboardingPage} requiredRole="admin" />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>

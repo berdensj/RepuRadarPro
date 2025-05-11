@@ -705,10 +705,476 @@ export async function registerRoutes(app: Express): Promise<Server> {
           { month: 'May', revenue: 22800, users: 2520 },
           { month: 'Jun', revenue: 24100, users: 2710 },
           { month: 'Jul', revenue: 25400, users: 2845 },
+        ],
+        revenueByPlan: [
+          { month: 'Jan', free: 0, pro: 7500, business: 5400, enterprise: 2500 },
+          { month: 'Feb', free: 0, pro: 8100, business: 6200, enterprise: 2900 },
+          { month: 'Mar', free: 0, pro: 8700, business: 7100, enterprise: 3300 },
+          { month: 'Apr', free: 0, pro: 9400, business: 8300, enterprise: 3800 },
+          { month: 'May', free: 0, pro: 9800, business: 8900, enterprise: 4100 },
+          { month: 'Jun', free: 0, pro: 10200, business: 9600, enterprise: 4300 },
+          { month: 'Jul', free: 0, pro: 10900, business: 10100, enterprise: 4400 },
         ]
       };
       
       res.json(dashboardData);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Admin Customer Management API endpoints
+  app.get("/api/admin/customers", requireRole('admin'), async (req, res, next) => {
+    try {
+      // In a real app, this would fetch real customer data from the database
+      // For now, we'll return sample data with structure matching frontend requirements
+      const customerData = [
+        {
+          id: 1,
+          username: "johndoe",
+          email: "john.doe@example.com",
+          fullName: "John Doe",
+          phone: "555-123-4567",
+          address: "123 Main St, Anytown, USA",
+          company: "Doe Enterprises",
+          role: "user",
+          isActive: true,
+          plan: "Pro",
+          billingCycle: "monthly",
+          nextBillingDate: "2025-06-01",
+          paymentMethod: "Credit Card",
+          createdAt: "2024-01-15",
+          profilePicture: null,
+          locationCount: 3,
+          totalSpend: 1250
+        },
+        {
+          id: 2,
+          username: "janewilson",
+          email: "jane.wilson@example.com",
+          fullName: "Jane Wilson",
+          phone: "555-987-6543",
+          address: "456 Oak Ave, Somewhere, USA",
+          company: "Wilson Law Firm",
+          role: "user",
+          isActive: true,
+          plan: "Business",
+          billingCycle: "annually",
+          nextBillingDate: "2025-12-15",
+          paymentMethod: "Credit Card",
+          createdAt: "2024-02-10",
+          profilePicture: null,
+          locationCount: 8,
+          totalSpend: 3600
+        },
+        {
+          id: 3,
+          username: "mikesmith",
+          email: "mike.smith@example.com",
+          fullName: "Michael Smith",
+          phone: "555-789-0123",
+          address: "789 Pine Rd, Elsewhere, USA",
+          company: "Smith Dental Care",
+          role: "user",
+          isActive: true,
+          plan: "Enterprise",
+          billingCycle: "annually",
+          nextBillingDate: "2025-08-22",
+          paymentMethod: "ACH Transfer",
+          createdAt: "2024-01-22",
+          profilePicture: null,
+          locationCount: 15,
+          totalSpend: 8750
+        },
+        {
+          id: 4,
+          username: "sarahlee",
+          email: "sarah.lee@example.com",
+          fullName: "Sarah Lee",
+          phone: "555-456-7890",
+          address: "321 Elm St, Nowhere, USA",
+          company: "Lee Accounting",
+          role: "user",
+          isActive: false,
+          plan: "Pro",
+          billingCycle: "monthly",
+          nextBillingDate: "2025-05-15",
+          paymentMethod: "Credit Card",
+          createdAt: "2024-03-05",
+          profilePicture: null,
+          locationCount: 1,
+          totalSpend: 425
+        },
+        {
+          id: 5,
+          username: "robertjohnson",
+          email: "robert.johnson@example.com",
+          fullName: "Robert Johnson",
+          phone: "555-567-8901",
+          address: "654 Maple Dr, Anywhere, USA",
+          company: "Johnson Real Estate",
+          role: "user",
+          isActive: true,
+          plan: "Business",
+          billingCycle: "monthly",
+          nextBillingDate: "2025-05-30",
+          paymentMethod: "Credit Card",
+          createdAt: "2024-01-30",
+          profilePicture: null,
+          locationCount: 6,
+          totalSpend: 2100
+        },
+        {
+          id: 6,
+          username: "lisamiller",
+          email: "lisa.miller@example.com",
+          fullName: "Lisa Miller",
+          phone: "555-678-9012",
+          address: "987 Walnut Blvd, Someplace, USA",
+          company: "Miller Physical Therapy",
+          role: "user",
+          isActive: true,
+          plan: "Pro",
+          billingCycle: "annually",
+          nextBillingDate: "2026-01-10",
+          paymentMethod: "Credit Card",
+          createdAt: "2024-02-10",
+          profilePicture: null,
+          locationCount: 2,
+          totalSpend: 950
+        },
+        {
+          id: 7,
+          username: "davidthomas",
+          email: "david.thomas@example.com",
+          fullName: "David Thomas",
+          phone: "555-789-0123",
+          address: "246 Cedar St, Somewhere, USA",
+          company: "Thomas Consulting",
+          role: "user",
+          isActive: true,
+          plan: "Free",
+          billingCycle: "monthly",
+          nextBillingDate: null,
+          paymentMethod: null,
+          createdAt: "2024-04-01",
+          profilePicture: null,
+          locationCount: 1,
+          totalSpend: 0
+        },
+        {
+          id: 8,
+          username: "jenniferwhite",
+          email: "jennifer.white@example.com",
+          fullName: "Jennifer White",
+          phone: "555-890-1234",
+          address: "135 Birch Ln, Elsewhere, USA",
+          company: "White Veterinary Clinic",
+          role: "user",
+          isActive: true,
+          plan: "Enterprise",
+          billingCycle: "annually",
+          nextBillingDate: "2025-11-05",
+          paymentMethod: "ACH Transfer",
+          createdAt: "2024-01-05",
+          profilePicture: null,
+          locationCount: 12,
+          totalSpend: 7200
+        },
+        {
+          id: 9,
+          username: "jamesbrown",
+          email: "james.brown@example.com",
+          fullName: "James Brown",
+          phone: "555-901-2345",
+          address: "753 Oak St, Nowhere, USA",
+          company: "Brown Financial Services",
+          role: "user",
+          isActive: false,
+          plan: "Business",
+          billingCycle: "monthly",
+          nextBillingDate: "2025-04-20",
+          paymentMethod: "Credit Card",
+          createdAt: "2024-02-20",
+          profilePicture: null,
+          locationCount: 4,
+          totalSpend: 1800
+        },
+        {
+          id: 10,
+          username: "susanwilliams",
+          email: "susan.williams@example.com",
+          fullName: "Susan Williams",
+          phone: "555-012-3456",
+          address: "864 Pine Ave, Anywhere, USA",
+          company: "Williams Medical Practice",
+          role: "user",
+          isActive: true,
+          plan: "Pro",
+          billingCycle: "monthly",
+          nextBillingDate: "2025-05-25",
+          paymentMethod: "Credit Card",
+          createdAt: "2024-01-25",
+          profilePicture: null,
+          locationCount: 2,
+          totalSpend: 900
+        }
+      ];
+      
+      res.json(customerData);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Update customer endpoint
+  app.patch("/api/admin/customers/:id", requireRole('admin'), async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const updates = req.body;
+      
+      // In a real app, this would update the customer in the database
+      // For now, we'll just return the updated data
+      const updatedCustomer = {
+        id: parseInt(id),
+        username: "customer_username", // This would be retrieved from the database
+        ...updates,
+        updatedAt: new Date().toISOString()
+      };
+      
+      res.json(updatedCustomer);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Customer onboarding endpoints
+  app.get("/api/admin/onboarding", requireRole('admin'), async (req, res, next) => {
+    try {
+      // In a real app, this would fetch customers with their onboarding status from the database
+      const onboardingData = [
+        {
+          id: 1,
+          customerId: 1,
+          customerName: "John Doe",
+          customerCompany: "Doe Enterprises",
+          email: "john.doe@example.com",
+          phone: "555-123-4567",
+          plan: "Pro",
+          startDate: "2024-04-15",
+          assignedTo: "Alex Johnson",
+          progress: 35,
+          tasks: [
+            { id: 1, name: "Account Setup", completed: true, lastUpdated: "2024-04-15" },
+            { id: 2, name: "Payment Information", completed: true, lastUpdated: "2024-04-15" },
+            { id: 3, name: "Business Details", completed: true, lastUpdated: "2024-04-16" },
+            { id: 4, name: "Google Integration", completed: false, lastUpdated: null },
+            { id: 5, name: "Yelp Integration", completed: false, lastUpdated: null },
+            { id: 6, name: "Facebook Integration", completed: false, lastUpdated: null },
+            { id: 7, name: "Initial Team Training", completed: false, lastUpdated: null },
+            { id: 8, name: "Review Template Setup", completed: false, lastUpdated: null },
+            { id: 9, name: "Workflow Customization", completed: false, lastUpdated: null },
+            { id: 10, name: "QR Code Generation", completed: false, lastUpdated: null }
+          ]
+        },
+        {
+          id: 2,
+          customerId: 2,
+          customerName: "Jane Wilson",
+          customerCompany: "Wilson Law Firm",
+          email: "jane.wilson@example.com",
+          phone: "555-987-6543",
+          plan: "Business",
+          startDate: "2024-04-10",
+          assignedTo: "Sam Lee",
+          progress: 60,
+          tasks: [
+            { id: 1, name: "Account Setup", completed: true, lastUpdated: "2024-04-10" },
+            { id: 2, name: "Payment Information", completed: true, lastUpdated: "2024-04-10" },
+            { id: 3, name: "Business Details", completed: true, lastUpdated: "2024-04-11" },
+            { id: 4, name: "Google Integration", completed: true, lastUpdated: "2024-04-12" },
+            { id: 5, name: "Yelp Integration", completed: true, lastUpdated: "2024-04-12" },
+            { id: 6, name: "Facebook Integration", completed: true, lastUpdated: "2024-04-12" },
+            { id: 7, name: "Initial Team Training", completed: false, lastUpdated: null },
+            { id: 8, name: "Review Template Setup", completed: false, lastUpdated: null },
+            { id: 9, name: "Workflow Customization", completed: false, lastUpdated: null },
+            { id: 10, name: "QR Code Generation", completed: false, lastUpdated: null }
+          ]
+        },
+        {
+          id: 3,
+          customerId: 3,
+          customerName: "Michael Smith",
+          customerCompany: "Smith Dental Care",
+          email: "mike.smith@example.com",
+          phone: "555-789-0123",
+          plan: "Enterprise",
+          startDate: "2024-03-25",
+          assignedTo: "Taylor Wong",
+          progress: 90,
+          tasks: [
+            { id: 1, name: "Account Setup", completed: true, lastUpdated: "2024-03-25" },
+            { id: 2, name: "Payment Information", completed: true, lastUpdated: "2024-03-25" },
+            { id: 3, name: "Business Details", completed: true, lastUpdated: "2024-03-26" },
+            { id: 4, name: "Google Integration", completed: true, lastUpdated: "2024-03-27" },
+            { id: 5, name: "Yelp Integration", completed: true, lastUpdated: "2024-03-27" },
+            { id: 6, name: "Facebook Integration", completed: true, lastUpdated: "2024-03-27" },
+            { id: 7, name: "Initial Team Training", completed: true, lastUpdated: "2024-04-02" },
+            { id: 8, name: "Review Template Setup", completed: true, lastUpdated: "2024-04-05" },
+            { id: 9, name: "Workflow Customization", completed: true, lastUpdated: "2024-04-10" },
+            { id: 10, name: "QR Code Generation", completed: false, lastUpdated: null }
+          ]
+        },
+        {
+          id: 4,
+          customerId: 4,
+          customerName: "Sarah Lee",
+          customerCompany: "Lee Accounting",
+          email: "sarah.lee@example.com",
+          phone: "555-456-7890",
+          plan: "Pro",
+          startDate: "2024-04-05",
+          assignedTo: "Alex Johnson",
+          progress: 20,
+          tasks: [
+            { id: 1, name: "Account Setup", completed: true, lastUpdated: "2024-04-05" },
+            { id: 2, name: "Payment Information", completed: true, lastUpdated: "2024-04-05" },
+            { id: 3, name: "Business Details", completed: false, lastUpdated: null },
+            { id: 4, name: "Google Integration", completed: false, lastUpdated: null },
+            { id: 5, name: "Yelp Integration", completed: false, lastUpdated: null },
+            { id: 6, name: "Facebook Integration", completed: false, lastUpdated: null },
+            { id: 7, name: "Initial Team Training", completed: false, lastUpdated: null },
+            { id: 8, name: "Review Template Setup", completed: false, lastUpdated: null },
+            { id: 9, name: "Workflow Customization", completed: false, lastUpdated: null },
+            { id: 10, name: "QR Code Generation", completed: false, lastUpdated: null }
+          ]
+        },
+        {
+          id: 5,
+          customerId: 5,
+          customerName: "Robert Johnson",
+          customerCompany: "Johnson Real Estate",
+          email: "robert.johnson@example.com",
+          phone: "555-567-8901",
+          plan: "Business",
+          startDate: "2024-03-30",
+          assignedTo: "Jordan Miller",
+          progress: 70,
+          tasks: [
+            { id: 1, name: "Account Setup", completed: true, lastUpdated: "2024-03-30" },
+            { id: 2, name: "Payment Information", completed: true, lastUpdated: "2024-03-30" },
+            { id: 3, name: "Business Details", completed: true, lastUpdated: "2024-03-31" },
+            { id: 4, name: "Google Integration", completed: true, lastUpdated: "2024-04-01" },
+            { id: 5, name: "Yelp Integration", completed: true, lastUpdated: "2024-04-01" },
+            { id: 6, name: "Facebook Integration", completed: true, lastUpdated: "2024-04-01" },
+            { id: 7, name: "Initial Team Training", completed: true, lastUpdated: "2024-04-05" },
+            { id: 8, name: "Review Template Setup", completed: false, lastUpdated: null },
+            { id: 9, name: "Workflow Customization", completed: false, lastUpdated: null },
+            { id: 10, name: "QR Code Generation", completed: false, lastUpdated: null }
+          ]
+        }
+      ];
+      
+      res.json(onboardingData);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Get specific customer onboarding data
+  app.get("/api/admin/onboarding/:id", requireRole('admin'), async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      
+      // In a real app, this would fetch the specific customer's onboarding data by ID
+      // For demo purposes, we'll return a fixed object
+      
+      const onboardingData = {
+        id: parseInt(id),
+        customerId: parseInt(id),
+        customerName: "John Doe",
+        customerCompany: "Doe Enterprises",
+        email: "john.doe@example.com",
+        phone: "555-123-4567",
+        plan: "Pro",
+        startDate: "2024-04-15",
+        assignedTo: "Alex Johnson",
+        progress: 35,
+        tasks: [
+          { id: 1, name: "Account Setup", completed: true, lastUpdated: "2024-04-15" },
+          { id: 2, name: "Payment Information", completed: true, lastUpdated: "2024-04-15" },
+          { id: 3, name: "Business Details", completed: true, lastUpdated: "2024-04-16" },
+          { id: 4, name: "Google Integration", completed: false, lastUpdated: null },
+          { id: 5, name: "Yelp Integration", completed: false, lastUpdated: null },
+          { id: 6, name: "Facebook Integration", completed: false, lastUpdated: null },
+          { id: 7, name: "Initial Team Training", completed: false, lastUpdated: null },
+          { id: 8, name: "Review Template Setup", completed: false, lastUpdated: null },
+          { id: 9, name: "Workflow Customization", completed: false, lastUpdated: null },
+          { id: 10, name: "QR Code Generation", completed: false, lastUpdated: null }
+        ],
+        notes: [
+          {
+            id: 1,
+            date: "2024-04-15",
+            author: "Alex Johnson",
+            content: "Initial setup completed. Customer needs help with Google integration."
+          },
+          {
+            id: 2,
+            date: "2024-04-16",
+            author: "System",
+            content: "Business details updated successfully."
+          }
+        ],
+        activity: [
+          {
+            id: 1,
+            date: "2024-04-15T10:30:00",
+            type: "signup",
+            description: "Customer signed up for Pro plan"
+          },
+          {
+            id: 2,
+            date: "2024-04-15T10:45:00",
+            type: "payment",
+            description: "Payment method added"
+          },
+          {
+            id: 3,
+            date: "2024-04-16T14:20:00",
+            type: "update",
+            description: "Business details updated"
+          },
+          {
+            id: 4,
+            date: "2024-04-18T09:15:00",
+            type: "support",
+            description: "Customer support call scheduled for Google integration"
+          }
+        ]
+      };
+      
+      res.json(onboardingData);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Update customer onboarding task
+  app.patch("/api/admin/onboarding/:id/tasks/:taskId", requireRole('admin'), async (req, res, next) => {
+    try {
+      const { id, taskId } = req.params;
+      const { completed } = req.body;
+      
+      // In a real app, this would update the task in the database
+      // For demo purposes, we'll just return a success response
+      
+      res.json({
+        id: parseInt(taskId),
+        name: "Task Name", // This would come from the database
+        completed,
+        lastUpdated: completed ? new Date().toISOString().split('T')[0] : null
+      });
     } catch (error) {
       next(error);
     }
