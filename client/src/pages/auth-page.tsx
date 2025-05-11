@@ -7,17 +7,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { 
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage
-} from "@/components/ui/form";
-import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { ChartLine, User } from "lucide-react";
 import { useLocation } from "wouter";
 
@@ -38,6 +28,16 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [, navigate] = useLocation();
   
+  // Login form direct state
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  
+  // Register form direct state
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerUsername, setRegisterUsername] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [registerFullName, setRegisterFullName] = useState("");
+  
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
@@ -45,31 +45,23 @@ export default function AuthPage() {
     }
   }, [user, navigate]);
 
-  const loginForm = useForm<LoginData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
+  // We're using direct state management instead of react-hook-form now
 
-  const registerForm = useForm<RegisterData>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: {
-      email: "",
-      username: "",
-      password: "",
-      fullName: "",
-    },
-  });
-
-  const onLoginSubmit = (data: LoginData) => {
-    loginMutation.mutate(data);
+  const onLoginSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    loginMutation.mutate({
+      email: loginEmail,
+      password: loginPassword
+    });
   };
 
-  const onRegisterSubmit = (data: RegisterData) => {
+  const onRegisterSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
     registerMutation.mutate({
-      ...data,
+      email: registerEmail,
+      username: registerUsername,
+      password: registerPassword,
+      fullName: registerFullName,
       plan: "Free"
     });
   };
@@ -105,35 +97,29 @@ export default function AuthPage() {
             </div>
 
             {isLogin ? (
-              <Form {...loginForm}>
-                <form onSubmit={loginForm.handleSubmit(onLoginSubmit)} className="space-y-4">
-                  <FormField
-                    control={loginForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="you@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              <div>
+                <form onSubmit={onLoginSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      placeholder="you@example.com" 
+                      value={loginEmail} 
+                      onChange={(e) => setLoginEmail(e.target.value)} 
+                    />
+                  </div>
                   
-                  <FormField
-                    control={loginForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      placeholder="••••••••" 
+                      value={loginPassword} 
+                      onChange={(e) => setLoginPassword(e.target.value)} 
+                    />
+                  </div>
                   
                   <Button 
                     type="submit" 
@@ -143,65 +129,53 @@ export default function AuthPage() {
                     {loginMutation.isPending ? "Signing in..." : "Sign in"}
                   </Button>
                 </form>
-              </Form>
+              </div>
             ) : (
-              <Form {...registerForm}>
-                <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
-                  <FormField
-                    control={registerForm.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              <div>
+                <form onSubmit={onRegisterSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input 
+                      id="fullName" 
+                      type="text" 
+                      placeholder="John Doe" 
+                      value={registerFullName} 
+                      onChange={(e) => setRegisterFullName(e.target.value)} 
+                    />
+                  </div>
                   
-                  <FormField
-                    control={registerForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="you@example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="registerEmail">Email</Label>
+                    <Input 
+                      id="registerEmail" 
+                      type="email" 
+                      placeholder="you@example.com" 
+                      value={registerEmail} 
+                      onChange={(e) => setRegisterEmail(e.target.value)} 
+                    />
+                  </div>
                   
-                  <FormField
-                    control={registerForm.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <FormControl>
-                          <Input placeholder="johndoe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input 
+                      id="username" 
+                      type="text" 
+                      placeholder="johndoe" 
+                      value={registerUsername} 
+                      onChange={(e) => setRegisterUsername(e.target.value)} 
+                    />
+                  </div>
                   
-                  <FormField
-                    control={registerForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input type="password" placeholder="••••••••" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-2">
+                    <Label htmlFor="registerPassword">Password</Label>
+                    <Input 
+                      id="registerPassword" 
+                      type="password" 
+                      placeholder="••••••••" 
+                      value={registerPassword} 
+                      onChange={(e) => setRegisterPassword(e.target.value)} 
+                    />
+                  </div>
                   
                   <Button 
                     type="submit" 
@@ -211,7 +185,7 @@ export default function AuthPage() {
                     {registerMutation.isPending ? "Creating account..." : "Create account"}
                   </Button>
                 </form>
-              </Form>
+              </div>
             )}
             
             {isLogin && (
