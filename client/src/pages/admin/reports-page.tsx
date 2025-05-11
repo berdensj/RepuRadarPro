@@ -307,7 +307,7 @@ export default function AdminReportsPage() {
                   </div>
                 ) : (
                   <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                    {(reportTemplates?.templates || []).map((template, i) => (
+                    {(reportTemplates?.templates || []).map((template: { name: string, description: string, isDefault: boolean, sections: string[] }, i: number) => (
                       <Card key={i}>
                         <CardHeader className="pb-2">
                           <div className="flex items-center justify-between">
