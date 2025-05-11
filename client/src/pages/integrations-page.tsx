@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -40,6 +40,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Location } from '@shared/schema';
 
 // Form schemas for each integration
 const googlePlacesSchema = z.object({
@@ -69,14 +70,6 @@ const appleMapsSchema = z.object({
 });
 
 type IntegrationStatus = 'idle' | 'loading' | 'success' | 'error';
-
-interface Location {
-  id: number;
-  userId: number;
-  name: string;
-  address?: string;
-  phone?: string;
-}
 
 const IntegrationsPage = () => {
   const { user } = useAuth();
@@ -109,7 +102,7 @@ const IntegrationsPage = () => {
     defaultValues: {
       placeId: '',
       apiKey: '',
-      locationId: ''
+      locationId: 'all'
     }
   });
 
@@ -118,7 +111,7 @@ const IntegrationsPage = () => {
     defaultValues: {
       businessId: '',
       apiKey: '',
-      locationId: ''
+      locationId: 'all'
     }
   });
 
@@ -127,7 +120,7 @@ const IntegrationsPage = () => {
     defaultValues: {
       pageId: '',
       accessToken: '',
-      locationId: ''
+      locationId: 'all'
     }
   });
 
@@ -138,7 +131,7 @@ const IntegrationsPage = () => {
       teamId: '',
       keyId: '',
       privateKey: '',
-      locationId: ''
+      locationId: 'all'
     }
   });
 
@@ -354,7 +347,7 @@ const IntegrationsPage = () => {
                     name="locationId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Location (Optional)</FormLabel>
+                        <FormLabel>Location</FormLabel>
                         <Select 
                           onValueChange={field.onChange} 
                           defaultValue={field.value}
@@ -365,8 +358,8 @@ const IntegrationsPage = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">All Locations</SelectItem>
-                            {locations.map((location) => (
+                            <SelectItem value="all">All Locations</SelectItem>
+                            {locations.map((location: Location) => (
                               <SelectItem key={location.id} value={String(location.id)}>
                                 {location.name}
                               </SelectItem>
@@ -474,7 +467,7 @@ const IntegrationsPage = () => {
                     name="locationId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Location (Optional)</FormLabel>
+                        <FormLabel>Location</FormLabel>
                         <Select 
                           onValueChange={field.onChange} 
                           defaultValue={field.value}
@@ -485,8 +478,8 @@ const IntegrationsPage = () => {
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="">All Locations</SelectItem>
-                            {locations.map((location) => (
+                            <SelectItem value="all">All Locations</SelectItem>
+                            {locations.map((location: Location) => (
                               <SelectItem key={location.id} value={String(location.id)}>
                                 {location.name}
                               </SelectItem>
@@ -516,8 +509,8 @@ const IntegrationsPage = () => {
               <h4 className="text-sm font-semibold mb-2">How to find your Yelp Business ID:</h4>
               <ol className="text-sm text-muted-foreground list-decimal pl-5 space-y-1">
                 <li>Go to your business page on Yelp</li>
-                <li>Look at the URL: https://www.yelp.com/biz/<strong>[your-business-id]</strong></li>
-                <li>Copy the part after "/biz/"</li>
+                <li>Your business ID is in the URL (e.g., 'your-business-name-city')</li>
+                <li>For Yelp API access, you need to apply in the <a href="https://www.yelp.com/developers" target="_blank" rel="noopener noreferrer" className="text-primary underline">Yelp Developer Program</a></li>
               </ol>
             </CardFooter>
           </Card>
@@ -529,7 +522,7 @@ const IntegrationsPage = () => {
             <CardHeader>
               <CardTitle>Facebook Integration</CardTitle>
               <CardDescription>
-                Import and monitor reviews from your Facebook Business page.
+                Connect your Facebook business page to import reviews.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -565,7 +558,7 @@ const IntegrationsPage = () => {
                           <Input placeholder="123456789012345" {...field} />
                         </FormControl>
                         <FormDescription>
-                          The ID of your Facebook business page
+                          The numeric ID of your Facebook business page
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -579,10 +572,10 @@ const IntegrationsPage = () => {
                       <FormItem>
                         <FormLabel>Access Token*</FormLabel>
                         <FormControl>
-                          <Input type="password" placeholder="Your Facebook access token" {...field} />
+                          <Input type="password" placeholder="Your long-lived access token" {...field} />
                         </FormControl>
                         <FormDescription>
-                          Enter a long-lived page access token
+                          A page access token with manage_pages permission
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -594,10 +587,25 @@ const IntegrationsPage = () => {
                     name="locationId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Location (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Location ID" {...field} />
-                        </FormControl>
+                        <FormLabel>Location</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a location" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="all">All Locations</SelectItem>
+                            {locations.map((location: Location) => (
+                              <SelectItem key={location.id} value={String(location.id)}>
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormDescription>
                           Link these reviews to a specific location
                         </FormDescription>
@@ -618,12 +626,11 @@ const IntegrationsPage = () => {
               </Form>
             </CardContent>
             <CardFooter className="flex flex-col items-start">
-              <h4 className="text-sm font-semibold mb-2">How to find your Facebook Page ID:</h4>
+              <h4 className="text-sm font-semibold mb-2">How to get Facebook Page Access:</h4>
               <ol className="text-sm text-muted-foreground list-decimal pl-5 space-y-1">
-                <li>Go to your Facebook Page</li>
-                <li>Click on "About" in the left sidebar</li>
-                <li>Scroll down to find your Page ID</li>
-                <li>For access tokens, use the <a href="https://developers.facebook.com/tools/explorer/" target="_blank" rel="noopener noreferrer" className="text-primary underline">Graph API Explorer</a></li>
+                <li>Create a Facebook Developer account at <a href="https://developers.facebook.com/" target="_blank" rel="noopener noreferrer" className="text-primary underline">developers.facebook.com</a></li>
+                <li>Create an app and request the Pages API permissions</li>
+                <li>Generate a long-lived access token with the pages_read_engagement permission</li>
               </ol>
             </CardFooter>
           </Card>
@@ -635,7 +642,7 @@ const IntegrationsPage = () => {
             <CardHeader>
               <CardTitle>Apple Maps Integration</CardTitle>
               <CardDescription>
-                Import and monitor reviews from Apple Maps.
+                Import reviews from your Apple Maps Connect business listing.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -668,10 +675,10 @@ const IntegrationsPage = () => {
                       <FormItem>
                         <FormLabel>Apple Maps Place ID*</FormLabel>
                         <FormControl>
-                          <Input placeholder="Place ID" {...field} />
+                          <Input placeholder="place.12345678" {...field} />
                         </FormControl>
                         <FormDescription>
-                          The unique identifier for your business on Apple Maps
+                          The place ID from Apple Maps Connect
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -685,10 +692,10 @@ const IntegrationsPage = () => {
                       <FormItem>
                         <FormLabel>Team ID*</FormLabel>
                         <FormControl>
-                          <Input placeholder="Apple Developer Team ID" {...field} />
+                          <Input placeholder="ABCDE12345" {...field} />
                         </FormControl>
                         <FormDescription>
-                          Your Apple Developer Team ID
+                          Your Apple Developer team ID
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -702,10 +709,10 @@ const IntegrationsPage = () => {
                       <FormItem>
                         <FormLabel>Key ID*</FormLabel>
                         <FormControl>
-                          <Input placeholder="Key ID" {...field} />
+                          <Input placeholder="ABCDEF1234" {...field} />
                         </FormControl>
                         <FormDescription>
-                          The ID of your private key from Apple Developer
+                          The Key ID for your Maps API key
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -720,14 +727,13 @@ const IntegrationsPage = () => {
                         <FormLabel>Private Key*</FormLabel>
                         <FormControl>
                           <Input 
-                            as="textarea" 
-                            placeholder="-----BEGIN PRIVATE KEY----- ..." 
-                            className="h-24" 
+                            placeholder="Your private key content" 
+                            className="font-mono text-xs"
                             {...field} 
                           />
                         </FormControl>
                         <FormDescription>
-                          Your private key for MapKit JS
+                          The contents of your private key file
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -739,10 +745,25 @@ const IntegrationsPage = () => {
                     name="locationId"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Location (Optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Location ID" {...field} />
-                        </FormControl>
+                        <FormLabel>Location</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a location" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="all">All Locations</SelectItem>
+                            {locations.map((location: Location) => (
+                              <SelectItem key={location.id} value={String(location.id)}>
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormDescription>
                           Link these reviews to a specific location
                         </FormDescription>
@@ -763,12 +784,12 @@ const IntegrationsPage = () => {
               </Form>
             </CardContent>
             <CardFooter className="flex flex-col items-start">
-              <h4 className="text-sm font-semibold mb-2">Apple Maps Integration Instructions:</h4>
+              <h4 className="text-sm font-semibold mb-2">How to access Apple Maps Connect API:</h4>
               <ol className="text-sm text-muted-foreground list-decimal pl-5 space-y-1">
-                <li>Register for the <a href="https://developer.apple.com/maps/" target="_blank" rel="noopener noreferrer" className="text-primary underline">Apple Maps APIs</a></li>
-                <li>Create a MapKit JS key in your Apple Developer account</li>
-                <li>Generate and download your private key</li>
-                <li>Copy your Team ID and Key ID from the developer portal</li>
+                <li>Register for the <a href="https://developer.apple.com/maps/mapkitjs/" target="_blank" rel="noopener noreferrer" className="text-primary underline">Maps Connect API program</a></li>
+                <li>Create a Maps API key in your Apple Developer Account</li>
+                <li>Generate a private key and note the Key ID</li>
+                <li>Your Team ID is found in your Apple Developer membership details</li>
               </ol>
             </CardFooter>
           </Card>
