@@ -23,8 +23,11 @@ ChartJS.register(
 
 interface BarChartProps {
   data: any[];
-  xKey: string;
-  yKeys: string[];
+  xKey?: string;
+  yKeys?: string[];
+  xField?: string;
+  yField?: string;
+  color?: string;
   labels?: string[];
   colors?: string[];
   title?: string;
@@ -40,6 +43,9 @@ export default function BarChart({
   data,
   xKey,
   yKeys,
+  xField,
+  yField,
+  color,
   labels,
   colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'],
   title,
@@ -51,17 +57,44 @@ export default function BarChart({
   yFormatter = (value) => value.toString(),
 }: BarChartProps) {
   const chartData = useMemo<ChartData<'bar'>>(() => {
-    // Extract x-axis labels
-    const xLabels = data.map(item => xFormatter(item[xKey]));
+    // Handle both prop formats (supporting legacy and new usage)
+    const actualXKey = xField || xKey || 'x';
     
-    // Create datasets for each y-key
-    const datasets = yKeys.map((key, index) => ({
-      label: labels ? labels[index] : key,
-      data: data.map(item => item[key]),
-      backgroundColor: colors[index % colors.length],
-      borderColor: colors[index % colors.length],
-      borderWidth: 1,
-    }));
+    // Extract x-axis labels
+    const xLabels = data.map(item => xFormatter(item[actualXKey]));
+    
+    // Create datasets based on which props are provided
+    const getDatasets = (): ChartData<'bar'>['datasets'] => {
+      if (yKeys && yKeys.length > 0) {
+        // Multi-series chart with explicit fields
+        return yKeys.map((key, index) => ({
+          label: labels && labels.length > index ? labels[index] : key,
+          data: data.map(item => item[key]),
+          backgroundColor: colors[index % colors.length],
+          borderColor: colors[index % colors.length],
+          borderWidth: 1,
+        }));
+      } else if (yField) {
+        // Single series chart
+        const barColor = color || colors[0];
+        return [{
+          label: yField,
+          data: data.map(item => item[yField as keyof typeof item]),
+          backgroundColor: barColor,
+          borderColor: barColor,
+          borderWidth: 1,
+        }];
+      } else {
+        // Fallback
+        return [{
+          label: 'No data',
+          data: [],
+          backgroundColor: colors[0],
+          borderColor: colors[0],
+          borderWidth: 1,
+        }];
+      }
+    };
     
     return {
       labels: xLabels,

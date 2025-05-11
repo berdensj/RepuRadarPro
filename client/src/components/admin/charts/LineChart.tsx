@@ -25,8 +25,11 @@ ChartJS.register(
 
 interface LineChartProps {
   data: any[];
-  xKey: string;
-  yKeys: string[];
+  xKey?: string;
+  yKeys?: string[];
+  xField?: string;
+  yField?: string;
+  categories?: string[];
   labels?: string[];
   colors?: string[];
   title?: string;
@@ -41,6 +44,9 @@ export default function LineChart({
   data,
   xKey,
   yKeys,
+  xField,
+  yField,
+  categories,
   labels,
   colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'],
   title,
@@ -51,18 +57,62 @@ export default function LineChart({
   yFormatter = (value) => value.toString(),
 }: LineChartProps) {
   const chartData = useMemo<ChartData<'line'>>(() => {
-    // Extract x-axis labels
-    const xLabels = data.map(item => xFormatter(item[xKey]));
+    // Handle both prop formats (supporting legacy and new usage)
+    const actualXKey = xField || xKey || 'x';
     
-    // Create datasets for each y-key
-    const datasets = yKeys.map((key, index) => ({
-      label: labels ? labels[index] : key,
-      data: data.map(item => item[key]),
-      borderColor: colors[index % colors.length],
-      backgroundColor: `${colors[index % colors.length]}20`,
-      tension: 0.2,
-      fill: true,
-    }));
+    // Extract x-axis labels
+    const xLabels = data.map(item => xFormatter(item[actualXKey]));
+    
+    // Create datasets based on which props are provided
+    const getDatasets = (): ChartData<'line'>['datasets'] => {
+      if (yKeys && yKeys.length > 0) {
+        // Multi-series chart with explicit fields
+        return yKeys.map((key, index) => ({
+          label: labels && labels.length > index ? labels[index] : key,
+          data: data.map(item => item[key]),
+          borderColor: colors[index % colors.length],
+          backgroundColor: `${colors[index % colors.length]}20`,
+          tension: 0.2,
+          fill: true,
+        }));
+      } else if (yField && categories && categories.length > 0) {
+        // Multi-series chart where categories are used as keys
+        return categories.map((category, index) => ({
+          label: category,
+          data: data.map(item => item[category as keyof typeof item] !== undefined 
+            ? item[category as keyof typeof item]
+            : 0),
+          borderColor: colors[index % colors.length],
+          backgroundColor: `${colors[index % colors.length]}20`,
+          tension: 0.2,
+          fill: true,
+        }));
+      } else if (yField) {
+        // Single series chart
+        return [{
+          label: yField,
+          data: data.map(item => item[yField as keyof typeof item] !== undefined 
+            ? item[yField as keyof typeof item]
+            : 0),
+          borderColor: colors[0],
+          backgroundColor: `${colors[0]}20`,
+          tension: 0.2,
+          fill: true,
+        }];
+      } else {
+        // Fallback to empty dataset to avoid errors
+        return [{
+          label: 'No data',
+          data: [],
+          borderColor: colors[0],
+          backgroundColor: `${colors[0]}20`,
+          tension: 0.2,
+          fill: true,
+        }];
+      }
+    };
+    
+    const datasets = getDatasets();
     
     return {
       labels: xLabels,
