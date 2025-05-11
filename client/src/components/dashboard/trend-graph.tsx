@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
 import { 
   Chart as ChartJS, 
   CategoryScale, 
@@ -28,55 +27,25 @@ ChartJS.register(
   Filler
 );
 
-type Period = '30' | '90' | '365';
+interface TrendGraphProps {
+  data?: any[];
+  labels?: string[];
+  isLoading?: boolean;
+}
 
-export function TrendGraph() {
-  const [period, setPeriod] = useState<Period>('90');
+export function TrendGraph({ data, labels, isLoading = false }: TrendGraphProps) {
+  // Default data if props are not provided
+  const defaultLabels = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
+  const defaultReviewsData = [25, 34, 42, 38, 56, 64];
+  const defaultRatingsData = [4.2, 4.1, 4.3, 4.4, 4.5, 4.6];
   
-  // This would be a real API call in production
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['/api/reviews/trends', period],
-  });
-  
-  if (isLoading) {
-    return (
-      <Card>
-        <CardContent className="p-5">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
-            <Skeleton className="h-6 w-32 mb-2 sm:mb-0" />
-            <Skeleton className="h-8 w-64" />
-          </div>
-          <div className="h-72 flex items-center justify-center">
-            <Skeleton className="h-full w-full" />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-5">
-          <div className="h-72 flex items-center justify-center">
-            <p className="text-red-500">Error loading trend data: {error.message}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-  
-  // Sample data for demonstration
-  const labels = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
-  const reviewsData = [25, 34, 42, 38, 56, 64];
-  const ratingsData = [4.2, 4.1, 4.3, 4.4, 4.5, 4.6];
-  
+  // Chart data configuration
   const chartData = {
-    labels,
+    labels: labels || defaultLabels,
     datasets: [
       {
         label: 'Number of Reviews',
-        data: reviewsData,
+        data: data?.[0]?.data || defaultReviewsData,
         borderColor: 'hsl(var(--primary))',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         tension: 0.4,
@@ -85,7 +54,7 @@ export function TrendGraph() {
       },
       {
         label: 'Average Rating',
-        data: ratingsData,
+        data: data?.[1]?.data || defaultRatingsData,
         borderColor: '#10b981',
         backgroundColor: 'transparent',
         tension: 0.4,
@@ -94,6 +63,7 @@ export function TrendGraph() {
     ],
   };
   
+  // Chart options
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -137,7 +107,7 @@ export function TrendGraph() {
         },
         titleFont: {
           size: 14,
-          weight: 'bold'
+          weight: 'bold' as const
         }
       }
     }
@@ -148,29 +118,6 @@ export function TrendGraph() {
       <CardContent className="p-5">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
           <h2 className="text-lg font-semibold text-slate-800">Review Trends</h2>
-          <div className="flex items-center space-x-2 mt-2 sm:mt-0">
-            <Button 
-              variant={period === '30' ? "default" : "outline"} 
-              size="sm" 
-              onClick={() => setPeriod('30')}
-            >
-              30 Days
-            </Button>
-            <Button 
-              variant={period === '90' ? "default" : "outline"} 
-              size="sm" 
-              onClick={() => setPeriod('90')}
-            >
-              90 Days
-            </Button>
-            <Button 
-              variant={period === '365' ? "default" : "outline"} 
-              size="sm" 
-              onClick={() => setPeriod('365')}
-            >
-              1 Year
-            </Button>
-          </div>
         </div>
         <div className="h-72">
           <Line data={chartData} options={options} />

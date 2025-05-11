@@ -41,6 +41,17 @@ export default function AnalyticsPage() {
     queryKey: ["/api/locations"],
   });
   
+  // Fetch analytics data based on selected location and period
+  const { data: analyticsData, isLoading: isLoadingAnalytics } = useQuery({
+    queryKey: ["/api/reviews/trends", selectedLocationId, periodFilter],
+    queryFn: async () => {
+      const locationParam = selectedLocationId !== "all" ? `&locationId=${selectedLocationId}` : "";
+      const res = await fetch(`/api/reviews/trends?period=${periodFilter}${locationParam}`);
+      if (!res.ok) throw new Error("Failed to fetch analytics data");
+      return res.json();
+    }
+  });
+  
   // Use appropriate title based on selected location
   const getLocationName = () => {
     if (selectedLocationId === "all") return "All Locations";
@@ -48,67 +59,121 @@ export default function AnalyticsPage() {
     return location ? location.name : "Selected Location";
   };
 
-  // Sample data for charts
-  const platformData = {
-    labels: ['Google', 'Yelp', 'Facebook', 'Healthgrades'],
-    datasets: [
-      {
-        label: 'Reviews by Platform',
-        data: [65, 32, 18, 12],
-        backgroundColor: [
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(54, 162, 235, 0.4)',
-          'rgba(75, 192, 192, 0.6)',
-        ],
-        borderColor: [
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 0.8)',
-          'rgba(75, 192, 192, 1)',
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
+  // Prepare chart data based on API response or use loading state
+  const prepareChartData = () => {
+    if (isLoadingAnalytics || !analyticsData) {
+      return {
+        platformData: {
+          labels: [],
+          datasets: [{
+            label: 'Loading...',
+            data: [],
+            backgroundColor: [],
+            borderColor: [],
+            borderWidth: 1,
+          }]
+        },
+        ratingData: {
+          labels: [],
+          datasets: [{
+            label: 'Loading...',
+            data: [],
+            backgroundColor: [],
+            borderColor: [],
+            borderWidth: 1,
+          }]
+        },
+        keywordData: {
+          labels: [],
+          datasets: [{
+            label: 'Loading...',
+            data: [],
+            backgroundColor: 'rgba(54, 162, 235, 0.6)',
+            borderColor: 'rgba(54, 162, 235, 1)',
+            borderWidth: 1,
+          }]
+        }
+      };
+    }
+    
+    // Platforms data
+    const platformLabels = Object.keys(analyticsData.platforms || {});
+    const platformValues = Object.values(analyticsData.platforms || {}) as number[];
+    
+    const platformData = {
+      labels: platformLabels,
+      datasets: [
+        {
+          label: 'Reviews by Platform',
+          data: platformValues,
+          backgroundColor: [
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 99, 132, 0.6)',
+            'rgba(54, 162, 235, 0.4)',
+            'rgba(75, 192, 192, 0.6)',
+          ],
+          borderColor: [
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(75, 192, 192, 1)',
+          ],
+          borderWidth: 1,
+        },
+      ],
+    };
 
-  const ratingData = {
-    labels: ['5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Star'],
-    datasets: [
-      {
-        label: 'Reviews by Rating',
-        data: [48, 35, 22, 14, 8],
-        backgroundColor: [
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(54, 162, 235, 0.6)',
-          'rgba(255, 206, 86, 0.6)',
-          'rgba(255, 159, 64, 0.6)',
-          'rgba(255, 99, 132, 0.6)',
-        ],
-        borderColor: [
-          'rgba(75, 192, 192, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(255, 159, 64, 1)',
-          'rgba(255, 99, 132, 1)',
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
+    // Ratings data
+    const ratingLabels = Object.keys(analyticsData.ratings || {}).map(r => `${r} Stars`);
+    const ratingValues = Object.values(analyticsData.ratings || {}) as number[];
+    
+    const ratingData = {
+      labels: ratingLabels,
+      datasets: [
+        {
+          label: 'Reviews by Rating',
+          data: ratingValues,
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.6)',
+            'rgba(54, 162, 235, 0.6)',
+            'rgba(255, 206, 86, 0.6)',
+            'rgba(255, 159, 64, 0.6)',
+            'rgba(255, 99, 132, 0.6)',
+          ],
+          borderColor: [
+            'rgba(75, 192, 192, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(255, 99, 132, 1)',
+          ],
+          borderWidth: 1,
+        },
+      ],
+    };
 
-  const keywordData = {
-    labels: ['Staff', 'Service', 'Price', 'Quality', 'Wait Time', 'Results'],
-    datasets: [
-      {
-        label: 'Mentioned in Reviews',
-        data: [85, 64, 54, 42, 38, 28],
-        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1,
-      },
-    ],
+    // Keywords data
+    const keywordLabels = Object.keys(analyticsData.keywords || {});
+    const keywordValues = Object.values(analyticsData.keywords || {}) as number[];
+    
+    const keywordData = {
+      labels: keywordLabels,
+      datasets: [
+        {
+          label: 'Mentioned in Reviews',
+          data: keywordValues,
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1,
+        },
+      ],
+    };
+    
+    return { platformData, ratingData, keywordData };
   };
+  
+  // Get chart data
+  const { platformData, ratingData, keywordData } = prepareChartData();
 
   return (
     <>
@@ -166,7 +231,17 @@ export default function AnalyticsPage() {
             </header>
 
             {/* Trend Graph */}
-            <TrendGraph />
+            <div className="relative">
+              {isLoadingAnalytics && (
+                <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
+                  <div className="flex flex-col items-center">
+                    <div className="h-8 w-8 border-4 border-slate-200 border-t-primary rounded-full animate-spin"></div>
+                    <span className="mt-2 text-sm text-slate-500">Loading data...</span>
+                  </div>
+                </div>
+              )}
+              <TrendGraph data={analyticsData?.datasets} labels={analyticsData?.labels} />
+            </div>
 
             {/* Analytics Tabs */}
             <div className="mt-6">
