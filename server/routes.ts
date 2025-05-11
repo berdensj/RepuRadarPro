@@ -197,6 +197,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       next(error);
     }
   });
+  
+  // Reviews trends for analytics
+  app.get("/api/reviews/trends", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const period = req.query.period || '90'; // Default to 90 days
+      
+      // Mock data for charts - in a real app this would be generated from actual review data
+      const trendData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
+        datasets: [
+          {
+            label: 'Average Rating',
+            data: [4.2, 4.3, 4.1, 4.4, 4.5, 4.3, 4.7],
+          },
+          {
+            label: 'Review Count',
+            data: [5, 8, 12, 9, 11, 14, 16],
+          }
+        ],
+        platforms: {
+          google: 65,
+          yelp: 32,
+          facebook: 18,
+          healthgrades: 12
+        },
+        ratings: {
+          '5': 48,
+          '4': 35,
+          '3': 22,
+          '2': 14,
+          '1': 8
+        },
+        keywords: {
+          'staff': 85,
+          'service': 64,
+          'price': 54,
+          'quality': 42,
+          'wait time': 38,
+          'results': 28
+        }
+      };
+      
+      res.json(trendData);
+    } catch (error) {
+      next(error);
+    }
+  });
 
   app.post("/api/metrics", async (req, res, next) => {
     try {

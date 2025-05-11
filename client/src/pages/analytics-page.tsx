@@ -10,13 +10,13 @@ import { BarChart, LineChart, PieChart, CandlestickChart, BarChart2, TrendingUp 
 import { 
   Chart as ChartJS, 
   ArcElement, 
-  Tooltip, 
   Legend, 
   CategoryScale, 
   LinearScale,
   BarElement,
-  Title
+  Title,
 } from 'chart.js';
+import { Tooltip } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
 
 ChartJS.register(
