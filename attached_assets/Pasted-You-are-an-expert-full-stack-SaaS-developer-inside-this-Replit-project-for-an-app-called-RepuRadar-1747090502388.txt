@@ -1,0 +1,76 @@
+You are an expert full-stack SaaS developer inside this Replit project for an app called **RepuRadarPro**, an AI-powered reputation management platform. Your goal is to implement a complete **new user onboarding flow** for a 14-day free trial experience.
+
+Please follow the steps below to create all necessary files, routes, UI screens, and data models using JavaScript (Node.js + HTML/CSS frontend) and Supabase for storage.
+
+---
+
+## STEP 1: USER ACCOUNT & TRIAL LOGIC
+- Set up Firebase Auth or a custom JWT-based login system.
+- Upon signup, store the user with:
+  - `user_id`, `email`, `created_at`, `trial_start`, `trial_end` (set trial to expire in 14 days).
+- Middleware to restrict access to dashboard features after trial ends (show upgrade prompt).
+
+---
+
+## STEP 2: ONBOARDING WIZARD SCREENS
+
+### Screen 1: Welcome Page
+- Show: “Welcome to RepuRadarPro — your 14-day trial has started!”
+- Button: “Let’s get started” → navigates to Business Info page
+
+### Screen 2: Business Info
+- Form fields:
+  - Business Name
+  - Industry (dropdown)
+  - Contact Name, Email, Phone
+  - Logo Upload (optional)
+- Save this to Supabase under `business_profiles`
+
+### Screen 3: Add Location
+- Allow multiple locations with fields:
+  - Location Name
+  - Address (Street, City, ZIP, State)
+  - Location Email/Phone
+- Save each location under the business account in `locations` table
+
+### Screen 4: Connect Platforms
+- Integration placeholder cards for:
+  - Google My Business
+  - Yelp
+  - Facebook
+- Each “Connect” button should save platform selection and mock connection for now (fake token ok)
+
+### Screen 5: Set AI Preferences
+- Toggle settings:
+  - Default tone (Professional, Friendly, Apologetic)
+  - Auto-reply to 5-star reviews (on/off)
+  - Notification frequency (Instant, Daily, Weekly)
+- Store this in a `preferences` table keyed by user or business
+
+### Screen 6: Dashboard
+- Show charts using Chart.js:
+  - Sample review volume chart
+  - Pie chart of sentiment (positive, neutral, negative)
+- List of recent reviews (use mock data if not integrated)
+- AI-generated replies visible with Approve/Reject buttons
+
+---
+
+## BACKEND TASKS
+- Set up Supabase tables:
+  - `users`, `business_profiles`, `locations`, `preferences`, `reviews`, `responses`
+- Connect OpenAI to `generateReply(reviewText, tone)` for AI reply generation
+- Implement mock review loader (fake reviews per location) to populate dashboard
+
+---
+
+## FINAL TASKS
+- Create a README.md summarizing:
+  - Onboarding flow
+  - How to test the 14-day trial
+  - How Supabase and OpenAI are integrated
+- Save all new components and link them together with clean routing logic
+
+---
+
+Now, begin auditing the project to determine which onboarding components already exist, then proceed to build any missing features using clean, modular code in new files. Use lightweight libraries only.
