@@ -70,8 +70,14 @@ export default function AnalyticsPage() {
     to: undefined,
   });
   
+  // Type definition from react-day-picker
+  type DateRange = {
+    from: Date | undefined;
+    to?: Date | undefined;
+  };
+  
   // Type-safe handler for date range selection
-  const handleDateRangeSelect = (range: { from: Date | undefined; to: Date | undefined } | undefined) => {
+  const handleDateRangeSelect = (range: DateRange | undefined) => {
     if (range) {
       setDateRange({
         from: range.from,
@@ -851,11 +857,13 @@ export default function AnalyticsPage() {
                               <div>
                                 <div className="text-sm font-medium mb-1">Common Positive Phrases:</div>
                                 <div className="flex flex-wrap gap-2">
-                                  {analyticsData?.positiveKeywords?.slice(0, 5).map((keyword, i) => (
+                                  {analyticsData?.positiveKeywords && 
+                                   Array.isArray(analyticsData.positiveKeywords) ? 
+                                   analyticsData.positiveKeywords.slice(0, 5).map((keyword: string, i: number) => (
                                     <Badge key={i} variant="outline" className="bg-green-50 text-green-700 hover:bg-green-100">
                                       {keyword}
                                     </Badge>
-                                  )) || (
+                                  )) : (
                                     <span className="text-sm text-slate-500">No data available</span>
                                   )}
                                 </div>
@@ -864,11 +872,13 @@ export default function AnalyticsPage() {
                               <div>
                                 <div className="text-sm font-medium mb-1">Common Negative Phrases:</div>
                                 <div className="flex flex-wrap gap-2">
-                                  {analyticsData?.negativeKeywords?.slice(0, 5).map((keyword, i) => (
+                                  {analyticsData?.negativeKeywords && 
+                                   Array.isArray(analyticsData.negativeKeywords) ? 
+                                   analyticsData.negativeKeywords.slice(0, 5).map((keyword: string, i: number) => (
                                     <Badge key={i} variant="outline" className="bg-red-50 text-red-700 hover:bg-red-100">
                                       {keyword}
                                     </Badge>
-                                  )) || (
+                                  )) : (
                                     <span className="text-sm text-slate-500">No data available</span>
                                   )}
                                 </div>
@@ -948,10 +958,10 @@ export default function AnalyticsPage() {
                         <div className="mt-6">
                           <div className="text-sm font-medium mb-2">Keyword Cloud:</div>
                           <div className="flex flex-wrap gap-2">
-                            {analyticsData?.keywords && Object.entries(analyticsData.keywords)
+                            {analyticsData?.keywords && typeof analyticsData.keywords === 'object' && Object.entries(analyticsData.keywords)
                               .sort((a, b) => (b[1] as number) - (a[1] as number))
                               .slice(0, 20)
-                              .map(([keyword, count]) => (
+                              .map(([keyword, count]: [string, unknown]) => (
                                 <Badge 
                                   key={keyword} 
                                   variant="outline" 
@@ -960,7 +970,7 @@ export default function AnalyticsPage() {
                                     fontSize: `${Math.max(0.7, Math.min(1.3, 0.8 + (count as number) / 10))}rem`
                                   }}
                                 >
-                                  {keyword} ({count})
+                                  {keyword} ({String(count)})
                                 </Badge>
                               ))}
                           </div>
