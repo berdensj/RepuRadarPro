@@ -4,11 +4,12 @@ import { useLocation } from "wouter";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { ChartLine, ChevronLeft, ChevronRight } from "lucide-react";
-import WelcomePage from "./welcome-page";
-import BusinessInfoPage from "./business-info-page";
-import AddLocationPage from "./add-location-page";
-import ConnectPlatformsPage from "./connect-platforms-page";
-import AiPreferencesPage from "./ai-preferences-page";
+// Fix import paths
+import WelcomePage from "@/pages/onboarding/welcome-page";
+import BusinessInfoPage from "@/pages/onboarding/business-info-page";
+import AddLocationPage from "@/pages/onboarding/add-location-page";
+import ConnectPlatformsPage from "@/pages/onboarding/connect-platforms-page";
+import AiPreferencesPage from "@/pages/onboarding/ai-preferences-page";
 import { useQuery } from "@tanstack/react-query";
 
 export default function OnboardingIndex() {

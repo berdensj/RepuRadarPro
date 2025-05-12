@@ -63,6 +63,7 @@ function Router() {
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/subscription" component={SubscriptionPage} />
       <ProtectedRoute path="/help" component={HelpPage} />
+      <ProtectedRoute path="/onboarding" component={UserOnboardingPage} />
       <ProtectedRoute path="/admin" component={AdminDashboardPage} requiredRole="admin" />
       <ProtectedRoute path="/admin/users" component={AdminUsersPage} requiredRole="admin" />
       <ProtectedRoute path="/admin/financial" component={AdminFinancialPage} requiredRole="admin" />

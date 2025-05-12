@@ -19,6 +19,18 @@ export const users = pgTable("users", {
   subscriptionEndsAt: timestamp("subscription_ends_at"),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
+  // Business info fields
+  businessName: text("business_name"),
+  industry: text("industry"),
+  contactName: text("contact_name"),
+  contactEmail: text("contact_email"),
+  contactPhone: text("contact_phone"),
+  // AI preferences
+  aiDefaultTone: text("ai_default_tone").default("professional"),
+  aiAutoReplyToFiveStars: boolean("ai_auto_reply_to_five_stars").default(false),
+  notificationFrequency: text("notification_frequency").default("daily"),
+  // Onboarding status
+  onboardingCompleted: boolean("onboarding_completed").default(false),
   role: text("role").default("user").notNull(), // Options: admin, user, staff
   isActive: boolean("is_active").default(true).notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
@@ -37,6 +49,18 @@ export const insertUserSchema = createInsertSchema(users).pick({
   subscriptionEndsAt: true,
   stripeCustomerId: true,
   stripeSubscriptionId: true,
+  // Business info fields
+  businessName: true,
+  industry: true,
+  contactName: true,
+  contactEmail: true,
+  contactPhone: true,
+  // AI preferences
+  aiDefaultTone: true,
+  aiAutoReplyToFiveStars: true,
+  notificationFrequency: true,
+  // Onboarding status
+  onboardingCompleted: true,
 });
 
 // Review table

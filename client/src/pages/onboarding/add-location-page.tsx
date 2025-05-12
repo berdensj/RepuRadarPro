@@ -158,7 +158,15 @@ export default function AddLocationPage({
         <div className="space-y-4">
           <h2 className="text-lg font-medium text-slate-800">Your Locations</h2>
           <div className="grid gap-4 sm:grid-cols-2">
-            {locations.map((location, index) => (
+            {locations.map((location: {
+              name: string;
+              address: string;
+              city: string;
+              state: string;
+              zip: string;
+              phone: string;
+              email: string;
+            }, index: number) => (
               <Card key={index} className="relative">
                 <Button
                   variant="ghost"

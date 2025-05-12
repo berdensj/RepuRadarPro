@@ -42,6 +42,148 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Attach permissions to requests
   app.use(attachPermissions);
 
+  // Onboarding routes
+  app.get("/api/user/onboarding/status", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      // Check if user has completed onboarding
+      const user = req.user;
+
+      // If the user has locations, we assume onboarding is complete
+      const locations = await storage.getLocations(user.id);
+      const onboardingComplete = locations.length > 0;
+
+      res.json({ onboardingComplete });
+    } catch (error) {
+      console.error("Error checking onboarding status:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/user/onboarding/business-info", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = req.user;
+      const { businessName, industry, contactName, contactEmail, contactPhone } = req.body;
+
+      // Update user profile with business info
+      const updatedUser = await storage.updateUser(user.id, {
+        businessName,
+        industry,
+        contactName,
+        contactEmail,
+        contactPhone
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error saving business info:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/user/onboarding/add-location", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = req.user;
+      const { name, address, city, state, zip, email, phone } = req.body;
+
+      // Add location to the user's account
+      const fullAddress = `${address}, ${city}, ${state} ${zip}`;
+      const location = await storage.createLocation({
+        userId: user.id,
+        name,
+        address: fullAddress,
+        phone,
+        email
+      });
+
+      res.json(location);
+    } catch (error) {
+      console.error("Error adding location:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/user/onboarding/connect-platform", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = req.user;
+      const { platform, platformId, locationId } = req.body;
+
+      // Update the location with platform info
+      let updateData = {};
+      if (platform === 'google') {
+        updateData = { googlePlaceId: platformId };
+      } else if (platform === 'yelp') {
+        updateData = { yelpBusinessId: platformId };
+      }
+
+      const location = await storage.updateLocation(locationId, updateData);
+
+      res.json(location);
+    } catch (error) {
+      console.error("Error connecting platform:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/user/onboarding/ai-preferences", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = req.user;
+      const { defaultTone, autoReplyToFiveStars, notificationFrequency } = req.body;
+
+      // Save AI preferences
+      // In a real app, we'd add a user_preferences table, but for now we'll add to the user
+      const updatedUser = await storage.updateUser(user.id, {
+        aiDefaultTone: defaultTone,
+        aiAutoReplyToFiveStars: autoReplyToFiveStars,
+        notificationFrequency
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error saving AI preferences:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/user/onboarding/complete", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = req.user;
+      
+      // Mark onboarding as complete
+      const updatedUser = await storage.updateUser(user.id, {
+        onboardingCompleted: true
+      });
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error completing onboarding:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // API routes
   // Reviews
   app.get("/api/reviews", async (req, res, next) => {
