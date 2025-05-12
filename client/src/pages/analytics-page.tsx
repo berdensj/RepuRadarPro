@@ -3,14 +3,14 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { TrendGraph } from "@/components/dashboard/trend-graph";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Helmet } from "react-helmet";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { 
   BarChart, LineChart, PieChart, CandlestickChart, BarChart2, TrendingUp, Building2,
   Star, MessageSquare, ThumbsUp, ArrowUpRight, Download, Mail, Calendar, 
-  Filter, Clock, AlertCircle
+  Filter, Clock, AlertCircle, MessageSquareText, Copy, Wand2, Loader2
 } from "lucide-react";
 import { 
   Chart as ChartJS, 
@@ -25,7 +25,7 @@ import {
 } from 'chart.js';
 import { Tooltip } from 'chart.js';
 import { Pie, Bar, Line } from 'react-chartjs-2';
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Location, Review } from "@shared/schema";
 import {
   Table,
@@ -44,6 +44,20 @@ import {
 } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
+import { generateReply } from "@/lib/openai";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 ChartJS.register(
   ArcElement, 
@@ -88,6 +102,14 @@ export default function AnalyticsPage() {
   const [isCustomDate, setIsCustomDate] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const reviewsPerPage = 5;
+  
+  // Review response state
+  const [selectedReview, setSelectedReview] = useState<Review | null>(null);
+  const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
+  const [responseText, setResponseText] = useState("");
+  const [responseTone, setResponseTone] = useState("professional");
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const { toast } = useToast();
   
   // Fetch locations for the current user
   const { data: locations = [], isLoading: isLoadingLocations } = useQuery<Location[]>({
