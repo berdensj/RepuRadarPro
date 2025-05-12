@@ -165,6 +165,66 @@ export default function AnalyticsPage() {
     const location = locations.find(loc => loc.id.toString() === selectedLocationId);
     return location ? location.name : "Selected Location";
   };
+  
+  // Handle opening the response modal
+  const handleOpenResponseModal = (review: Review) => {
+    setSelectedReview(review);
+    setResponseText(review.response || "");
+    setIsResponseModalOpen(true);
+  };
+  
+  // Save response mutation
+  const saveResponseMutation = useMutation({
+    mutationFn: async ({ reviewId, response }: { reviewId: number, response: string }) => {
+      const res = await apiRequest("PATCH", `/api/reviews/${reviewId}`, { response });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
+      toast({
+        title: "Response saved",
+        description: "Your response has been saved successfully.",
+      });
+      setIsResponseModalOpen(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Error saving response",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  });
+  
+  // Handle saving the response
+  const handleSaveResponse = () => {
+    if (selectedReview) {
+      saveResponseMutation.mutate({ reviewId: selectedReview.id, response: responseText });
+    }
+  };
+  
+  // Generate AI response
+  const handleGenerateAIResponse = async () => {
+    if (!selectedReview) return;
+    
+    setIsGeneratingAI(true);
+    try {
+      const aiSuggestion = await generateReply(selectedReview.id, responseTone);
+      setResponseText(aiSuggestion);
+      toast({
+        title: "AI response generated",
+        description: "You can edit the suggestion before saving.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error generating response",
+        description: "Could not generate AI response. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
 
   // Calculate KPI metrics
   const calculateMetrics = () => {
@@ -751,8 +811,17 @@ export default function AnalyticsPage() {
                               <Badge variant="outline" className="text-xs">
                                 {review.platform}
                               </Badge>
-                              <Button variant="outline" size="sm" className="text-xs h-7">
-                                Respond
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-xs h-7"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  handleOpenResponseModal(review);
+                                }}
+                              >
+                                {review.response ? "Edit Response" : "Respond"}
                               </Button>
                             </div>
                           </div>
@@ -1006,6 +1075,137 @@ export default function AnalyticsPage() {
           </div>
         </main>
       </div>
+      
+      {/* AI Review Response Modal */}
+      <Dialog open={isResponseModalOpen} onOpenChange={setIsResponseModalOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquareText className="h-5 w-5" />
+              {selectedReview ? (
+                <>Respond to {selectedReview.reviewerName}'s Review</>
+              ) : (
+                <>Respond to Review</>
+              )}
+            </DialogTitle>
+            <DialogDescription>
+              Craft a professional response or use AI to generate a suggested reply
+            </DialogDescription>
+          </DialogHeader>
+          
+          {selectedReview && (
+            <div className="grid gap-6 py-4">
+              {/* Original Review Display */}
+              <Card className="bg-slate-50">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-slate-500 flex items-center gap-2">
+                    <Star className="h-4 w-4 text-amber-500" />
+                    Original Review ({selectedReview.rating}/5)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-slate-700">"{selectedReview.reviewText}"</p>
+                  <div className="flex justify-between items-center mt-2 text-xs text-slate-500">
+                    <span>{selectedReview.reviewerName} • {selectedReview.platform}</span>
+                    <span>{new Date(selectedReview.date).toLocaleDateString()}</span>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              {/* AI Response Generation */}
+              <div className="flex gap-3 items-start">
+                <Select value={responseTone} onValueChange={setResponseTone}>
+                  <SelectTrigger className="w-[140px]">
+                    <SelectValue placeholder="Select tone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="professional">Professional</SelectItem>
+                    <SelectItem value="friendly">Friendly</SelectItem>
+                    <SelectItem value="apologetic">Apologetic</SelectItem>
+                    <SelectItem value="formal">Formal</SelectItem>
+                  </SelectContent>
+                </Select>
+                
+                <Button 
+                  onClick={handleGenerateAIResponse}
+                  className="gap-2"
+                  disabled={isGeneratingAI}
+                  variant="outline"
+                >
+                  {isGeneratingAI ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="h-4 w-4" />
+                      Generate AI Response
+                    </>
+                  )}
+                </Button>
+                
+                {responseText && (
+                  <Button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(responseText);
+                      toast({
+                        title: "Copied to clipboard",
+                        description: "Response text copied to clipboard",
+                      });
+                    }}
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1"
+                  >
+                    <Copy className="h-3 w-3" />
+                    Copy
+                  </Button>
+                )}
+              </div>
+              
+              {/* Response Text Area */}
+              <div className="grid gap-2">
+                <label htmlFor="response" className="text-sm font-medium">
+                  Your Response
+                </label>
+                <Textarea
+                  id="response"
+                  value={responseText}
+                  onChange={(e) => setResponseText(e.target.value)}
+                  placeholder="Write your response here or use the AI to generate one..."
+                  className="min-h-[150px] resize-none"
+                />
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsResponseModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleSaveResponse}
+              disabled={saveResponseMutation.isPending}
+              className="gap-2"
+            >
+              {saveResponseMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  Save Response
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

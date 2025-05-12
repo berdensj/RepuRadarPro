@@ -11,7 +11,7 @@ import {
   insertLocationSchema,
   insertCrmIntegrationSchema
 } from "@shared/schema";
-import { generateAIReply } from "./lib/openai";
+import { generateAIReply, analyzeReviewSentiment } from "./lib/openai";
 import { requireRole, attachPermissions } from "./middleware/rbac";
 
 // Import external services
