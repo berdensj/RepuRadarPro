@@ -187,11 +187,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create a welcome alert for the user
       await storage.createAlert({
         userId,
-        title: "Welcome to RepuRadar!",
-        message: "Your 14-day trial has started. Explore all the premium features to manage your online reputation.",
-        type: "info",
-        read: false,
-        createdAt: new Date()
+        alertType: "onboarding",
+        content: JSON.stringify({
+          title: "Welcome to RepuRadar!",
+          message: "Your 14-day trial has started. Explore all the premium features to manage your online reputation."
+        }),
+        date: new Date(),
+        isRead: false
       });
       
       res.json({ 
@@ -956,7 +958,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update last sync time
       if (storage.updateCrmIntegration) {
         await storage.updateCrmIntegration(integrationId, {
-          lastSync: new Date().toISOString()
+          lastSync: new Date()
         });
       }
       

@@ -6,6 +6,7 @@ import { TrendGraph } from "@/components/dashboard/trend-graph";
 import { ReviewFeed } from "@/components/dashboard/review-feed";
 import { AIReplyPanel } from "@/components/dashboard/ai-reply-panel";
 import { AlertCenter } from "@/components/dashboard/alert-center";
+import { TrialStatus } from "@/components/dashboard/trial-status";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Download } from "lucide-react";
@@ -93,6 +94,9 @@ export default function DashboardPage() {
                   </Button>
                 </div>
               </header>
+              
+              {/* Trial Status Banner */}
+              <TrialStatus />
 
               {/* Summary Metrics */}
               <SummaryMetrics />
