@@ -1,0 +1,69 @@
+You are a full-stack SaaS developer working on RepuRadarPro — a reputation management platform built in Replit. The current MVP includes basic functionality like AI-generated replies and a simple analytics dashboard.
+
+Your job is to perform a **feature audit and enhancement** of the MVP based on the feature roadmap below. For each item, check whether the feature is present, complete, and production-ready. If not, **implement or upgrade it** using clean, modular code.
+
+---
+
+## 🎯 PRIORITY FEATURES TO AUDIT + IMPLEMENT
+
+### ✅ HIGH PRIORITY
+1. **User Onboarding Flow**  
+   - Multi-step form that collects business name, industry, main contact, and logo  
+   - Step 2: Add 1+ business locations with name, address, and timezone
+
+2. **Location Management**  
+   - Create `locations` table (Supabase or JSON fallback)  
+   - Enforce limits by subscription tier (e.g., 1 for Starter, 5 for Growth, 15 for Agency)
+
+3. **Subscription + Trial Logic**  
+   - Add 14-day trial logic after signup  
+   - Create mock subscription tiers (Starter, Growth, Agency, Enterprise)  
+   - Restrict access to features once trial expires or based on plan
+
+4. **Billing Placeholder Setup**  
+   - Add Stripe integration placeholder or stub routes  
+   - Show pricing page with upgrade buttons for each plan
+
+5. **Review Aggregation Expansion**  
+   - Mock Yelp and Facebook review imports (expand beyond Google)  
+   - Use fake data if API integration not yet complete
+
+6. **Authentication (if missing)**  
+   - Add Firebase Auth or JWT login/register if not implemented
+
+---
+
+### ✅ MEDIUM PRIORITY
+7. **Advanced Analytics Enhancements**  
+   - Add:
+     - KPI cards (total reviews, average rating, response rate)  
+     - Sentiment chart (positive/neutral/negative)  
+     - Review volume over time  
+     - Filters: date range + location selector
+
+8. **AI Response Controls**  
+   - Allow user to choose tone (Professional, Friendly, Apologetic)  
+   - Store this in preferences and use it in OpenAI prompt  
+   - Add Approve / Edit / Reject buttons for AI-generated replies
+
+9. **Team/User Role Management (Basic)**  
+   - Create logic for Admin and Staff roles  
+   - Restrict certain pages (billing, settings) to Admin only
+
+10. **Email/SMS Review Requests (Mocked)**  
+   - Create a form to send a test review request via email (SendGrid placeholder)  
+   - Mock SMS sending button with console feedback
+
+---
+
+## 🧠 INSTRUCTIONS
+- Use modular JavaScript (Node.js or Express backend), Supabase for storage, and HTML/CSS or EJS for views
+- Use clean folder structure: `/routes`, `/views`, `/db`, `/auth`
+- Use fake/mock data where integrations (Yelp, Stripe, etc.) aren’t live
+- Leave TODO comments for advanced features like webhook handling or Stripe subscriptions
+
+---
+
+Start by auditing the project for existing features. Print a checklist of what exists. Then begin building high priority features, followed by medium priority ones. Use comments and clean code.
+
+When finished, update `README.md` with newly added or upgraded features.
