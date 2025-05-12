@@ -62,17 +62,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Calculate trial status
       const now = new Date();
-      const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // Default 14 days
-      const trialActive = now < trialEndsAt;
-      const daysRemaining = Math.max(0, Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+      let trialEndsAt: Date;
       
-      // If user doesn't have a trial end date, set one for 14 days from now
-      if (!user.trialEndsAt) {
+      if (user.trialEndsAt) {
+        trialEndsAt = new Date(user.trialEndsAt);
+      } else {
+        // Default 14 days from now
+        trialEndsAt = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
+        
+        // Update user with trial end date
         await storage.updateUser(userId, {
           trialEndsAt,
-          subscriptionStatus: "trial"
+          subscriptionStatus: "trial",
+          plan: "Pro" // Default to Pro plan for trial
         });
       }
+      
+      const trialActive = now < trialEndsAt;
+      const daysRemaining = Math.max(0, Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
       res.json({
         onboardingComplete: user.onboardingCompleted || locations.length > 0,
@@ -132,7 +139,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { businessInfo, locations, platforms, aiPreferences } = req.body;
       
       const updates: any = {
-        onboardingCompleted: true
+        onboardingCompleted: true,
+        subscriptionStatus: "trial"
       };
       
       // Update business info if provided
@@ -154,23 +162,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update user record
       const updatedUser = await storage.updateUser(userId, updates);
       
-      // Create locations if provided
+      // Create locations with platform connections if provided
       if (locations && Array.isArray(locations) && locations.length > 0) {
         for (const location of locations) {
-          await storage.createLocation({
+          const locationData: any = {
             userId,
             name: location.name,
-            address: location.address,
-            city: location.city,
-            state: location.state,
-            zipCode: location.zip,
+            address: `${location.address}, ${location.city}, ${location.state} ${location.zip}`,
             phone: location.phone,
             email: location.email
-          });
+          };
+          
+          // If we have platforms data for this location
+          if (platforms) {
+            if (platforms.google) locationData.googlePlaceId = platforms.googlePlaceId || "placeholder";
+            if (platforms.yelp) locationData.yelpBusinessId = platforms.yelpBusinessId || "placeholder";
+            if (platforms.facebook) locationData.facebookPageId = platforms.facebookPageId || "placeholder";
+          }
+          
+          await storage.createLocation(locationData);
         }
       }
       
-      res.json({ success: true, message: "Onboarding completed successfully" });
+      // Create a welcome alert for the user
+      await storage.createAlert({
+        userId,
+        title: "Welcome to RepuRadar!",
+        message: "Your 14-day trial has started. Explore all the premium features to manage your online reputation.",
+        type: "info",
+        read: false,
+        createdAt: new Date()
+      });
+      
+      res.json({ 
+        success: true, 
+        message: "Onboarding completed successfully",
+        redirectTo: "/"
+      });
     } catch (error) {
       next(error);
     }
