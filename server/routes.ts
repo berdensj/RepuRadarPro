@@ -43,37 +43,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(attachPermissions);
 
   // Onboarding routes
-  app.get("/api/user/onboarding/status", async (req, res) => {
+  app.get("/api/user/onboarding/status", async (req, res, next) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      // Check if user has completed onboarding
-      const user = req.user;
+      // Get full user data
+      const userId = req.user!.id;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Get user's locations
+      const locations = await storage.getLocations(userId);
+      
+      // Calculate trial status
+      const now = new Date();
+      const trialEndsAt = user.trialEndsAt ? new Date(user.trialEndsAt) : new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // Default 14 days
+      const trialActive = now < trialEndsAt;
+      const daysRemaining = Math.max(0, Math.ceil((trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+      
+      // If user doesn't have a trial end date, set one for 14 days from now
+      if (!user.trialEndsAt) {
+        await storage.updateUser(userId, {
+          trialEndsAt,
+          subscriptionStatus: "trial"
+        });
+      }
 
-      // If the user has locations, we assume onboarding is complete
-      const locations = await storage.getLocations(user.id);
-      const onboardingComplete = locations.length > 0;
-
-      res.json({ onboardingComplete });
+      res.json({
+        onboardingComplete: user.onboardingCompleted || locations.length > 0,
+        businessInfo: {
+          businessName: user.businessName || "",
+          industry: user.industry || "",
+          contactName: user.contactName || "",
+          contactEmail: user.contactEmail || "",
+          contactPhone: user.contactPhone || ""
+        },
+        trialStatus: {
+          active: trialActive,
+          daysRemaining,
+          endsAt: trialEndsAt
+        },
+        plan: user.plan,
+        subscriptionStatus: user.subscriptionStatus
+      });
     } catch (error) {
-      console.error("Error checking onboarding status:", error);
-      res.status(500).json({ message: "Internal server error" });
+      next(error);
     }
   });
 
-  app.post("/api/user/onboarding/business-info", async (req, res) => {
+  app.post("/api/user/onboarding/business-info", async (req, res, next) => {
     try {
       if (!req.isAuthenticated()) {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      const user = req.user;
+      const userId = req.user!.id;
       const { businessName, industry, contactName, contactEmail, contactPhone } = req.body;
 
       // Update user profile with business info
-      const updatedUser = await storage.updateUser(user.id, {
+      const updatedUser = await storage.updateUser(userId, {
         businessName,
         industry,
         contactName,
@@ -83,8 +116,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(updatedUser);
     } catch (error) {
-      console.error("Error saving business info:", error);
-      res.status(500).json({ message: "Internal server error" });
+      next(error);
+    }
+  });
+  
+  app.post("/api/user/onboarding/complete", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      
+      const userId = req.user!.id;
+      
+      // Update user with onboarding data from request body
+      const { businessInfo, locations, platforms, aiPreferences } = req.body;
+      
+      const updates: any = {
+        onboardingCompleted: true
+      };
+      
+      // Update business info if provided
+      if (businessInfo) {
+        updates.businessName = businessInfo.businessName;
+        updates.industry = businessInfo.industry;
+        updates.contactName = businessInfo.contactName;
+        updates.contactEmail = businessInfo.contactEmail;
+        updates.contactPhone = businessInfo.contactPhone;
+      }
+      
+      // Update AI preferences if provided
+      if (aiPreferences) {
+        updates.aiDefaultTone = aiPreferences.defaultTone;
+        updates.aiAutoReplyToFiveStars = aiPreferences.autoReplyToFiveStars;
+        updates.notificationFrequency = aiPreferences.notificationFrequency;
+      }
+      
+      // Update user record
+      const updatedUser = await storage.updateUser(userId, updates);
+      
+      // Create locations if provided
+      if (locations && Array.isArray(locations) && locations.length > 0) {
+        for (const location of locations) {
+          await storage.createLocation({
+            userId,
+            name: location.name,
+            address: location.address,
+            city: location.city,
+            state: location.state,
+            zipCode: location.zip,
+            phone: location.phone,
+            email: location.email
+          });
+        }
+      }
+      
+      res.json({ success: true, message: "Onboarding completed successfully" });
+    } catch (error) {
+      next(error);
     }
   });
 
