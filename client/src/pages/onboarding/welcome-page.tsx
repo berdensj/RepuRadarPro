@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ChartLine, Clock } from "lucide-react";
+import { ChartLine, Clock, Medal, CheckCircle, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface WelcomePageProps {
@@ -14,13 +14,13 @@ export default function WelcomePage({ goNext, trialDays = 14 }: WelcomePageProps
         <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-4">
           <ChartLine className="h-8 w-8" />
         </div>
-        <h1 className="text-3xl font-bold text-slate-800">Welcome to RepuRadar</h1>
+        <h1 className="text-3xl font-bold text-slate-800">Welcome to RepuRadar Pro</h1>
         <p className="text-lg text-slate-600 mt-2">
-          Your {trialDays}-day trial of RepuRadar Pro has started!
+          Your {trialDays}-day trial has started!
         </p>
         <div className="inline-flex items-center mt-3 bg-blue-50 px-3 py-1 rounded-full">
           <Clock className="h-4 w-4 text-blue-600 mr-2" />
-          <span className="text-sm font-medium text-blue-700">Full access to all Pro features</span>
+          <span className="text-sm font-medium text-blue-700">Full access to all premium features</span>
         </div>
       </div>
 
