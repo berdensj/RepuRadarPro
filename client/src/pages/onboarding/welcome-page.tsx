@@ -1,91 +1,63 @@
-import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
-import { CheckCheck, Star, Calendar } from "lucide-react";
-import { format, addDays } from "date-fns";
+import { ChartLine } from "lucide-react";
 
 interface WelcomePageProps {
-  data: any;
-  updateData: (section: string, data: any) => void;
   goNext: () => void;
 }
 
 export default function WelcomePage({ goNext }: WelcomePageProps) {
-  const { user } = useAuth();
-  const [trialEndDate, setTrialEndDate] = useState<Date | null>(null);
-
-  // Calculate trial end date (14 days from now or from user's trialEndsAt)
-  useEffect(() => {
-    if (user && user.trialEndsAt) {
-      setTrialEndDate(new Date(user.trialEndsAt));
-    } else {
-      // Default to 14 days from now if not set in user profile
-      setTrialEndDate(addDays(new Date(), 14));
-    }
-  }, [user]);
-
   return (
-    <div className="text-center space-y-6">
-      <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-4">
-        <Star className="h-8 w-8" />
+    <div className="space-y-6 max-w-xl mx-auto text-center">
+      <div className="space-y-2">
+        <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-4">
+          <ChartLine className="h-8 w-8" />
+        </div>
+        <h1 className="text-3xl font-bold text-slate-800">Welcome to RepuRadar</h1>
+        <p className="text-lg text-slate-600 mt-2">
+          Your 14-day trial of RepuRadar Pro has started!
+        </p>
       </div>
-      
-      <h1 className="text-3xl font-bold text-slate-800">
-        Welcome to RepuRadarPro!
-      </h1>
-      
-      <p className="text-lg text-slate-600 max-w-md mx-auto">
-        Your 14-day free trial has started. Let's set up your account to get the most out of our AI-powered reputation management platform.
-      </p>
-      
-      {trialEndDate && (
-        <div className="bg-blue-50 p-4 rounded-lg inline-flex items-center space-x-3 text-blue-700">
-          <Calendar className="h-5 w-5" />
-          <span>Your trial ends on {format(trialEndDate, "MMMM d, yyyy")}</span>
-        </div>
-      )}
-      
-      <div className="pt-4 space-y-4 text-left max-w-lg mx-auto">
-        <div className="flex items-start space-x-3">
-          <div className="mt-1 bg-primary/10 p-1 rounded text-primary">
-            <CheckCheck className="h-4 w-4" />
-          </div>
-          <div>
-            <h3 className="font-medium">All Features Unlocked</h3>
-            <p className="text-sm text-slate-600">
-              During your trial, you have access to all premium features.
-            </p>
-          </div>
-        </div>
-        
-        <div className="flex items-start space-x-3">
-          <div className="mt-1 bg-primary/10 p-1 rounded text-primary">
-            <CheckCheck className="h-4 w-4" />
-          </div>
-          <div>
-            <h3 className="font-medium">No Credit Card Required</h3>
-            <p className="text-sm text-slate-600">
-              Try everything with no commitment during your trial period.
-            </p>
-          </div>
-        </div>
-        
-        <div className="flex items-start space-x-3">
-          <div className="mt-1 bg-primary/10 p-1 rounded text-primary">
-            <CheckCheck className="h-4 w-4" />
-          </div>
-          <div>
-            <h3 className="font-medium">Easy Setup Process</h3>
-            <p className="text-sm text-slate-600">
-              It only takes a few minutes to get your account ready.
-            </p>
-          </div>
-        </div>
+
+      <div className="bg-slate-50 p-6 rounded-lg border border-slate-200 my-8">
+        <h2 className="text-xl font-medium text-slate-800 mb-4">What's included in your trial?</h2>
+        <ul className="space-y-3 text-left">
+          <li className="flex items-start">
+            <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-green-100 text-green-800 text-xs font-bold mr-3 mt-0.5">✓</span>
+            <div>
+              <span className="font-medium">AI-powered review responses</span>
+              <p className="text-sm text-slate-600">Automatically generate professional responses to customer reviews</p>
+            </div>
+          </li>
+          <li className="flex items-start">
+            <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-green-100 text-green-800 text-xs font-bold mr-3 mt-0.5">✓</span>
+            <div>
+              <span className="font-medium">Multi-platform monitoring</span>
+              <p className="text-sm text-slate-600">Track reviews across Google, Yelp, Facebook, and more in one place</p>
+            </div>
+          </li>
+          <li className="flex items-start">
+            <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-green-100 text-green-800 text-xs font-bold mr-3 mt-0.5">✓</span>
+            <div>
+              <span className="font-medium">Review request campaigns</span>
+              <p className="text-sm text-slate-600">Send personalized review requests to boost your online presence</p>
+            </div>
+          </li>
+          <li className="flex items-start">
+            <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-green-100 text-green-800 text-xs font-bold mr-3 mt-0.5">✓</span>
+            <div>
+              <span className="font-medium">Performance analytics</span>
+              <p className="text-sm text-slate-600">Track sentiment trends and identify improvement opportunities</p>
+            </div>
+          </li>
+        </ul>
       </div>
-      
-      <div className="pt-6">
-        <Button onClick={goNext} size="lg" className="w-full sm:w-auto">
-          Let's Get Started
+
+      <div className="space-y-4">
+        <p className="text-slate-600">
+          Let's set up your account to get the most out of your trial. This will only take about 5 minutes.
+        </p>
+        <Button size="lg" onClick={goNext}>
+          Begin Setup
         </Button>
       </div>
     </div>

@@ -153,8 +153,10 @@ export const locations = pgTable("locations", {
   name: text("name").notNull(),
   address: text("address"),
   phone: text("phone"),
+  email: text("email"),
   googlePlaceId: text("google_place_id"),
   yelpBusinessId: text("yelp_business_id"),
+  facebookPageId: text("facebook_page_id"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -163,8 +165,10 @@ export const insertLocationSchema = createInsertSchema(locations).pick({
   name: true,
   address: true,
   phone: true,
+  email: true,
   googlePlaceId: true,
   yelpBusinessId: true,
+  facebookPageId: true,
 });
 
 export type InsertLocation = z.infer<typeof insertLocationSchema>;

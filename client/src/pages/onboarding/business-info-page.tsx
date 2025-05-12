@@ -1,22 +1,43 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/hooks/use-auth";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { 
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Card,
-  CardContent
-} from "@/components/ui/card";
-import { Building2, Upload } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { useRef } from "react";
+import { Building2 } from "lucide-react";
+
+// Form validation schema
+const formSchema = z.object({
+  businessName: z.string().min(2, {
+    message: "Business name must be at least 2 characters."
+  }),
+  industry: z.string({
+    required_error: "Please select an industry."
+  }),
+  contactName: z.string().min(2, {
+    message: "Contact name must be at least 2 characters."
+  }),
+  contactEmail: z.string().email({
+    message: "Please enter a valid email address."
+  }),
+  contactPhone: z.string().optional(),
+});
 
 interface BusinessInfoPageProps {
   data: any;
@@ -24,125 +45,32 @@ interface BusinessInfoPageProps {
   goNext: () => void;
 }
 
-// Industry options
-const INDUSTRIES = [
-  "Healthcare",
-  "Dental",
-  "Legal",
-  "Accounting",
-  "Real Estate",
-  "Food & Beverage",
-  "Retail",
-  "Hospitality",
-  "Automotive",
-  "Home Services",
-  "Beauty & Wellness",
-  "Fitness",
-  "Education",
-  "Financial Services",
-  "Technology",
-  "Other"
-];
-
 export default function BusinessInfoPage({ 
   data, 
   updateData, 
-  goNext 
+  goNext
 }: BusinessInfoPageProps) {
-  const { user } = useAuth();
   const { toast } = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [formData, setFormData] = useState({
-    businessName: data.businessInfo.businessName || "",
-    industry: data.businessInfo.industry || "",
-    contactName: data.businessInfo.contactName || user?.fullName || "",
-    contactEmail: data.businessInfo.contactEmail || user?.email || "",
-    contactPhone: data.businessInfo.contactPhone || "",
-    logo: data.businessInfo.logo || null
+  // Initialize form with default values or data from parent
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      businessName: data.businessInfo?.businessName || "",
+      industry: data.businessInfo?.industry || "",
+      contactName: data.businessInfo?.contactName || "",
+      contactEmail: data.businessInfo?.contactEmail || "",
+      contactPhone: data.businessInfo?.contactPhone || "",
+    },
   });
   
-  const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  
-  // Handle form input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  // Handle industry selection
-  const handleIndustryChange = (value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      industry: value
-    }));
-  };
-  
-  // Handle logo upload
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      
-      // Check file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Logo image must be less than 5MB",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      // Check file type
-      if (!file.type.startsWith('image/')) {
-        toast({
-          title: "Invalid file type",
-          description: "Please upload an image file",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      setFormData(prev => ({
-        ...prev,
-        logo: file
-      }));
-      
-      // Create preview URL
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setLogoPreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-  
-  // Trigger file input click
-  const handleLogoClick = () => {
-    fileInputRef.current?.click();
-  };
-  
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate required fields
-    if (!formData.businessName || !formData.industry || !formData.contactName || !formData.contactEmail) {
-      toast({
-        title: "Missing required fields",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    // Update the data in parent component
-    updateData('businessInfo', formData);
-    
-    // Move to next step
+  const onSubmit = (values: z.infer<typeof formSchema>) => {
+    updateData('businessInfo', values);
+    toast({
+      title: "Business information saved",
+      description: "Your business profile has been updated"
+    });
     goNext();
   };
   
@@ -154,123 +82,108 @@ export default function BusinessInfoPage({
         </div>
         <h1 className="text-2xl font-bold text-slate-800">Business Information</h1>
         <p className="text-slate-600 max-w-lg mx-auto">
-          Tell us about your business so we can customize your experience.
+          Tell us about your business to help us customize your RepuRadar experience
         </p>
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="businessName">Business Name *</Label>
-            <Input
-              id="businessName"
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-4">
+            <FormField
+              control={form.control}
               name="businessName"
-              value={formData.businessName}
-              onChange={handleChange}
-              placeholder="Your Business Name"
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Business Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your business name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="industry">Industry *</Label>
-            <Select 
-              value={formData.industry} 
-              onValueChange={handleIndustryChange}
-              required
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select an industry" />
-              </SelectTrigger>
-              <SelectContent>
-                {INDUSTRIES.map(industry => (
-                  <SelectItem key={industry} value={industry}>
-                    {industry}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="contactName">Contact Name *</Label>
-            <Input
-              id="contactName"
+            
+            <FormField
+              control={form.control}
+              name="industry"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Industry</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select your industry" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="healthcare">Healthcare</SelectItem>
+                      <SelectItem value="law">Law</SelectItem>
+                      <SelectItem value="accounting">Accounting</SelectItem>
+                      <SelectItem value="dental">Dental</SelectItem>
+                      <SelectItem value="medspa">Med Spa</SelectItem>
+                      <SelectItem value="restaurant">Restaurant</SelectItem>
+                      <SelectItem value="retail">Retail</SelectItem>
+                      <SelectItem value="realestate">Real Estate</SelectItem>
+                      <SelectItem value="automotive">Automotive</SelectItem>
+                      <SelectItem value="education">Education</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
               name="contactName"
-              value={formData.contactName}
-              onChange={handleChange}
-              placeholder="Your Name"
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Primary Contact Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter contact name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="contactEmail">Contact Email *</Label>
-            <Input
-              id="contactEmail"
+            
+            <FormField
+              control={form.control}
               name="contactEmail"
-              type="email"
-              value={formData.contactEmail}
-              onChange={handleChange}
-              placeholder="your@email.com"
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter contact email" type="email" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-          
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="contactPhone">Phone Number</Label>
-            <Input
-              id="contactPhone"
+            
+            <FormField
+              control={form.control}
               name="contactPhone"
-              value={formData.contactPhone}
-              onChange={handleChange}
-              placeholder="(123) 456-7890"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Contact Phone (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter contact phone number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
           
-          <div className="space-y-2 sm:col-span-2">
-            <Label>Business Logo (Optional)</Label>
-            <Card 
-              className="cursor-pointer border-dashed hover:border-primary/50 transition-colors" 
-              onClick={handleLogoClick}
-            >
-              <CardContent className="flex flex-col items-center justify-center p-6">
-                {logoPreview ? (
-                  <div className="text-center">
-                    <img 
-                      src={logoPreview} 
-                      alt="Business logo preview" 
-                      className="h-32 max-w-full object-contain mx-auto mb-2"
-                    />
-                    <p className="text-sm text-slate-500">Click to change</p>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 text-primary mb-2">
-                      <Upload className="h-6 w-6" />
-                    </div>
-                    <p className="text-sm font-medium">Click to upload your logo</p>
-                    <p className="text-xs text-slate-500 mt-1">SVG, PNG, JPG or GIF (max. 5MB)</p>
-                  </div>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                />
-              </CardContent>
-            </Card>
+          <div className="flex justify-end">
+            <Button type="submit">
+              Save and Continue
+            </Button>
           </div>
-        </div>
-        
-        <div className="pt-4 flex justify-end">
-          <Button type="submit">
-            Save and Continue
-          </Button>
-        </div>
-      </form>
+        </form>
+      </Form>
     </div>
   );
 }
