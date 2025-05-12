@@ -307,16 +307,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Reply generation
-  app.post("/api/reviews/:id/generate-reply", async (req, res, next) => {
+  app.post("/api/reviews/generate-reply", async (req, res, next) => {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const reviewId = Number(req.params.id);
+      const { reviewId, tone = "professional" } = req.body;
+      if (!reviewId) {
+        return res.status(400).json({ message: "reviewId is required" });
+      }
+      
       const userId = req.user!.id;
-      const tone = req.body.tone || "professional";
       
       // Check if the review belongs to the user
-      const review = await storage.getReviewById(reviewId);
+      const review = await storage.getReviewById(Number(reviewId));
       if (!review) {
         return res.status(404).json({ message: "Review not found" });
       }
@@ -326,7 +329,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const generatedReply = await generateAIReply(review, tone);
-      res.json({ reply: generatedReply });
+      res.json({ response: generatedReply });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Sentiment analysis
+  app.post("/api/reviews/analyze-sentiment", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const { reviewText } = req.body;
+      if (!reviewText) {
+        return res.status(400).json({ message: "reviewText is required" });
+      }
+      
+      const sentiment = await analyzeReviewSentiment(reviewText);
+      res.json(sentiment);
     } catch (error) {
       next(error);
     }
