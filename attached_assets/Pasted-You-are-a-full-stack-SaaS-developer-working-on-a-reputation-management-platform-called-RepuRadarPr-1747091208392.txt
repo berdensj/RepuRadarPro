@@ -1,0 +1,75 @@
+You are a full-stack SaaS developer working on a reputation management platform called **RepuRadarPro**. I already have an analytics dashboard in this Replit project. Your task is to enhance it using best practices for reputation management SaaS platforms.
+
+## GOAL:
+Upgrade the existing analytics page to be more actionable, insightful, and user-friendly for business owners managing reviews.
+
+---
+
+## ENHANCEMENT TASKS:
+
+### 1. KPI Summary Cards
+At the top of the page, add four summary cards that display:
+- Total Reviews (in current time range)
+- Average Star Rating
+- Response Rate (replied reviews / total reviews)
+- Sentiment Breakdown (positive, neutral, negative count)
+
+Use visually distinct styling with icons and color indicators.
+
+---
+
+### 2. Interactive Filters
+Above the charts, add:
+- A **date range selector** (e.g., last 7 days, last 30 days, custom)
+- A **location dropdown filter** (if user has more than one business location)
+- A **sentiment filter** (All, Positive, Neutral, Negative)
+
+These filters should dynamically update the charts and summary cards.
+
+---
+
+### 3. Enhanced Charts
+Use **Chart.js** to create the following:
+- A **line chart** showing daily or weekly review volume
+- A **pie or bar chart** for sentiment distribution
+- Optional: bar chart showing response rates per location (if multi-location data is available)
+
+---
+
+### 4. Recent Reviews + AI Response Panel
+Below the charts:
+- Display a paginated table of recent reviews with columns for:
+  - Review Date
+  - Rating (stars)
+  - Text
+  - Sentiment (emoji or icon)
+  - AI-Generated Reply
+  - Buttons to Approve / Edit / Reject
+
+Add action handlers to update the reply status (mark as responded or pending).
+
+---
+
+### 5. Export + Email Options
+At the top or bottom of the dashboard:
+- Add a **"Download PDF"** button to export analytics (mock for now)
+- Add a **"Schedule Email Report"** button that lets user choose daily, weekly, or monthly (mock the email feature for now)
+
+---
+
+### 6. Clean Code & Responsive Design
+- Make sure the layout is **responsive** (flex/grid)
+- Use consistent styles and avoid hardcoded data
+- Separate logic from UI when possible (e.g., put data functions in `analytics.js`)
+
+---
+
+## OTHER INSTRUCTIONS:
+- Use mock data where live data is not yet available
+- Use lightweight JS and CSS (no frameworks)
+- Write modular, well-commented code
+- Update the README.md to explain how to test the new dashboard features
+
+---
+
+Begin by reviewing the current analytics page, checking which features are already implemented. Then progressively build and integrate the enhancements above.

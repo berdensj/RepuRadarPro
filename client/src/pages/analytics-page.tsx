@@ -3,10 +3,15 @@ import { Sidebar } from "@/components/dashboard/sidebar";
 import { TrendGraph } from "@/components/dashboard/trend-graph";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Helmet } from "react-helmet";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BarChart, LineChart, PieChart, CandlestickChart, BarChart2, TrendingUp, Building2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { 
+  BarChart, LineChart, PieChart, CandlestickChart, BarChart2, TrendingUp, Building2,
+  Star, MessageSquare, ThumbsUp, ArrowUpRight, Download, Mail, Calendar, 
+  Filter, Clock, AlertCircle
+} from "lucide-react";
 import { 
   Chart as ChartJS, 
   ArcElement, 
@@ -14,12 +19,31 @@ import {
   CategoryScale, 
   LinearScale,
   BarElement,
+  PointElement,
+  LineElement,
   Title,
 } from 'chart.js';
 import { Tooltip } from 'chart.js';
-import { Pie, Bar } from 'react-chartjs-2';
+import { Pie, Bar, Line } from 'react-chartjs-2';
 import { useQuery } from "@tanstack/react-query";
-import { Location } from "@shared/schema";
+import { Location, Review } from "@shared/schema";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
 
 ChartJS.register(
   ArcElement, 
@@ -28,26 +52,71 @@ ChartJS.register(
   CategoryScale,
   LinearScale,
   BarElement,
+  PointElement,
+  LineElement,
   Title
 );
 
 export default function AnalyticsPage() {
   const isMobile = useIsMobile();
-  const [periodFilter, setPeriodFilter] = useState("90");
+  const [periodFilter, setPeriodFilter] = useState("30");
   const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
+  const [sentimentFilter, setSentimentFilter] = useState("all");
+  const [dateRange, setDateRange] = useState<{
+    from: Date | undefined;
+    to: Date | undefined;
+  }>({
+    from: undefined,
+    to: undefined,
+  });
+  const [isCustomDate, setIsCustomDate] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const reviewsPerPage = 5;
   
   // Fetch locations for the current user
   const { data: locations = [], isLoading: isLoadingLocations } = useQuery<Location[]>({
     queryKey: ["/api/locations"],
   });
   
+  // Handle date filter changes
+  const handleDateFilterChange = (value: string) => {
+    setIsCustomDate(value === "custom");
+    setPeriodFilter(value);
+    // Reset custom date range when switching to preset periods
+    if (value !== "custom") {
+      setDateRange({ from: undefined, to: undefined });
+    }
+  };
+  
+  // Prepare date parameters for API
+  const getDateParams = () => {
+    if (isCustomDate && dateRange.from && dateRange.to) {
+      return `&startDate=${dateRange.from.toISOString()}&endDate=${dateRange.to.toISOString()}`;
+    }
+    return `&period=${periodFilter}`;
+  };
+  
   // Fetch analytics data based on selected location and period
   const { data: analyticsData, isLoading: isLoadingAnalytics } = useQuery({
-    queryKey: ["/api/reviews/trends", selectedLocationId, periodFilter],
+    queryKey: ["/api/reviews/trends", selectedLocationId, periodFilter, dateRange, isCustomDate],
     queryFn: async () => {
       const locationParam = selectedLocationId !== "all" ? `&locationId=${selectedLocationId}` : "";
-      const res = await fetch(`/api/reviews/trends?period=${periodFilter}${locationParam}`);
+      const dateParams = getDateParams();
+      const res = await fetch(`/api/reviews/trends?${dateParams}${locationParam}`);
       if (!res.ok) throw new Error("Failed to fetch analytics data");
+      return res.json();
+    }
+  });
+  
+  // Fetch recent reviews for the table
+  const { data: recentReviews = [], isLoading: isLoadingReviews } = useQuery<Review[]>({
+    queryKey: ["/api/reviews", selectedLocationId, periodFilter, sentimentFilter, dateRange, isCustomDate],
+    queryFn: async () => {
+      const locationParam = selectedLocationId !== "all" ? `&locationId=${selectedLocationId}` : "";
+      const sentimentParam = sentimentFilter !== "all" ? `&sentiment=${sentimentFilter}` : "";
+      const dateParams = getDateParams();
+      const res = await fetch(`/api/reviews?${dateParams}${locationParam}${sentimentParam}&limit=100`);
+      if (!res.ok) throw new Error("Failed to fetch reviews");
       return res.json();
     }
   });
