@@ -44,6 +44,7 @@ function Router() {
   return (
     <Switch>
       <ProtectedRoute path="/" component={DashboardPage} />
+      <ProtectedRoute path="/dashboard" component={DashboardPage} />
       <ProtectedRoute path="/reviews" component={ReviewsPage} />
       <ProtectedRoute path="/alerts" component={AlertsPage} />
       <ProtectedRoute path="/responses" component={ResponsesPage} />

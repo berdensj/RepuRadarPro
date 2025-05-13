@@ -124,15 +124,13 @@ export function AdminLayout({ children, pageTitle }: AdminLayoutProps) {
         { icon: MessageSquarePlus, label: "Feedback", href: "/admin/feedback" },
       ]
     },
-    // Only show the "Return to Dashboard" button for true system admins
-    ...(localStorage.getItem('isSystemAdmin') === 'true' ? [
-      {
-        title: "Navigation",
-        items: [
-          { icon: Home, label: "Return to Dashboard", href: "/" },
-        ]
-      }
-    ] : [])
+    // Show the "Return to Dashboard" button for all admin users
+    {
+      title: "Navigation",
+      items: [
+        { icon: Home, label: "Return to Dashboard", href: "/dashboard" },
+      ]
+    }
   ];
   
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
