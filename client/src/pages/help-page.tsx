@@ -3,6 +3,8 @@ import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
+import DashboardLayout from '@/components/dashboard/layout';
+import { Helmet } from 'react-helmet';
 import {
   Card,
   CardContent,
@@ -73,7 +75,7 @@ const searchSchema = z.object({
   query: z.string().min(2, 'Search query must be at least 2 characters'),
 });
 
-const HelpPage = () => {
+export default function HelpPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -315,372 +317,370 @@ Remember, how you handle negative reviews can turn an unhappy customer into a lo
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-8">
-      <h1 className="text-3xl font-bold">Help & Support</h1>
+    <>
+      <Helmet>
+        <title>Help & Support | RepuRadar</title>
+        <meta name="description" content="Get support, search the knowledge base, and find answers to your questions about RepuRadar." />
+      </Helmet>
       
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Knowledge Base</CardTitle>
-              <CardDescription>
-                Search our documentation for quick answers to your questions.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...searchForm}>
-                <form 
-                  onSubmit={searchForm.handleSubmit(onSearchSubmit)} 
-                  className="flex w-full max-w-lg items-center space-x-2"
-                >
-                  <FormField
-                    control={searchForm.control}
-                    name="query"
-                    render={({ field }) => (
-                      <FormItem className="flex-1">
-                        <FormControl>
-                          <div className="relative">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                            <Input 
-                              placeholder="Search for help articles..." 
-                              className="pl-10" 
-                              {...field} 
-                            />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button 
-                    type="submit"
-                    disabled={searchKnowledgeBaseMutation.isPending}
-                  >
-                    {searchKnowledgeBaseMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      'Search'
-                    )}
-                  </Button>
-                </form>
-              </Form>
-              
-              {/* Search Results or Selected Article */}
-              {selectedArticle ? (
-                <div className="mt-6">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={backToResults}
-                    className="mb-4"
-                  >
-                    ← Back to results
-                  </Button>
-                  
-                  <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <h1>{selectedArticle.title}</h1>
-                    <div className="flex items-center space-x-2 mb-4">
-                      <Badge>{selectedArticle.category}</Badge>
-                      {selectedArticle.tags.map((tag: string) => (
-                        <Badge key={tag} variant="outline">{tag}</Badge>
-                      ))}
-                    </div>
-                    <div dangerouslySetInnerHTML={{ __html: selectedArticle.content.replace(/\n/g, '<br>') }} />
-                  </div>
-                </div>
-              ) : searchResults.length > 0 ? (
-                <div className="mt-6 space-y-4">
-                  <h3 className="font-medium">Search Results ({searchResults.length})</h3>
-                  <div className="space-y-2">
-                    {knowledgeBaseArticles.map((article) => (
-                      <div 
-                        key={article.id}
-                        className="border rounded-md p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => viewArticle(article)}
-                      >
-                        <h4 className="font-medium">{article.title}</h4>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge className="text-xs">{article.category}</Badge>
-                          {article.tags.slice(0, 2).map((tag) => (
-                            <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
-                          ))}
-                          {article.tags.length > 2 && (
-                            <Badge variant="outline" className="text-xs">+{article.tags.length - 2} more</Badge>
-                          )}
-                        </div>
-                        <div className="flex items-center text-sm text-muted-foreground mt-2">
-                          <FileText className="h-3 w-3 mr-1" /> Article
-                          <Button variant="link" size="sm" className="p-0 ml-auto h-auto">
-                            Read More <ChevronRight className="h-3 w-3 ml-1" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-6">
-                  <h3 className="font-medium mb-4">Popular Articles</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {knowledgeBaseArticles.map((article) => (
-                      <div 
-                        key={article.id}
-                        className="border rounded-md p-4 cursor-pointer hover:bg-muted/50 transition-colors"
-                        onClick={() => viewArticle(article)}
-                      >
-                        <h4 className="font-medium">{article.title}</h4>
-                        <div className="flex items-center text-sm text-muted-foreground mt-2">
-                          <FileText className="h-3 w-3 mr-1" /> Article
-                          <Badge className="ml-2 text-xs">{article.category}</Badge>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+      <DashboardLayout>
+        <div className="space-y-8">
+          <h1 className="text-3xl font-bold">Help & Support</h1>
           
-          <Tabs defaultValue="faq">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="faq">Frequently Asked Questions</TabsTrigger>
-              <TabsTrigger value="videos">Video Tutorials</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="faq" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+            <div className="space-y-6">
               <Card>
                 <CardHeader>
-                  <CardTitle>Frequently Asked Questions</CardTitle>
+                  <CardTitle>Knowledge Base</CardTitle>
                   <CardDescription>
-                    Find quick answers to common questions about using RepuRadar.
+                    Search our documentation for quick answers to your questions.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Accordion type="single" collapsible className="w-full">
-                    {faqItems.map((item, index) => (
-                      <AccordionItem key={index} value={`item-${index}`}>
-                        <AccordionTrigger>{item.question}</AccordionTrigger>
-                        <AccordionContent>
-                          <p className="text-muted-foreground">{item.answer}</p>
-                        </AccordionContent>
-                      </AccordionItem>
-                    ))}
-                  </Accordion>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="videos" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Video Tutorials</CardTitle>
-                  <CardDescription>
-                    Watch step-by-step guides to get the most out of RepuRadar.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {videoTutorials.map((video, index) => (
-                      <div 
-                        key={index}
-                        className="border rounded-md overflow-hidden group cursor-pointer"
+                  <Form {...searchForm}>
+                    <form 
+                      onSubmit={searchForm.handleSubmit(onSearchSubmit)} 
+                      className="flex w-full max-w-lg items-center space-x-2"
+                    >
+                      <FormField
+                        control={searchForm.control}
+                        name="query"
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormControl>
+                              <div className="relative">
+                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                                <Input 
+                                  placeholder="Search for help articles..." 
+                                  className="pl-10" 
+                                  {...field} 
+                                />
+                              </div>
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button 
+                        type="submit"
+                        disabled={searchKnowledgeBaseMutation.isPending}
                       >
-                        <div className="relative aspect-video bg-muted">
-                          {/* Video thumbnail would be here */}
-                          <div className="flex items-center justify-center h-full">
-                            <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center text-primary-foreground">
-                              <Play className="h-6 w-6 ml-1" />
+                        {searchKnowledgeBaseMutation.isPending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          'Search'
+                        )}
+                      </Button>
+                    </form>
+                  </Form>
+                  
+                  {/* Search Results or Selected Article */}
+                  {selectedArticle ? (
+                    <div className="mt-6">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={backToResults}
+                        className="mb-4"
+                      >
+                        ← Back to results
+                      </Button>
+                      
+                      <div className="prose prose-sm max-w-none dark:prose-invert">
+                        <h1>{selectedArticle.title}</h1>
+                        <div className="flex items-center space-x-2 mb-4">
+                          <Badge>{selectedArticle.category}</Badge>
+                          {selectedArticle.tags.map((tag: string) => (
+                            <Badge key={tag} variant="outline">{tag}</Badge>
+                          ))}
+                        </div>
+                        <div dangerouslySetInnerHTML={{ __html: selectedArticle.content.replace(/\n/g, '<br>') }} />
+                      </div>
+                    </div>
+                  ) : searchResults.length > 0 ? (
+                    <div className="mt-6 space-y-4">
+                      <h3 className="font-medium">Search Results ({searchResults.length})</h3>
+                      <div className="space-y-2">
+                        {knowledgeBaseArticles.map((article) => (
+                          <div 
+                            key={article.id}
+                            className="border rounded-md p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                            onClick={() => viewArticle(article)}
+                          >
+                            <h4 className="font-medium">{article.title}</h4>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <Badge className="text-xs">{article.category}</Badge>
+                              {article.tags.slice(0, 2).map((tag) => (
+                                <Badge key={tag} variant="outline" className="text-xs">{tag}</Badge>
+                              ))}
+                              {article.tags.length > 2 && (
+                                <Badge variant="outline" className="text-xs">+{article.tags.length - 2} more</Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground mt-2">
+                              <FileText className="h-3 w-3 mr-1" /> Article
+                              <Button variant="link" size="sm" className="p-0 ml-auto h-auto">
+                                Read More <ChevronRight className="h-3 w-3 ml-1" />
+                              </Button>
                             </div>
                           </div>
-                          <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                            {video.duration}
-                          </div>
-                        </div>
-                        <div className="p-3">
-                          <h4 className="font-medium group-hover:text-primary transition-colors">
-                            {video.title}
-                          </h4>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {video.description}
-                          </p>
-                        </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                  ) : (
+                    <div className="mt-6">
+                      <Tabs defaultValue="faq">
+                        <TabsList className="grid w-full grid-cols-3">
+                          <TabsTrigger value="faq">FAQ</TabsTrigger>
+                          <TabsTrigger value="videos">Video Tutorials</TabsTrigger>
+                          <TabsTrigger value="guides">Guides</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="faq" className="mt-4">
+                          <Accordion type="single" collapsible className="w-full">
+                            {faqItems.map((item, index) => (
+                              <AccordionItem key={index} value={`item-${index}`}>
+                                <AccordionTrigger>
+                                  <div className="flex items-start text-left">
+                                    <HelpCircle className="h-5 w-5 mr-2 flex-shrink-0 text-primary" />
+                                    <span>{item.question}</span>
+                                  </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                  <p className="pl-7">{item.answer}</p>
+                                </AccordionContent>
+                              </AccordionItem>
+                            ))}
+                          </Accordion>
+                        </TabsContent>
+                        <TabsContent value="videos" className="mt-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {videoTutorials.map((video, index) => (
+                              <Card key={index} className="overflow-hidden">
+                                <div className="aspect-video relative bg-slate-100 flex items-center justify-center">
+                                  {/* Placeholder for video thumbnail */}
+                                  <Play className="h-12 w-12 text-primary opacity-80" />
+                                </div>
+                                <CardContent className="pt-4">
+                                  <h3 className="font-medium">{video.title}</h3>
+                                  <p className="text-sm text-muted-foreground mt-1">{video.description}</p>
+                                  <div className="flex items-center justify-between mt-2">
+                                    <Badge variant="outline">{video.duration}</Badge>
+                                    <Button variant="ghost" size="sm" className="p-0 h-auto">
+                                      Watch <ArrowRight className="h-3 w-3 ml-1" />
+                                    </Button>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                        </TabsContent>
+                        <TabsContent value="guides" className="mt-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {knowledgeBaseArticles.map((article) => (
+                              <Card key={article.id} className="cursor-pointer hover:bg-muted/50 transition-colors">
+                                <CardHeader className="p-4 pb-2">
+                                  <CardTitle className="text-base">{article.title}</CardTitle>
+                                  <div className="flex items-center space-x-2 mt-1">
+                                    <Badge className="text-xs">{article.category}</Badge>
+                                  </div>
+                                </CardHeader>
+                                <CardFooter className="p-4 pt-2 flex justify-between">
+                                  <div className="text-sm text-muted-foreground flex items-center">
+                                    <FileText className="h-3 w-3 mr-1" /> Guide
+                                  </div>
+                                  <Button 
+                                    variant="link" 
+                                    size="sm" 
+                                    className="p-0 h-auto"
+                                    onClick={() => viewArticle(article)}
+                                  >
+                                    Read Guide <ChevronRight className="h-3 w-3 ml-1" />
+                                  </Button>
+                                </CardFooter>
+                              </Card>
+                            ))}
+                          </div>
+                        </TabsContent>
+                      </Tabs>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Right column with contact info and support ticket form */}
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Contact Us</CardTitle>
+                  <CardDescription>Reach our support team through these channels.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-start">
+                    <Mail className="h-5 w-5 mr-3 text-primary" />
+                    <div>
+                      <h4 className="font-medium">Email Support</h4>
+                      <p className="text-sm text-muted-foreground">support@repuradar.com</p>
+                      <p className="text-xs text-muted-foreground mt-1">Responses within 24 hours</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <Phone className="h-5 w-5 mr-3 text-primary" />
+                    <div>
+                      <h4 className="font-medium">Phone Support</h4>
+                      <p className="text-sm text-muted-foreground">+1 (800) 555-0123</p>
+                      <p className="text-xs text-muted-foreground mt-1">Mon-Fri, 9am-5pm EST</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <MessageSquare className="h-5 w-5 mr-3 text-primary" />
+                    <div>
+                      <h4 className="font-medium">Live Chat</h4>
+                      <p className="text-sm text-muted-foreground">Available on website</p>
+                      <p className="text-xs text-muted-foreground mt-1">Business hours only</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-        
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Contact Support</CardTitle>
-              <CardDescription>
-                Can't find what you're looking for? Our support team is here to help.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {ticketSubmitted ? (
-                <div className="text-center py-6">
-                  <CheckCircle2 className="mx-auto h-12 w-12 text-green-600" />
-                  <h3 className="mt-4 text-lg font-medium">Ticket Submitted!</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Thank you for reaching out. We've received your support ticket and will get back to you as soon as possible.
-                  </p>
-                  <Button 
-                    onClick={() => setTicketSubmitted(false)} 
-                    className="mt-4"
-                  >
-                    Submit Another Ticket
-                  </Button>
-                </div>
-              ) : (
-                <Form {...ticketForm}>
-                  <form onSubmit={ticketForm.handleSubmit(onTicketSubmit)} className="space-y-4">
-                    <FormField
-                      control={ticketForm.control}
-                      name="subject"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Subject*</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Brief description of your issue" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={ticketForm.control}
-                      name="category"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Category*</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a category" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="account">Account & Billing</SelectItem>
-                              <SelectItem value="technical">Technical Issue</SelectItem>
-                              <SelectItem value="feature">Feature Request</SelectItem>
-                              <SelectItem value="integration">Integration Help</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={ticketForm.control}
-                      name="priority"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Priority</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select priority" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="low">Low</SelectItem>
-                              <SelectItem value="medium">Medium</SelectItem>
-                              <SelectItem value="high">High</SelectItem>
-                              <SelectItem value="critical">Critical</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={ticketForm.control}
-                      name="message"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Message*</FormLabel>
-                          <FormControl>
-                            <Textarea 
-                              placeholder="Please describe your issue in detail..." 
-                              className="min-h-[150px]" 
-                              {...field} 
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <Button 
-                      type="submit" 
-                      className="w-full"
-                      disabled={submitTicketMutation.isPending}
-                    >
-                      {submitTicketMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Submit Ticket
-                    </Button>
-                  </form>
-                </Form>
-              )}
               
-              <div className="pt-6 border-t">
-                <h3 className="text-sm font-medium mb-2">Alternative Contact Methods</h3>
-                <div className="space-y-2">
-                  <div className="flex items-center">
-                    <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">support@repuradar.com</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">+1 (800) 123-4567</span>
-                  </div>
-                  <div className="flex items-center">
-                    <MessageSquare className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">Live chat available 9am-5pm EST</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Quick Links</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">
-                  <HelpCircle className="mr-2 h-4 w-4" />
-                  Getting Started Guide
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <FileText className="mr-2 h-4 w-4" />
-                  API Documentation
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Mail className="mr-2 h-4 w-4" />
-                  Sign Up for Webinar
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <ArrowRight className="mr-2 h-4 w-4" />
-                  Changelog
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Submit a Support Ticket</CardTitle>
+                  <CardDescription>We'll respond to your inquiry as soon as possible.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {ticketSubmitted ? (
+                    <div className="py-8 text-center">
+                      <div className="mx-auto w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                        <CheckCircle2 className="h-6 w-6 text-green-600" />
+                      </div>
+                      <h3 className="text-lg font-medium mb-2">Ticket Submitted</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Thank you for reaching out. Our support team will get back to you within 24 hours.
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setTicketSubmitted(false)}
+                      >
+                        Submit Another Ticket
+                      </Button>
+                    </div>
+                  ) : (
+                    <Form {...ticketForm}>
+                      <form onSubmit={ticketForm.handleSubmit(onTicketSubmit)} className="space-y-4">
+                        <FormField
+                          control={ticketForm.control}
+                          name="subject"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Subject</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Brief description of your issue" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={ticketForm.control}
+                          name="category"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Category</FormLabel>
+                              <Select 
+                                onValueChange={field.onChange} 
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select a category" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="technical">Technical Issue</SelectItem>
+                                  <SelectItem value="billing">Billing</SelectItem>
+                                  <SelectItem value="account">Account</SelectItem>
+                                  <SelectItem value="feature">Feature Request</SelectItem>
+                                  <SelectItem value="other">Other</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={ticketForm.control}
+                          name="message"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Message</FormLabel>
+                              <FormControl>
+                                <Textarea 
+                                  placeholder="Please describe your issue in detail"
+                                  className="min-h-[120px]" 
+                                  {...field} 
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={ticketForm.control}
+                          name="priority"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Priority</FormLabel>
+                              <Select 
+                                onValueChange={field.onChange} 
+                                defaultValue={field.value}
+                              >
+                                <FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue placeholder="Select priority" />
+                                  </SelectTrigger>
+                                </FormControl>
+                                <SelectContent>
+                                  <SelectItem value="low">Low</SelectItem>
+                                  <SelectItem value="medium">Medium</SelectItem>
+                                  <SelectItem value="high">High</SelectItem>
+                                  <SelectItem value="urgent">Urgent</SelectItem>
+                                </SelectContent>
+                              </Select>
+                              <FormDescription>
+                                Please select an appropriate priority level for your issue
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <Button 
+                          type="submit" 
+                          className="w-full"
+                          disabled={submitTicketMutation.isPending}
+                        >
+                          {submitTicketMutation.isPending ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Submitting
+                            </>
+                          ) : (
+                            'Submit Ticket'
+                          )}
+                        </Button>
+                      </form>
+                    </Form>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </DashboardLayout>
+    </>
   );
 };
-
-export default HelpPage;
