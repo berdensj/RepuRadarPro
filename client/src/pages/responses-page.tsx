@@ -1,6 +1,6 @@
+import DashboardLayout from "@/components/dashboard/layout";
 import { useState } from "react";
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { useIsMobile } from "@/hooks/use-mobile";
+
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,7 +10,6 @@ import { MessageSquareText, Copy, RotateCw, ThumbsUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ResponsesPage() {
-  const isMobile = useIsMobile();
   const { toast } = useToast();
   const [selectedTone, setSelectedTone] = useState("professional");
   const [isGenerating, setIsGenerating] = useState(false);

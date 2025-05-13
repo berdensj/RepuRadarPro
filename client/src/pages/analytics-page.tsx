@@ -1,7 +1,7 @@
+import DashboardLayout from "@/components/dashboard/layout";
 import { useState, useEffect } from "react";
-import { Sidebar } from "@/components/dashboard/sidebar";
+
 import { TrendGraph } from "@/components/dashboard/trend-graph";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -72,7 +72,6 @@ ChartJS.register(
 );
 
 export default function AnalyticsPage() {
-  const isMobile = useIsMobile();
   const [periodFilter, setPeriodFilter] = useState("30");
   const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
   const [sentimentFilter, setSentimentFilter] = useState("all");

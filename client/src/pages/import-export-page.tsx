@@ -1,7 +1,8 @@
+import DashboardLayout from "@/components/dashboard/layout";
 import React, { useState } from "react";
 import { Helmet } from "react-helmet";
 import { useQuery } from "@tanstack/react-query";
-import { Sidebar } from "@/components/dashboard/sidebar";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
