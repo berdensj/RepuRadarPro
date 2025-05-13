@@ -1,6 +1,5 @@
 import { AlertCenter } from "@/components/dashboard/alert-center";
 import { Helmet } from "react-helmet";
-import DashboardLayout from "@/components/dashboard/layout";
 
 export default function AlertsPage() {
   return (
@@ -10,18 +9,16 @@ export default function AlertsPage() {
         <meta name="description" content="View important alerts about negative reviews and trending issues with your reputation." />
       </Helmet>
       
-      <DashboardLayout>
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
-          <header className="mb-6">
-            <h1 className="text-2xl font-semibold text-slate-800">Alerts</h1>
-            <p className="text-slate-500">Stay updated on important reputation issues</p>
-          </header>
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <header className="mb-6">
+          <h1 className="text-2xl font-semibold text-slate-800">Alerts</h1>
+          <p className="text-slate-500">Stay updated on important reputation issues</p>
+        </header>
 
-          {/* Alert Center expanded view */}
-          <AlertCenter />
-        </div>
-      </DashboardLayout>
+        {/* Alert Center expanded view */}
+        <AlertCenter />
+      </div>
     </>
   );
 }
