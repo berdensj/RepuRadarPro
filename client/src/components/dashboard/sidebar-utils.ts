@@ -138,10 +138,14 @@ export function useAutoExpandActiveGroups(
     // Check if the current location matches any child item
     const checkAndOpenGroup = (groupName: string, children: SimpleNavItem[]) => {
       const isActive = children.some(item => item.href === location);
-      if (isActive && !expandedGroups[groupName]) {
+      
+      // Map Configuration to config for state key
+      const stateKey = groupName === "Configuration" ? "config" : groupName.toLowerCase();
+      
+      if (isActive && !expandedGroups[stateKey]) {
         setExpandedGroups(prev => ({
           ...prev,
-          [groupName]: true
+          [stateKey]: true
         }));
       }
     };
@@ -150,7 +154,8 @@ export function useAutoExpandActiveGroups(
     Object.entries(navItems).forEach(([key, item]) => {
       if (isGroupNavItem(item as any)) {
         const group = item as GroupNavItem;
-        checkAndOpenGroup(key, group.children);
+        // Use the item's label for the check as it has the proper display name
+        checkAndOpenGroup(group.label, group.children);
       }
     });
   }, [location, expandedGroups, setExpandedGroups, navItems]);

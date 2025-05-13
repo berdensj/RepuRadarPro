@@ -1,0 +1,80 @@
+You are a full-stack SaaS developer working on RepuRadarPro, a reputation management platform.
+
+Your task is to **update the subscription page** to reflect the latest pricing structure, including a new **Free Plan** and changes to the Enterprise Plan's CTA.
+
+---
+
+## 📦 Plans to Include on Pricing Page:
+
+### 1. 🆓 Free Plan — $0/month
+- 1 business location  
+- Google reviews only  
+- 20 AI replies/month  
+- Manual reply approval only  
+- No analytics, SMS, or integrations  
+- Review history limited to 7 days  
+- “Powered by RepuRadarPro” branding  
+- Email support  
+
+**Button:** `Get Started` → Route to account signup with free plan selected
+
+---
+
+### 2. Starter — $29/month
+- 1 location  
+- Google reviews  
+- 100 AI replies/month  
+- Basic analytics  
+- Scheduled/manual replies  
+- Email support  
+**Button:** `Choose Plan`
+
+---
+
+### 3. Growth — $79/month
+- 5 locations included  
+- Google, Yelp, Facebook integrations  
+- Unlimited AI replies  
+- Full analytics dashboard  
+- SMS/email requests (250/month)  
+- Auto-replies + 3 team users  
+- $10/location overage  
+**Button:** `Choose Plan`
+
+---
+
+### 4. Agency — Starting at $249/month
+- 15 locations included  
+- White-labeling + client reports  
+- Role-based access (admin/client)  
+- API access  
+- $7/location overage  
+**Button:** `Choose Plan`
+
+---
+
+### 5. Enterprise — Custom ($799+/month)
+- 50 locations included  
+- SSO + advanced permissions  
+- CRM integrations (Salesforce, Slack, etc.)  
+- Custom AI tone tuning  
+- Dedicated onboarding & support  
+- Volume discounts ($5/$3 per extra location)  
+**Button:** `Schedule Call` → Link to Calendly: `https://calendly.com/YOUR_LINK_HERE`
+
+---
+
+## 🧩 Technical Requirements:
+- Replace any outdated pricing or plan names
+- Ensure the "Schedule Call" button for Enterprise opens the Calendly link in a **new tab**
+- If using cards or tiles, ensure consistency in layout and style
+- Highlight the most popular plan (e.g., Growth) with a badge if applicable
+- Add responsive styling for mobile screens
+
+---
+
+## 🔁 After Update:
+- Test all CTA buttons and route handling
+- Update any trial logic or UI copy tied to plans (e.g., "Start 14-day free trial" for Starter+)
+
+Begin by checking the current subscription UI and im
