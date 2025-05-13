@@ -120,8 +120,8 @@ export function SidebarLayout({
           </div>
         )}
         
-        {/* Content container */}
-        <div className="container mx-auto px-4 py-4 md:px-6 md:py-6">
+        {/* Content container - removed container class to fix spacing */}
+        <div className="px-4 py-4 md:px-6 md:py-6 w-full">
           {children}
         </div>
       </main>

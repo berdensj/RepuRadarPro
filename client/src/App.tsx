@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Switch } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -7,46 +8,63 @@ import NotFound from "@/pages/not-found";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
-import DashboardPage from "@/pages/dashboard-page";
-import AuthPage from "@/pages/auth-page";
-import ReviewsPage from "@/pages/reviews-page";
-import AlertsPage from "@/pages/alerts-page";
-import ResponsesPage from "@/pages/responses-page";
-import AnalyticsPage from "@/pages/analytics-page";
-import SettingsPage from "@/pages/settings-page";
-import IntegrationsPage from "@/pages/integrations-page";
-import CompetitorsPage from "@/pages/competitors-page";
-import ReviewRequestsPage from "@/pages/review-requests-page";
-import ProfilePage from "@/pages/profile-page";
-import HelpPage from "@/pages/help-page";
-import SubscriptionPage from "@/pages/subscription-page";
-import ReportsPage from "@/pages/reports-page";
-import WorkflowsPage from "@/pages/workflows-page";
-import TemplatesPage from "@/pages/templates-page";
-import ImportExportPage from "@/pages/import-export-page";
-import ActivityLogsPage from "@/pages/activity-logs-page";
-import CommunicationsPage from "@/pages/communications-page";
-import ApiAccessPage from "@/pages/api-access-page";
-import WhiteLabelPage from "@/pages/white-label-page";
-import DashboardBuilderPage from "@/pages/dashboard-builder-page";
-import AdminDashboardPage from "@/pages/admin/dashboard-page";
-import AdminUsersPage from "@/pages/admin/users-page";
-import AdminFinancialPage from "@/pages/admin/financial-page";
-import AdminSystemPage from "@/pages/admin/system-page";
-import AdminCustomersPage from "@/pages/admin/customers-page";
-import OnboardingPage from "@/pages/admin/onboarding-page";
-import AdminAnalyticsPage from "@/pages/admin/analytics-page";
-import AdminReportsPage from "@/pages/admin/reports-page";
-import UserOnboardingPage from "@/pages/onboarding";
-import ClientAdminUsersPage from "@/pages/client-admin/users-page";
 import { Route } from "wouter";
+import { Loader2 } from "lucide-react";
 
-// Function to wrap a component with the SidebarLayout
-const withSidebarLayout = (Component: React.ComponentType, pageTitle?: string) => {
+// Non-lazy load for not-found page to prevent hydration issues
+import NotFoundPage from "@/pages/not-found";
+
+// Lazy load components for better performance
+// Using dynamic imports with proper typing
+const DashboardPage = lazy(() => import("@/pages/dashboard-page").then(module => ({ default: module.default })));
+const AuthPage = lazy(() => import("@/pages/auth-page").then(module => ({ default: module.default })));
+const ReviewsPage = lazy(() => import("@/pages/reviews-page").then(module => ({ default: module.default })));
+const AlertsPage = lazy(() => import("@/pages/alerts-page").then(module => ({ default: module.default })));
+const ResponsesPage = lazy(() => import("@/pages/responses-page").then(module => ({ default: module.default })));
+const AnalyticsPage = lazy(() => import("@/pages/analytics-page").then(module => ({ default: module.default })));
+const SettingsPage = lazy(() => import("@/pages/settings-page").then(module => ({ default: module.default })));
+const IntegrationsPage = lazy(() => import("@/pages/integrations-page").then(module => ({ default: module.default })));
+const CompetitorsPage = lazy(() => import("@/pages/competitors-page").then(module => ({ default: module.default })));
+const ReviewRequestsPage = lazy(() => import("@/pages/review-requests-page").then(module => ({ default: module.default })));
+const ProfilePage = lazy(() => import("@/pages/profile-page").then(module => ({ default: module.default })));
+const HelpPage = lazy(() => import("@/pages/help-page").then(module => ({ default: module.default })));
+const SubscriptionPage = lazy(() => import("@/pages/subscription-page").then(module => ({ default: module.default })));
+const ReportsPage = lazy(() => import("@/pages/reports-page").then(module => ({ default: module.default })));
+const WorkflowsPage = lazy(() => import("@/pages/workflows-page").then(module => ({ default: module.default })));
+const TemplatesPage = lazy(() => import("@/pages/templates-page").then(module => ({ default: module.default })));
+const ImportExportPage = lazy(() => import("@/pages/import-export-page").then(module => ({ default: module.default })));
+const ActivityLogsPage = lazy(() => import("@/pages/activity-logs-page").then(module => ({ default: module.default })));
+const CommunicationsPage = lazy(() => import("@/pages/communications-page").then(module => ({ default: module.default })));
+const ApiAccessPage = lazy(() => import("@/pages/api-access-page").then(module => ({ default: module.default })));
+const WhiteLabelPage = lazy(() => import("@/pages/white-label-page").then(module => ({ default: module.default })));
+const DashboardBuilderPage = lazy(() => import("@/pages/dashboard-builder-page").then(module => ({ default: module.default })));
+const AdminDashboardPage = lazy(() => import("@/pages/admin/dashboard-page").then(module => ({ default: module.default })));
+const AdminUsersPage = lazy(() => import("@/pages/admin/users-page").then(module => ({ default: module.default })));
+const AdminFinancialPage = lazy(() => import("@/pages/admin/financial-page").then(module => ({ default: module.default })));
+const AdminSystemPage = lazy(() => import("@/pages/admin/system-page").then(module => ({ default: module.default })));
+const AdminCustomersPage = lazy(() => import("@/pages/admin/customers-page").then(module => ({ default: module.default })));
+const OnboardingPage = lazy(() => import("@/pages/admin/onboarding-page").then(module => ({ default: module.default })));
+const AdminAnalyticsPage = lazy(() => import("@/pages/admin/analytics-page").then(module => ({ default: module.default })));
+const AdminReportsPage = lazy(() => import("@/pages/admin/reports-page").then(module => ({ default: module.default })));
+const UserOnboardingPage = lazy(() => import("@/pages/onboarding").then(module => ({ default: module.default })));
+const ClientAdminUsersPage = lazy(() => import("@/pages/client-admin/users-page").then(module => ({ default: module.default })));
+
+// Loading spinner component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <Loader2 className="h-10 w-10 animate-spin text-primary" />
+  </div>
+);
+
+// Function to wrap a component with the SidebarLayout and Suspense
+// Using a more direct approach to avoid type errors
+const withSidebarLayout = (LazyComponent: any, pageTitle?: string) => {
   return function WrappedComponent() {
     return (
       <SidebarLayout pageTitle={pageTitle}>
-        <Component />
+        <Suspense fallback={<LoadingSpinner />}>
+          <LazyComponent />
+        </Suspense>
       </SidebarLayout>
     );
   };
@@ -78,7 +96,13 @@ function Router() {
       <ProtectedRoute path="/profile" component={withSidebarLayout(ProfilePage, "Profile")} />
       <ProtectedRoute path="/subscription" component={withSidebarLayout(SubscriptionPage, "Subscription")} />
       <ProtectedRoute path="/help" component={withSidebarLayout(HelpPage, "Help & Support")} />
-      <ProtectedRoute path="/onboarding" component={UserOnboardingPage} />
+      <ProtectedRoute path="/onboarding">
+        {() => (
+          <Suspense fallback={<LoadingSpinner />}>
+            <UserOnboardingPage />
+          </Suspense>
+        )}
+      </ProtectedRoute>
       
       {/* Client Admin Section */}
       <ProtectedRoute 
@@ -139,9 +163,17 @@ function Router() {
         requiredRole="systemAdmin" 
       />
       
-      {/* Public routes */}
-      <Route path="/auth" component={AuthPage} />
-      <Route component={NotFound} />
+      {/* Public routes with proper Suspense handling */}
+      <Route path="/auth">
+        {() => (
+          <Suspense fallback={<LoadingSpinner />}>
+            <AuthPage />
+          </Suspense>
+        )}
+      </Route>
+      <Route>
+        {() => <NotFoundPage />}
+      </Route>
     </Switch>
   );
 }

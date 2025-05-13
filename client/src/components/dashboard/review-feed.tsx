@@ -56,11 +56,13 @@ export function ReviewFeed() {
     },
   });
 
-  const filteredReviews = reviews
-    ? platform
-      ? reviews.filter((review) => review.platform === platform)
-      : reviews
-    : [];
+  // Ensure reviews is an array with error handling
+  const reviewsArray = Array.isArray(reviews) ? reviews : [];
+  
+  // Apply platform filtering if needed
+  const filteredReviews = platform
+    ? reviewsArray.filter((review) => review.platform === platform)
+    : reviewsArray;
 
   const handlePlatformChange = (value: string) => {
     setPlatform(value === "all" ? null : value);
