@@ -5,28 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { Sidebar } from "@/components/dashboard/sidebar";
-
-// Custom hook for mobile detection
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(false);
-  
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    
-    // Initial check
-    checkIfMobile();
-    
-    // Add event listener
-    window.addEventListener('resize', checkIfMobile);
-    
-    // Clean up
-    return () => window.removeEventListener('resize', checkIfMobile);
-  }, []);
-  
-  return isMobile;
-}
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SidebarLayoutProps {
   children: ReactNode;
@@ -82,10 +61,10 @@ export function SidebarLayout({
     <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
       {/* Sidebar - fixed on mobile, relative on desktop */}
       <div className={cn(
-        "transition-all duration-300 ease-in-out z-30 bg-white border-r border-slate-200",
+        "transition-all duration-300 ease-in-out z-40 bg-white border-r border-slate-200",
         isMobile ? (
           mobileMenuOpen 
-            ? "fixed left-0 top-0 h-full w-64 shadow-xl" 
+            ? "fixed left-0 top-0 h-full w-[85%] max-w-[300px] shadow-xl" 
             : "fixed left-0 top-0 h-full w-0 -translate-x-full"
         ) : (
           sidebarCollapsed ? "w-20" : "w-64"
@@ -105,23 +84,25 @@ export function SidebarLayout({
       )}>
         {/* Mobile header with toggle */}
         {isMobile && (
-          <div className="sticky top-0 z-20 flex items-center justify-between p-4 bg-white border-b border-gray-200">
+          <div className="sticky top-0 z-20 flex items-center justify-between p-3 bg-white border-b border-gray-200 shadow-sm">
             <div className="flex items-center">
               <Button 
                 variant="ghost" 
                 size="icon" 
                 className="mr-2" 
                 onClick={toggleMobileMenu}
+                aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
               >
                 {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               </Button>
-              {pageTitle && <h1 className="text-xl font-semibold">{pageTitle}</h1>}
+              {pageTitle && <h1 className="text-lg font-semibold truncate">{pageTitle}</h1>}
+              {!pageTitle && <span className="text-primary text-lg font-semibold">RepuRadar</span>}
             </div>
           </div>
         )}
         
-        {/* Content container - removed container class to fix spacing */}
-        <div className="px-4 py-4 md:px-6 md:py-6 w-full">
+        {/* Content container with improved mobile spacing */}
+        <div className="px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-6 w-full">
           {children}
         </div>
       </main>
@@ -129,7 +110,7 @@ export function SidebarLayout({
       {/* Overlay for mobile when sidebar is open */}
       {isMobile && mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-20"
+          className="fixed inset-0 bg-black/50 z-30"
           onClick={toggleMobileMenu}
           aria-hidden="true"
         />
