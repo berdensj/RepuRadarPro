@@ -68,7 +68,9 @@ function Router() {
       <ProtectedRoute path="/onboarding" component={UserOnboardingPage} />
       
       {/* Client Admin Section */}
+      <ProtectedRoute path="/client-admin" component={ClientAdminUsersPage} requiredPermission="canManageUsers" />
       <ProtectedRoute path="/client-admin/users" component={ClientAdminUsersPage} requiredPermission="canManageUsers" />
+      <ProtectedRoute path="/client-admin/dashboard" component={ClientAdminUsersPage} requiredPermission="canManageUsers" />
       
       {/* System Admin Section - Only accessible to system admin users */}
       <ProtectedRoute path="/admin" component={AdminDashboardPage} requiredRole="systemAdmin" />

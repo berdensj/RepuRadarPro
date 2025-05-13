@@ -89,6 +89,8 @@ const locationManagerSchema = z.object({
   locationId: z.string(),
 });
 
+import ClientAdminLayout from "@/components/client-admin/layout";
+
 export default function ClientAdminUsersPage() {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -794,10 +796,7 @@ export default function ClientAdminUsersPage() {
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedUser(user);
-                                  setEditUserOpen(true);
-                                }}
+                                onClick={() => handleEditUser(user)}
                               >
                                 <Edit className="h-4 w-4 mr-2" /> Edit User
                               </DropdownMenuItem>
@@ -865,7 +864,10 @@ export default function ClientAdminUsersPage() {
       </Card>
       
       {/* Edit User Dialog */}
-      <Dialog open={editUserOpen} onOpenChange={setEditUserOpen}>
+      <Dialog open={editUserOpen} onOpenChange={(open) => {
+        setEditUserOpen(open);
+        if (!open) setSelectedUser(null);
+      }}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
@@ -879,7 +881,8 @@ export default function ClientAdminUsersPage() {
               <FormLabel className="text-right">Name</FormLabel>
               <Input 
                 id="fullName" 
-                defaultValue={selectedUser?.fullName} 
+                value={editFullName}
+                onChange={(e) => setEditFullName(e.target.value)} 
                 className="col-span-3" 
               />
             </div>
@@ -887,13 +890,17 @@ export default function ClientAdminUsersPage() {
               <FormLabel className="text-right">Email</FormLabel>
               <Input 
                 id="email" 
-                defaultValue={selectedUser?.email} 
+                value={editEmail}
+                onChange={(e) => setEditEmail(e.target.value)}
                 className="col-span-3" 
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <FormLabel className="text-right">Status</FormLabel>
-              <Select defaultValue={selectedUser?.isActive ? "active" : "inactive"}>
+              <Select 
+                value={editIsActive ? "active" : "inactive"}
+                onValueChange={(value) => setEditIsActive(value === "active")}
+              >
                 <SelectTrigger className="col-span-3">
                   <SelectValue />
                 </SelectTrigger>
@@ -909,14 +916,28 @@ export default function ClientAdminUsersPage() {
             <Button variant="outline" onClick={() => setEditUserOpen(false)}>
               Cancel
             </Button>
-            <Button type="submit" onClick={() => {
-              toast({
-                title: "User updated",
-                description: "The user information has been updated."
-              });
-              setEditUserOpen(false);
-            }}>
-              Save Changes
+            <Button 
+              type="submit" 
+              onClick={() => {
+                if (selectedUser) {
+                  updateUserMutation.mutate({
+                    id: selectedUser.id,
+                    fullName: editFullName,
+                    email: editEmail,
+                    isActive: editIsActive
+                  });
+                }
+              }}
+              disabled={updateUserMutation.isPending}
+            >
+              {updateUserMutation.isPending ? (
+                <>
+                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-background border-t-transparent rounded-full" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

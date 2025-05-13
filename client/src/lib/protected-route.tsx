@@ -42,13 +42,15 @@ export function ProtectedRoute({
   
   // Special case: If this is a client admin (admin role but not system admin) 
   // trying to access the root dashboard, redirect to the main dashboard (not admin)
-  if (path === '/' && user.role === 'admin') {
+  if ((path === '/' || path === '/dashboard') && user.role === 'admin') {
     const isSystemAdmin = localStorage.getItem('isSystemAdmin') === 'true';
     if (!isSystemAdmin) {
-      console.log("Client admin detected at root path, redirecting to dashboard");
+      console.log("Client admin detected, redirecting to appropriate dashboard");
+      // For client admins, redirect to client admin dashboard or main dashboard
+      const pageToRedirectTo = path === '/' ? '/dashboard' : '/client-admin/users';
       return (
         <Route path={path}>
-          <Redirect to="/dashboard" />
+          <Redirect to={pageToRedirectTo} />
         </Route>
       );
     }
@@ -56,8 +58,24 @@ export function ProtectedRoute({
 
   // Check for permission-based access
   if (requiredPermission && permissions) {
-    // Check if the permission exists and is false
-    if (permissions.hasOwnProperty(requiredPermission) && !permissions[requiredPermission as keyof typeof permissions]) {
+    // Special case for client-admin routes
+    if (path.startsWith('/client-admin')) {
+      // Client admins (role = admin) always have access to client-admin routes
+      if (user.role === 'admin') {
+        // Allow access
+        console.log("Client admin accessing admin section - permitted");
+      }
+      // For others, check specific permissions
+      else if (permissions.hasOwnProperty(requiredPermission) && !permissions[requiredPermission as keyof typeof permissions]) {
+        return (
+          <Route path={path}>
+            <AccessDeniedPage />
+          </Route>
+        );
+      }
+    }
+    // For non-client-admin routes with permission requirements
+    else if (permissions.hasOwnProperty(requiredPermission) && !permissions[requiredPermission as keyof typeof permissions]) {
       return (
         <Route path={path}>
           <AccessDeniedPage />
