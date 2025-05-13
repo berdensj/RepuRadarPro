@@ -5,7 +5,12 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Paintbrush, Check, RotateCcw } from 'lucide-react';
 import { Label } from '@/components/ui/label';
-import { Slider } from '@/components/ui/slider';
+import { 
+  Slider, 
+  SliderTrack, 
+  SliderRange, 
+  SliderThumb 
+} from '@/components/ui/slider';
 import { hexToHSL, hslToHex } from '@/lib/color-utils';
 
 // Predefined color palettes

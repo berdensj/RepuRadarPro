@@ -75,47 +75,40 @@ export interface RolePermissions {
  * @returns Object containing navigation item groups
  */
 export function createNavStructure(expandedGroups: Record<string, boolean>) {
-  // Group: Dashboard & Main
-  const mainNavItems: NavItem[] = [
-    {
-      type: 'item',
-      icon: BarChart2,
-      label: "Dashboard",
-      href: "/reviews",
-      tooltip: "View your main dashboard"
-    }
-  ];
+  // Main dashboard item
+  const dashboardNavItem: SimpleNavItem = {
+    type: 'item',
+    icon: BarChart2,
+    label: "Dashboard",
+    href: "/reviews",
+    tooltip: "View your main dashboard"
+  };
   
-  // Group: Reviews & Feedback
-  const reviewsNavItems: GroupNavItem = {
-    type: 'group',
+  const mainNavItems: NavItem[] = [dashboardNavItem];
+  
+  // Reviews & Feedback - Ungrouped
+  const reviewsNavItem: SimpleNavItem = {
+    type: 'item',
     icon: Star,
     label: "Reviews",
-    tooltip: "Manage all your reviews",
-    expanded: expandedGroups.reviews,
-    children: [
-      {
-        type: 'item',
-        icon: Star,
-        label: "All Reviews",
-        href: "/reviews",
-        tooltip: "View all your reviews"
-      },
-      {
-        type: 'item',
-        icon: MessageSquare,
-        label: "AI Responses",
-        href: "/responses",
-        tooltip: "AI-generated response suggestions"
-      },
-      {
-        type: 'item',
-        icon: Send,
-        label: "Review Requests",
-        href: "/review-requests",
-        tooltip: "Manage review requests"
-      }
-    ]
+    href: "/reviews",
+    tooltip: "View all your reviews"
+  };
+  
+  const responsesNavItem: SimpleNavItem = {
+    type: 'item',
+    icon: MessageSquare,
+    label: "AI Responses",
+    href: "/responses",
+    tooltip: "AI-generated response suggestions"
+  };
+  
+  const reviewRequestsNavItem: SimpleNavItem = {
+    type: 'item',
+    icon: Send,
+    label: "Review Requests",
+    href: "/review-requests",
+    tooltip: "Manage review requests"
   };
   
   // Group: Alerts & Notifications
@@ -349,7 +342,9 @@ export function createNavStructure(expandedGroups: Record<string, boolean>) {
   
   return {
     mainNavItems,
-    reviewsNavItems,
+    reviewsNavItem,
+    responsesNavItem,
+    reviewRequestsNavItem,
     alertsNavItem,
     analyticsNavItems,
     managementNavItems,
@@ -379,7 +374,9 @@ export function generateSidebarNavigation(
 ): NavItem[] {
   const {
     mainNavItems,
-    reviewsNavItems,
+    reviewsNavItem,
+    responsesNavItem,
+    reviewRequestsNavItem,
     alertsNavItem,
     analyticsNavItems,
     managementNavItems,
@@ -393,7 +390,9 @@ export function generateSidebarNavigation(
   // Base navigation items available to all users
   const baseNavItems: NavItem[] = [
     ...mainNavItems,
-    reviewsNavItems,
+    reviewsNavItem,
+    responsesNavItem,
+    reviewRequestsNavItem,
     alertsNavItem,
     separators.analyticsSeparator,
     analyticsNavItems,
