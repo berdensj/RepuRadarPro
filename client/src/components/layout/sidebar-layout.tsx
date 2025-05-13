@@ -59,6 +59,14 @@ export function SidebarLayout({
   
   return (
     <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+      {/* ADA compliance: Added skip to main content link */}
+      <a 
+        href="#main-content" 
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-1/2 focus:-translate-x-1/2 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-white focus:rounded"
+      >
+        Skip to main content
+      </a>
+      
       {/* Sidebar - static position so it scrolls with page */}
       <div className={cn(
         "transition-all duration-300 ease-in-out z-40 bg-white border-r border-slate-200 h-screen",
@@ -77,11 +85,16 @@ export function SidebarLayout({
       </div>
       
       {/* Main content */}
-      <main className={cn(
-        "flex-1 overflow-auto transition-all duration-300 ease-in-out h-screen",
-        isMobile ? "ml-0" : "",
-        className
-      )}>
+      <main 
+        id="main-content" 
+        className={cn(
+          "flex-1 overflow-auto transition-all duration-300 ease-in-out h-screen",
+          isMobile ? "ml-0" : "",
+          className
+        )}
+        role="main"
+        aria-label="Main content"
+      >
         {/* Mobile header with toggle */}
         {isMobile && (
           <div className="sticky top-0 z-20 flex items-center justify-between p-3 bg-white border-b border-gray-200 shadow-sm">

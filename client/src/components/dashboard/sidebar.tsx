@@ -113,6 +113,8 @@ export function Sidebar({
           mobileMenuOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full lg:translate-x-0 lg:w-auto",
           className
         )}
+        role="navigation"
+        aria-label="Main navigation"
       >
         <div className="flex flex-col h-full">
           {/* Mobile Header */}
@@ -221,14 +223,22 @@ export function Sidebar({
                                 ? "bg-primary/10 text-primary" 
                                 : "text-slate-700 hover:bg-slate-100"
                             )}
+                            role="menuitem"
+                            aria-current={isActive ? "page" : undefined}
                           >
                             <div className="relative">
-                              <Icon className={cn("flex-shrink-0", 
-                                sidebarCollapsed ? "w-6 h-6" : "w-5 h-5 mr-3"
-                              )} />
+                              <Icon 
+                                className={cn("flex-shrink-0", 
+                                  sidebarCollapsed ? "w-6 h-6" : "w-5 h-5 mr-3"
+                                )} 
+                                aria-hidden="true"
+                              />
                               {/* Notification badge - shown for certain menu items */}
                               {(item.label === "Alerts" || item.label === "Reviews") && (
-                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                                <span 
+                                  className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+                                  aria-label={`${item.label === "Alerts" ? "3" : "5"} new ${item.label.toLowerCase()}`}
+                                >
                                   {item.label === "Alerts" ? "3" : "5"}
                                 </span>
                               )}
