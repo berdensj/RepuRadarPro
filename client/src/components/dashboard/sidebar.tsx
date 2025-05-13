@@ -5,374 +5,50 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { 
-  BarChart2, 
-  Bell, 
-  ChartPieIcon, 
   ChartLine, 
   LogOut, 
   Menu, 
-  MessageSquare, 
-  Settings, 
-  Star, 
   X,
-  Plug,
-  Send,
-  UsersRound,
-  User,
-  HelpCircle,
-  ShieldCheck,
-  CreditCard,
-  FileText,
-  LayoutDashboard,
-  FileCog,
-  Clock,
-  Import,
-  Workflow,
-  Paintbrush,
-  Code,
   ChevronDown,
   ChevronRight,
-  Users,
-  BadgeDollarSign,
-  Package
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useIsMobile } from "@/hooks/use-mobile";
+
+// Import sidebar configuration and types
+import { 
+  NavItem, 
+  SimpleNavItem, 
+  GroupNavItem,
+  generateSidebarNavigation
+} from './sidebar-config';
+
+// Import sidebar utilities
+import { 
+  isSeparator, 
+  isSimpleNavItem, 
+  isGroupNavItem,
+  useSidebarGroups,
+  useSidebarCollapsed
+} from './sidebar-utils';
 
 interface SidebarProps {
   className?: string;
 }
 
-// Base navigation item
-interface NavItemBase {
-  icon: React.ComponentType<any>;
-  label: string;
-  tooltip?: string;
-}
-
-// Simple navigation item
-interface SimpleNavItem extends NavItemBase {
-  type: 'item';
-  href: string;
-}
-
-// Group navigation item with children
-interface GroupNavItem extends NavItemBase {
-  type: 'group';
-  children: SimpleNavItem[];
-  expanded?: boolean;
-}
-
-// Separator item
-interface SeparatorItem {
-  type: 'separator';
-  label: string;
-}
-
-// Union type for all navigation item types
-type NavItem = SimpleNavItem | GroupNavItem | SeparatorItem;
-
-// Role type
-type UserRole = 'admin' | 'staff' | 'user' | 'location_manager';
-
 export function Sidebar({ className }: SidebarProps) {
   const { user, permissions, logoutMutation } = useAuth();
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
   const sidebarRef = useRef<HTMLElement>(null);
   
-  // Track expanded groups state
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    reviews: false,
-    analytics: false,
-    management: false,
-    config: false,
-    account: false,
-    admin: false
-  });
+  // Use custom hooks for sidebar state management
+  const { expandedGroups, toggleGroup } = useSidebarGroups();
+  const { sidebarCollapsed, toggleSidebar } = useSidebarCollapsed();
   
-  // Toggle a group's expanded state
-  const toggleGroup = (groupName: string) => {
-    setExpandedGroups(prev => ({
-      ...prev,
-      [groupName]: !prev[groupName]
-    }));
-  };
-  
-  // Group: Dashboard & Main
-  const mainNavItems: NavItem[] = [
-    {
-      type: 'item',
-      icon: BarChart2,
-      label: "Dashboard",
-      href: "/",
-      tooltip: "View your main dashboard"
-    }
-  ];
-  
-  // Group: Reviews & Feedback
-  const reviewsNavItems: GroupNavItem = {
-    type: 'group',
-    icon: Star,
-    label: "Reviews",
-    tooltip: "Manage all your reviews",
-    expanded: expandedGroups.reviews,
-    children: [
-      {
-        type: 'item',
-        icon: Star,
-        label: "All Reviews",
-        href: "/reviews",
-        tooltip: "View all your reviews"
-      },
-      {
-        type: 'item',
-        icon: MessageSquare,
-        label: "AI Responses",
-        href: "/responses",
-        tooltip: "AI-generated response suggestions"
-      },
-      {
-        type: 'item',
-        icon: Send,
-        label: "Review Requests",
-        href: "/review-requests",
-        tooltip: "Manage review requests"
-      }
-    ]
-  };
-  
-  // Group: Alerts & Notifications
-  const alertsNavItem: NavItem = {
-    type: 'item',
-    icon: Bell,
-    label: "Alerts",
-    href: "/alerts",
-    tooltip: "Review notifications and alerts"
-  };
-  
-  // Group: Analytics & Reports
-  const analyticsNavItems: GroupNavItem = {
-    type: 'group',
-    icon: ChartPieIcon,
-    label: "Analytics",
-    tooltip: "Performance insights and reports",
-    expanded: expandedGroups.analytics,
-    children: [
-      {
-        type: 'item',
-        icon: ChartPieIcon,
-        label: "Analytics",
-        href: "/analytics",
-        tooltip: "Detailed analytics and metrics"
-      },
-      {
-        type: 'item',
-        icon: FileText,
-        label: "Reports",
-        href: "/reports",
-        tooltip: "Custom and scheduled reports"
-      },
-      {
-        type: 'item',
-        icon: UsersRound,
-        label: "Competitors",
-        href: "/competitors",
-        tooltip: "Monitor competitor performance"
-      },
-      {
-        type: 'item',
-        icon: LayoutDashboard,
-        label: "Dashboard Builder",
-        href: "/dashboard-builder",
-        tooltip: "Create custom dashboards"
-      }
-    ]
-  };
-  
-  // Group: Management
-  const managementNavItems: GroupNavItem = {
-    type: 'group',
-    icon: Settings,
-    label: "Management",
-    tooltip: "Manage platform operations",
-    expanded: expandedGroups.management,
-    children: [
-      {
-        type: 'item',
-        icon: MessageSquare,
-        label: "Communications",
-        href: "/communications",
-        tooltip: "Communication templates and history"
-      },
-      {
-        type: 'item',
-        icon: Import,
-        label: "Import/Export",
-        href: "/import-export",
-        tooltip: "Import or export platform data"
-      },
-      {
-        type: 'item',
-        icon: Workflow,
-        label: "Workflows",
-        href: "/workflows",
-        tooltip: "Automated workflow management"
-      },
-      {
-        type: 'item',
-        icon: Clock,
-        label: "Activity Logs",
-        href: "/activity-logs",
-        tooltip: "User and system activity logs"
-      },
-      {
-        type: 'item',
-        icon: FileCog,
-        label: "Templates",
-        href: "/templates",
-        tooltip: "Manage response templates"
-      }
-    ]
-  };
-  
-  // Group: Configuration & Settings
-  const configNavItems: GroupNavItem = {
-    type: 'group',
-    icon: Settings,
-    label: "Configuration",
-    tooltip: "Platform configuration",
-    expanded: expandedGroups.config,
-    children: [
-      {
-        type: 'item',
-        icon: Code,
-        label: "API Access",
-        href: "/api-access",
-        tooltip: "API keys and documentation"
-      },
-      {
-        type: 'item',
-        icon: Paintbrush,
-        label: "White Label",
-        href: "/white-label",
-        tooltip: "White label settings"
-      },
-      {
-        type: 'item',
-        icon: Plug,
-        label: "Integrations",
-        href: "/integrations",
-        tooltip: "Third-party integrations"
-      },
-      {
-        type: 'item',
-        icon: Settings,
-        label: "Settings",
-        href: "/settings",
-        tooltip: "Platform settings"
-      }
-    ]
-  };
-  
-  // Group: Account & Profile
-  const accountNavItems: GroupNavItem = {
-    type: 'group',
-    icon: User,
-    label: "Account",
-    tooltip: "Manage your account",
-    expanded: expandedGroups.account,
-    children: [
-      {
-        type: 'item',
-        icon: User,
-        label: "Profile",
-        href: "/profile",
-        tooltip: "Your profile settings"
-      },
-      {
-        type: 'item',
-        icon: CreditCard,
-        label: "Subscription",
-        href: "/subscription",
-        tooltip: "Manage your subscription"
-      },
-      {
-        type: 'item',
-        icon: HelpCircle,
-        label: "Help & Support",
-        href: "/help",
-        tooltip: "Get help and support"
-      }
-    ]
-  };
-  
-  // Admin-only navigation items
-  const adminNavItems: GroupNavItem = {
-    type: 'group',
-    icon: ShieldCheck,
-    label: "Admin",
-    tooltip: "Administration tools",
-    expanded: expandedGroups.admin,
-    children: [
-      {
-        type: 'item',
-        icon: Users,
-        label: "Users",
-        href: "/admin/users",
-        tooltip: "Manage users"
-      },
-      {
-        type: 'item',
-        icon: BadgeDollarSign,
-        label: "Billing",
-        href: "/admin/billing",
-        tooltip: "Manage billing"
-      },
-      {
-        type: 'item',
-        icon: Package,
-        label: "Subscriptions",
-        href: "/admin/subscriptions",
-        tooltip: "Manage subscriptions"
-      }
-    ]
-  };
-  
-  // Create separator items
-  const analyticsSeparator: SeparatorItem = { type: 'separator', label: 'Analytics' };
-  const managementSeparator: SeparatorItem = { type: 'separator', label: 'Management' };
-  const configSeparator: SeparatorItem = { type: 'separator', label: 'Configuration' };
-  const accountSeparator: SeparatorItem = { type: 'separator', label: 'Account' };
-  const adminSeparator: SeparatorItem = { type: 'separator', label: 'Administration' };
-  
-  // Combine all navigation items for rendering based on user role and permissions
-  const baseNavItems: NavItem[] = [
-    ...mainNavItems,
-    reviewsNavItems,
-    alertsNavItem,
-    analyticsSeparator,
-    analyticsNavItems,
-    managementSeparator,
-    managementNavItems,
-    configSeparator,
-    configNavItems,
-    accountSeparator,
-    accountNavItems,
-  ];
-  
-  // Add admin items based on permissions
-  let roleBasedNavItems: NavItem[] = [...baseNavItems];
-  
-  if (permissions?.canManageUsers) {
-    roleBasedNavItems = [
-      ...roleBasedNavItems,
-      adminSeparator,
-      adminNavItems
-    ];
-  }
+  // Generate navigation structure based on current user permissions
+  const roleBasedNavItems = generateSidebarNavigation(expandedGroups, permissions);
   
   // Handle sidebar click outside to close on mobile
   useEffect(() => {
@@ -392,30 +68,8 @@ export function Sidebar({ className }: SidebarProps) {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isMobile, mobileMenuOpen]);
-  
-  // Auto-open group when an item in the group is active
-  useEffect(() => {
-    // Check if the current location matches any child item
-    const checkAndOpenGroup = (groupName: string, children: SimpleNavItem[]) => {
-      const isActive = children.some(item => item.href === location);
-      if (isActive) {
-        setExpandedGroups(prev => ({
-          ...prev,
-          [groupName]: true
-        }));
-      }
-    };
     
-    checkAndOpenGroup('reviews', reviewsNavItems.children);
-    checkAndOpenGroup('analytics', analyticsNavItems.children);
-    checkAndOpenGroup('management', managementNavItems.children);
-    checkAndOpenGroup('config', configNavItems.children);
-    checkAndOpenGroup('account', accountNavItems.children);
-    checkAndOpenGroup('admin', adminNavItems.children);
-  }, [location]);
-  
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
-  const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
   
   const handleLogout = () => {
     logoutMutation.mutate();
