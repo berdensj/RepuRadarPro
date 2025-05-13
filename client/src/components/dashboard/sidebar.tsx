@@ -11,6 +11,8 @@ import {
   X,
   ChevronDown,
   ChevronRight,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -40,12 +42,37 @@ export function Sidebar({ className }: SidebarProps) {
   const { user, permissions, logoutMutation } = useAuth();
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const isMobile = useIsMobile();
   const sidebarRef = useRef<HTMLElement>(null);
   
   // Use custom hooks for sidebar state management
   const { expandedGroups, toggleGroup } = useSidebarGroups();
   const { sidebarCollapsed, toggleSidebar } = useSidebarCollapsed();
+  
+  // Toggle dark mode
+  const toggleDarkMode = () => {
+    const newMode = !darkMode;
+    setDarkMode(newMode);
+    
+    // Apply dark mode to the document
+    if (newMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('repuradar_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('repuradar_theme', 'light');
+    }
+  }
+  
+  // Initialize dark mode from localStorage
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('repuradar_theme');
+    if (savedTheme === 'dark') {
+      setDarkMode(true);
+      document.documentElement.classList.add('dark');
+    }
+  }, []);
   
   // Generate navigation structure based on current user permissions
   const roleBasedNavItems = generateSidebarNavigation(expandedGroups, permissions);
@@ -142,6 +169,24 @@ export function Sidebar({ className }: SidebarProps) {
             </Button>
           )}
           
+          {/* Search bar - only visible when sidebar is expanded */}
+          {!sidebarCollapsed && (
+            <div className="px-4 pt-4 pb-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* Navigation */}
           <nav className="flex-grow overflow-y-auto py-2 px-2">
             <ul className="space-y-1">
@@ -232,7 +277,15 @@ export function Sidebar({ className }: SidebarProps) {
                               )}
                               onClick={() => toggleGroup(item.label.toLowerCase())}
                             >
-                              <Icon className="w-6 h-6" />
+                              <div className="relative">
+                                <Icon className="w-6 h-6" />
+                                {/* Group notification badge */}
+                                {item.label === "Reviews" && (
+                                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                                    8
+                                  </span>
+                                )}
+                              </div>
                             </button>
                           </TooltipTrigger>
                           <TooltipContent side="right" className="z-50">
@@ -282,7 +335,15 @@ export function Sidebar({ className }: SidebarProps) {
                         onClick={() => toggleGroup(item.label.toLowerCase())}
                       >
                         <div className="flex items-center">
-                          <Icon className="w-5 h-5 mr-3" />
+                          <div className="relative">
+                            <Icon className="w-5 h-5 mr-3" />
+                            {/* Group notification badge for expanded view */}
+                            {item.label === "Reviews" && (
+                              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                                8
+                              </span>
+                            )}
+                          </div>
                           <span>{item.label}</span>
                         </div>
                         <ChevronDown 
@@ -350,15 +411,30 @@ export function Sidebar({ className }: SidebarProps) {
                   <p className="text-sm font-medium truncate">{user?.fullName}</p>
                   <p className="text-xs text-slate-500 truncate">{user?.plan || "Free"} Plan</p>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={handleLogout}
-                  disabled={logoutMutation.isPending}
-                  aria-label="Sign out"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  {/* Dark mode toggle */}
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={toggleDarkMode}
+                    aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+                    className="h-8 w-8"
+                  >
+                    {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                  </Button>
+                  
+                  {/* Logout button */}
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={handleLogout}
+                    disabled={logoutMutation.isPending}
+                    aria-label="Sign out"
+                    className="h-8 w-8"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             ) : (
               // Collapsed user profile section
@@ -372,6 +448,18 @@ export function Sidebar({ className }: SidebarProps) {
                         <AvatarFallback>{user?.fullName?.charAt(0) || "U"}</AvatarFallback>
                       )}
                     </Avatar>
+                    {/* Dark mode toggle */}
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={toggleDarkMode}
+                      aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+                      className="h-8 w-8 mb-2"
+                    >
+                      {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    </Button>
+                    
+                    {/* Logout button */}
                     <Button 
                       variant="ghost" 
                       size="icon" 
