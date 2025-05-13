@@ -81,7 +81,7 @@ export function createNavStructure(expandedGroups: Record<string, boolean>) {
       type: 'item',
       icon: BarChart2,
       label: "Dashboard",
-      href: "/",
+      href: "/reviews",
       tooltip: "View your main dashboard"
     }
   ];

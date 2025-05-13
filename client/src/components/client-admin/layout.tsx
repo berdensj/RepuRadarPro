@@ -101,13 +101,17 @@ export default function ClientAdminLayout({ children }: AdminLayoutProps) {
   const renderNavContent = () => (
     <div className="flex flex-col h-full">
       <div className="flex h-14 items-center px-4 py-2 border-b">
-        <Link href="/dashboard">
+        <Button 
+          variant="link" 
+          className="p-0 h-auto" 
+          onClick={() => window.location.href = "/reviews"}
+        >
           <div className="flex items-center gap-2 font-bold text-xl cursor-pointer">
             <LayoutDashboard className="h-6 w-6 text-primary" />
             <span>RepuRadar</span>
             <span className="text-xs font-normal bg-primary/10 text-primary px-2 py-0.5 rounded">Client Admin</span>
           </div>
-        </Link>
+        </Button>
       </div>
       <div className="flex-1">
         <ScrollArea className="h-[calc(100vh-8rem)]">
