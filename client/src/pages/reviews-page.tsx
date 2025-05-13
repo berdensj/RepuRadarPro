@@ -1,16 +1,15 @@
 import { useState } from "react";
-import { Sidebar } from "@/components/dashboard/sidebar";
 import { ReviewFeed } from "@/components/dashboard/review-feed";
 import { AIReplyPanel } from "@/components/dashboard/ai-reply-panel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Download } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Review } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Helmet } from "react-helmet";
+import DashboardLayout from "@/components/dashboard/layout";
 
 export default function ReviewsPage() {
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
