@@ -48,7 +48,12 @@ export function ProtectedRoute({
   // Special case: If this is a client admin (admin role but not system admin) 
   // trying to access the root dashboard, redirect to the reviews page
   if ((path === '/' || path === '/dashboard') && user.role === 'admin') {
-    const isSystemAdmin = localStorage.getItem('isSystemAdmin') === 'true';
+    // The isSystemAdmin flag is only set to true for admin users with username "admin"
+    // Let's simplify this logic to avoid access issues
+    
+    // We'll just check if this user is the main system admin
+    const isSystemAdmin = user.username === 'admin';
+    
     if (!isSystemAdmin) {
       console.log("Client admin detected, redirecting to reviews dashboard");
       // For client admins at root, redirect to reviews page (main dashboard)
@@ -93,8 +98,9 @@ export function ProtectedRoute({
     // Special case: 'systemAdmin' role is only for platform owners
     // This is a pseudo-role that's checked differently
     if (requiredRole === 'systemAdmin') {
-      // System admin routes require isSystemAdmin to be true
-      const isSystemAdmin = localStorage.getItem('isSystemAdmin') === 'true';
+      // Instead of using localStorage which might get out of sync,
+      // directly check if the user is the system admin by username
+      const isSystemAdmin = user.username === 'admin';
       if (!isSystemAdmin) {
         return (
           <Route path={path}>
