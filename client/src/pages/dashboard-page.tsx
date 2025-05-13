@@ -130,7 +130,10 @@ export default function DashboardPage() {
               
               <div className="mt-4 flex justify-end">
                 <Button 
-                  onClick={() => handleApplyReply(document.getElementById('ai-reply')?.value || '')}
+                  onClick={() => {
+                    const textarea = document.getElementById('ai-reply') as HTMLTextAreaElement;
+                    handleApplyReply(textarea?.value || '');
+                  }}
                   disabled={updateReviewMutation.isPending}
                 >
                   {updateReviewMutation.isPending ? 'Saving...' : 'Apply Reply'}
