@@ -291,6 +291,43 @@ export default function ClientAdminUsersPage() {
       });
     },
   });
+  
+  // Form state for edit user
+  const [editFullName, setEditFullName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editIsActive, setEditIsActive] = useState<boolean>(true);
+  
+  // Update user mutation
+  const updateUserMutation = useMutation({
+    mutationFn: async (data: { id: number; fullName: string; email: string; isActive: boolean }) => {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+      return { ...data };
+    },
+    onSuccess: () => {
+      toast({
+        title: "User updated",
+        description: "The user information has been updated successfully.",
+      });
+      setEditUserOpen(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Update failed",
+        description: error.message || "There was an error updating the user.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Handle opening the edit dialog with pre-populated data
+  const handleEditUser = (user: UserWithLocationCount) => {
+    setSelectedUser(user);
+    setEditFullName(user.fullName);
+    setEditEmail(user.email);
+    setEditIsActive(user.isActive);
+    setEditUserOpen(true);
+  };
 
   const deleteLocationManagerMutation = useMutation({
     mutationFn: async ({ userId, locationId }: { userId: number; locationId: number }) => {
