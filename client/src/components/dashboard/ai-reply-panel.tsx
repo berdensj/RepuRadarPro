@@ -149,11 +149,14 @@ export function AIReplyPanel({
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-md flex items-center">
-            <Sparkles className="h-4 w-4 mr-2 text-primary" />
+            <Sparkles className="h-4 w-4 mr-2 text-primary" aria-hidden="true" />
             AI-Powered Reply Suggestion
           </CardTitle>
           {aiReplyQuery.isFetching && !aiReplyQuery.isLoading && (
-            <Clock className="h-4 w-4 animate-pulse text-muted-foreground" />
+            <span aria-live="polite" className="flex items-center">
+              <Clock className="h-4 w-4 animate-pulse text-muted-foreground" aria-hidden="true" />
+              <span className="sr-only">Generating new reply...</span>
+            </span>
           )}
         </div>
       </CardHeader>
@@ -162,12 +165,20 @@ export function AIReplyPanel({
           <div>
             <Label htmlFor="tone-select">Response Tone</Label>
             <Select value={tone} onValueChange={handleToneChange}>
-              <SelectTrigger id="tone-select" className="mt-1.5">
+              <SelectTrigger 
+                id="tone-select" 
+                className="mt-1.5"
+                aria-label="Select response tone"
+              >
                 <SelectValue placeholder="Select tone" />
               </SelectTrigger>
               <SelectContent>
                 {toneOptions.map((toneOption) => (
-                  <SelectItem key={toneOption.value} value={toneOption.value}>
+                  <SelectItem 
+                    key={toneOption.value} 
+                    value={toneOption.value}
+                    aria-description={toneOption.description}
+                  >
                     <div className="flex flex-col">
                       <span>{toneOption.label}</span>
                       <span className="text-xs text-muted-foreground">{toneOption.description}</span>
@@ -181,11 +192,17 @@ export function AIReplyPanel({
           <div>
             <Label htmlFor="ai-reply">Generated Reply</Label>
             {aiReplyQuery.isLoading ? (
-              <div className="space-y-2 mt-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
+              <div 
+                className="space-y-2 mt-2"
+                role="status"
+                aria-label="Loading AI-generated reply"
+                aria-live="polite"
+              >
+                <Skeleton className="h-4 w-full" aria-hidden="true" />
+                <Skeleton className="h-4 w-full" aria-hidden="true" />
+                <Skeleton className="h-4 w-full" aria-hidden="true" />
+                <Skeleton className="h-4 w-3/4" aria-hidden="true" />
+                <span className="sr-only">Generating AI reply, please wait...</span>
               </div>
             ) : (
               <Textarea
@@ -193,6 +210,7 @@ export function AIReplyPanel({
                 className="mt-1.5 min-h-[120px]"
                 value={reply}
                 readOnly
+                aria-label="AI-generated reply suggestion"
               />
             )}
           </div>
@@ -204,8 +222,9 @@ export function AIReplyPanel({
           size="sm" 
           onClick={debouncedRegenerate}
           disabled={aiReplyQuery.isLoading || isRegenerating}
+          aria-label="Regenerate AI reply"
         >
-          <Repeat className="h-4 w-4 mr-2" />
+          <Repeat className="h-4 w-4 mr-2" aria-hidden="true" />
           Regenerate
         </Button>
         <Button 
@@ -213,8 +232,9 @@ export function AIReplyPanel({
           size="sm" 
           onClick={handleCopyToClipboard}
           disabled={!reply || aiReplyQuery.isLoading}
+          aria-label="Copy reply to clipboard"
         >
-          <Copy className="h-4 w-4 mr-2" />
+          <Copy className="h-4 w-4 mr-2" aria-hidden="true" />
           Copy to Clipboard
         </Button>
       </CardFooter>

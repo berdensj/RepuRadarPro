@@ -238,8 +238,12 @@ export function Sidebar({
                                 <span 
                                   className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
                                   aria-label={`${item.label === "Alerts" ? "3" : "5"} new ${item.label.toLowerCase()}`}
+                                  role="status"
+                                  aria-live="polite"
                                 >
-                                  {item.label === "Alerts" ? "3" : "5"}
+                                  <span aria-hidden="true">
+                                    {item.label === "Alerts" ? "3" : "5"}
+                                  </span>
                                 </span>
                               )}
                             </div>
@@ -294,14 +298,21 @@ export function Sidebar({
                                   <span 
                                     className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
                                     aria-label="8 new reviews"
+                                    role="status"
+                                    aria-live="polite"
                                   >
-                                    8
+                                    <span aria-hidden="true">8</span>
                                   </span>
                                 )}
                               </div>
                             </button>
                           </TooltipTrigger>
-                          <TooltipContent side="right" className="z-50">
+                          <TooltipContent 
+                            side="right" 
+                            className="z-50"
+                            role="tooltip"
+                            id={`tooltip-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
+                          >
                             {item.tooltip || item.label}
                           </TooltipContent>
                         </Tooltip>
