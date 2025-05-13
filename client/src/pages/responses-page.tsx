@@ -1,6 +1,4 @@
-import DashboardLayout from "@/components/dashboard/layout";
 import { useState } from "react";
-
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MessageSquareText, Copy, RotateCw, ThumbsUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import SidebarLayout from "@/components/layout/sidebar-layout";
 
 export default function ResponsesPage() {
   const { toast } = useToast();
@@ -59,136 +58,130 @@ export default function ResponsesPage() {
   };
 
   return (
-    <>
+    <SidebarLayout>
       <Helmet>
         <title>AI Responses | RepuRadar</title>
         <meta name="description" content="Access pre-written response templates and generate custom AI responses for your reviews." />
       </Helmet>
       
-      <div className="min-h-screen flex flex-col lg:flex-row">
-        <Sidebar />
-        
-        <main className="flex-1 p-4 lg:p-6 bg-slate-50 min-h-screen">
-          <div className="max-w-7xl mx-auto">
-            {/* Header */}
-            <header className="mb-6">
-              <h1 className="text-2xl font-semibold text-slate-800">AI Response Templates</h1>
-              <p className="text-slate-500">Pre-written templates and custom responses for reviews</p>
-            </header>
+      <div className="p-4 lg:p-6">
+        {/* Header */}
+        <header className="mb-6">
+          <h1 className="text-2xl font-semibold text-slate-800">AI Response Templates</h1>
+          <p className="text-slate-500">Pre-written templates and custom responses for reviews</p>
+        </header>
 
-            <div className="grid grid-cols-1 gap-6">
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                    <CardTitle>Response Templates</CardTitle>
-                    <div className="mt-2 sm:mt-0 flex gap-2 items-center">
-                      <span className="text-sm text-slate-500">Tone:</span>
-                      <Select defaultValue={selectedTone} onValueChange={setSelectedTone}>
-                        <SelectTrigger className="w-[180px]">
-                          <SelectValue placeholder="Select tone" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="professional">Professional</SelectItem>
-                          <SelectItem value="friendly">Friendly</SelectItem>
-                          <SelectItem value="apologetic">Apologetic</SelectItem>
-                        </SelectContent>
-                      </Select>
+        <div className="grid grid-cols-1 gap-6">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <CardTitle>Response Templates</CardTitle>
+                <div className="mt-2 sm:mt-0 flex gap-2 items-center">
+                  <span className="text-sm text-slate-500">Tone:</span>
+                  <Select defaultValue={selectedTone} onValueChange={setSelectedTone}>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select tone" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="professional">Professional</SelectItem>
+                      <SelectItem value="friendly">Friendly</SelectItem>
+                      <SelectItem value="apologetic">Apologetic</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="positive" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="positive" className="flex items-center">
+                    <ThumbsUp className="h-4 w-4 mr-2" />
+                    Positive Reviews
+                  </TabsTrigger>
+                  <TabsTrigger value="negative">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-2"><path d="M22 17H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h16"></path><path d="M2 9h2"></path><path d="M6 17v4"></path><path d="M10 17v4"></path></svg>
+                    Negative Reviews
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="positive" className="space-y-4">
+                  {templates.positive.map((template, index) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex justify-between mb-2">
+                        <h3 className="font-medium">{template.title}</h3>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleCopyText(template.content)}
+                          className="text-xs"
+                        >
+                          <Copy className="h-3 w-3 mr-1" />
+                          Copy
+                        </Button>
+                      </div>
+                      <p className="text-sm text-slate-600">{template.content}</p>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Tabs defaultValue="positive" className="w-full">
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="positive" className="flex items-center">
-                        <ThumbsUp className="h-4 w-4 mr-2" />
-                        Positive Reviews
-                      </TabsTrigger>
-                      <TabsTrigger value="negative">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 mr-2"><path d="M22 17H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h16"></path><path d="M2 9h2"></path><path d="M6 17v4"></path><path d="M10 17v4"></path></svg>
-                        Negative Reviews
-                      </TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="positive" className="space-y-4">
-                      {templates.positive.map((template, index) => (
-                        <div key={index} className="border rounded-lg p-4">
-                          <div className="flex justify-between mb-2">
-                            <h3 className="font-medium">{template.title}</h3>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => handleCopyText(template.content)}
-                              className="text-xs"
-                            >
-                              <Copy className="h-3 w-3 mr-1" />
-                              Copy
-                            </Button>
-                          </div>
-                          <p className="text-sm text-slate-600">{template.content}</p>
-                        </div>
-                      ))}
-                    </TabsContent>
-                    
-                    <TabsContent value="negative" className="space-y-4">
-                      {templates.negative.map((template, index) => (
-                        <div key={index} className="border rounded-lg p-4">
-                          <div className="flex justify-between mb-2">
-                            <h3 className="font-medium">{template.title}</h3>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => handleCopyText(template.content)}
-                              className="text-xs"
-                            >
-                              <Copy className="h-3 w-3 mr-1" />
-                              Copy
-                            </Button>
-                          </div>
-                          <p className="text-sm text-slate-600">{template.content}</p>
-                        </div>
-                      ))}
-                    </TabsContent>
-                  </Tabs>
-                  
-                  <div className="mt-6 pt-4 border-t">
-                    <div className="flex justify-between mb-4">
-                      <h3 className="font-medium">Generate Custom Response</h3>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleGenerateNew}
-                        disabled={isGenerating}
-                      >
-                        {isGenerating ? (
-                          <>
-                            <RotateCw className="h-3 w-3 mr-1 animate-spin" />
-                            Generating...
-                          </>
-                        ) : (
-                          <>
-                            <MessageSquareText className="h-3 w-3 mr-1" />
-                            Generate New
-                          </>
-                        )}
-                      </Button>
+                  ))}
+                </TabsContent>
+                
+                <TabsContent value="negative" className="space-y-4">
+                  {templates.negative.map((template, index) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <div className="flex justify-between mb-2">
+                        <h3 className="font-medium">{template.title}</h3>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleCopyText(template.content)}
+                          className="text-xs"
+                        >
+                          <Copy className="h-3 w-3 mr-1" />
+                          Copy
+                        </Button>
+                      </div>
+                      <p className="text-sm text-slate-600">{template.content}</p>
                     </div>
-                    <p className="text-sm text-slate-500 mb-3">
-                      Our AI can generate a custom response based on your requirements.
+                  ))}
+                </TabsContent>
+              </Tabs>
+              
+              <div className="mt-6 pt-4 border-t">
+                <div className="flex justify-between mb-4">
+                  <h3 className="font-medium">Generate Custom Response</h3>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGenerateNew}
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <RotateCw className="h-3 w-3 mr-1 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <MessageSquareText className="h-3 w-3 mr-1" />
+                        Generate New
+                      </>
+                    )}
+                  </Button>
+                </div>
+                <p className="text-sm text-slate-500 mb-3">
+                  Our AI can generate a custom response based on your requirements.
+                </p>
+                <Card className="bg-slate-50">
+                  <CardContent className="p-4">
+                    <p className="text-sm text-slate-600 italic">
+                      "We appreciate your valuable feedback on your recent visit. Your insights help us improve our service quality. I'd like to personally address the concerns you've raised about wait times. We're implementing a new scheduling system specifically designed to reduce waiting periods and improve efficiency. We value you as a client and hope to provide a better experience on your next visit."
                     </p>
-                    <Card className="bg-slate-50">
-                      <CardContent className="p-4">
-                        <p className="text-sm text-slate-600 italic">
-                          "We appreciate your valuable feedback on your recent visit. Your insights help us improve our service quality. I'd like to personally address the concerns you've raised about wait times. We're implementing a new scheduling system specifically designed to reduce waiting periods and improve efficiency. We value you as a client and hope to provide a better experience on your next visit."
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </main>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
-    </>
+    </SidebarLayout>
   );
 }
