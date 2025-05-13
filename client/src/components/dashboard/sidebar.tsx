@@ -65,29 +65,7 @@ export function Sidebar({
   // Use either provided toggle function or internal one
   const toggleSidebar = onToggleSidebar || internalSidebarState.toggleSidebar;
   
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
-    
-    // Apply dark mode to the document
-    if (newMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('repuradar_theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('repuradar_theme', 'light');
-    }
-  }
-  
-  // Initialize dark mode from localStorage
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('repuradar_theme');
-    if (savedTheme === 'dark') {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
+  // Dark mode is now handled by ThemeProvider context
   
   // Generate navigation structure based on current user permissions
   const roleBasedNavItems = generateSidebarNavigation(expandedGroups, permissions);
@@ -431,11 +409,11 @@ export function Sidebar({
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    onClick={toggleDarkMode}
-                    aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+                    onClick={toggleTheme}
+                    aria-label={theme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
                     className="h-8 w-8"
                   >
-                    {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                   </Button>
                   
                   {/* Logout button */}
@@ -467,11 +445,11 @@ export function Sidebar({
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      onClick={toggleDarkMode}
-                      aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+                      onClick={toggleTheme}
+                      aria-label={theme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
                       className="h-8 w-8 mb-2"
                     >
-                      {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                      {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                     </Button>
                     
                     {/* Logout button */}
