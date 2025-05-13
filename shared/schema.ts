@@ -22,6 +22,9 @@ export const users = pgTable("users", {
   // Business info fields
   businessName: text("business_name"),
   industry: text("industry"),
+  clientType: text("client_type"), // Med Spa, Dental Office, etc.
+  clientTypeCustom: text("client_type_custom"), // For "Other" selection
+  isAgency: boolean("is_agency").default(false), // Flag for agency clients
   contactName: text("contact_name"),
   contactEmail: text("contact_email"),
   contactPhone: text("contact_phone"),
@@ -52,6 +55,9 @@ export const insertUserSchema = createInsertSchema(users).pick({
   // Business info fields
   businessName: true,
   industry: true,
+  clientType: true,
+  clientTypeCustom: true,
+  isAgency: true,
   contactName: true,
   contactEmail: true,
   contactPhone: true,

@@ -150,6 +150,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updates.contactName = businessInfo.contactName;
         updates.contactEmail = businessInfo.contactEmail;
         updates.contactPhone = businessInfo.contactPhone;
+        
+        // Add new business type fields if provided
+        if (businessInfo.clientType) {
+          updates.clientType = businessInfo.clientType;
+          
+          // Set agency flag if selected
+          updates.isAgency = businessInfo.clientType === 'agency';
+          
+          // If client type is "other", save the custom description
+          if (businessInfo.clientType === 'other' && businessInfo.clientTypeCustom) {
+            updates.clientTypeCustom = businessInfo.clientTypeCustom;
+          }
+        }
       }
       
       // Update AI preferences if provided

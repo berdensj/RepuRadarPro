@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Clock, CheckCircle2 } from "lucide-react";
 import WelcomePage from "@/pages/onboarding/welcome-page";
 import BusinessInfoPage from "@/pages/onboarding/business-info-page";
+import BusinessTypePage from "@/pages/onboarding/business-type-page";
 import AddLocationPage from "@/pages/onboarding/add-location-page";
 import ConnectPlatformsPage from "@/pages/onboarding/connect-platforms-page";
 import AiPreferencesPage from "@/pages/onboarding/ai-preferences-page";
@@ -47,6 +48,7 @@ export default function OnboardingIndex() {
   const steps = [
     "Welcome",
     "Business Info",
+    "Business Type",
     "Locations",
     "Connect Platforms",
     "AI Preferences"
@@ -149,7 +151,7 @@ export default function OnboardingIndex() {
         );
       case 2:
         return (
-          <AddLocationPage 
+          <BusinessTypePage 
             data={onboardingData} 
             updateData={updateData} 
             goNext={goNext} 
@@ -157,13 +159,21 @@ export default function OnboardingIndex() {
         );
       case 3:
         return (
-          <ConnectPlatformsPage 
+          <AddLocationPage 
             data={onboardingData} 
             updateData={updateData} 
             goNext={goNext} 
           />
         );
       case 4:
+        return (
+          <ConnectPlatformsPage 
+            data={onboardingData} 
+            updateData={updateData} 
+            goNext={goNext} 
+          />
+        );
+      case 5:
         return (
           <AiPreferencesPage 
             data={onboardingData} 

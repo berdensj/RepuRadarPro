@@ -1,0 +1,52 @@
+You are a full-stack SaaS developer working inside RepuRadarPro, a reputation management SaaS platform built in Replit.
+
+Your task is to update the onboarding flow by adding a **“Business Type” (Client Type)** selection step so that new users can be categorized during signup.
+
+---
+
+## 🎯 GOAL
+Create a new onboarding screen or step labeled **“What type of business do you manage?”** and display the following options as a dropdown menu or tile grid:
+
+### Recommended Business Types:
+1. Med Spa / Aesthetic Clinic  
+2. Dental Office  
+3. Home Services (Plumbing, HVAC, Roofing, etc.)  
+4. Restaurant / Food Service  
+5. Fitness Studio / Gym  
+6. Real Estate Agent / Brokerage  
+7. Marketing or Reputation Agency  
+8. Other (with optional custom input field)
+
+---
+
+## 🔧 REQUIREMENTS
+
+1. **Frontend:**
+   - Add this step to the onboarding wizard after collecting name/email and before review source integration.
+   - Display the options using a dropdown or radio-style button group.
+   - If the user selects “Other,” show an optional text field for them to describe their business.
+   - Add a “Next” button that validates a selection was made.
+
+2. **Backend / Storage:**
+   - Store the selected business type in the `business_profiles` or `clients` table as `client_type`.
+   - If custom text is entered under "Other", store it as `client_type_custom`.
+
+3. **Usage:**
+   - This value should later be used to:
+     - Customize AI tone settings
+     - Tailor analytics views or templates
+     - Segment users for future targeting or feature gating
+
+4. **Design Notes:**
+   - Keep the UI mobile-friendly and match the style of existing onboarding steps.
+   - Add labels/tooltips for clarity if needed (e.g., “This helps us personalize your dashboard and responses”).
+
+---
+
+## BONUS (Optional):
+- If the user selects **Agency**, set a flag `is_agency: true` in the database for role/feature toggling later.
+- Leave a TODO comment for future logic that maps business type to AI tone preset.
+
+---
+
+Use clean, modular code. Update both the frontend flow and backend data model. After implementation, update the README.md to reflect this new onboarding step.
