@@ -182,9 +182,17 @@ export function Sidebar({ className }: SidebarProps) {
                                 : "text-slate-700 hover:bg-slate-100"
                             )}
                           >
-                            <Icon className={cn("flex-shrink-0", 
-                              sidebarCollapsed ? "w-6 h-6" : "w-5 h-5 mr-3"
-                            )} />
+                            <div className="relative">
+                              <Icon className={cn("flex-shrink-0", 
+                                sidebarCollapsed ? "w-6 h-6" : "w-5 h-5 mr-3"
+                              )} />
+                              {/* Notification badge - shown for certain menu items */}
+                              {(item.label === "Alerts" || item.label === "Reviews") && (
+                                <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                                  {item.label === "Alerts" ? "3" : "5"}
+                                </span>
+                              )}
+                            </div>
                             {!sidebarCollapsed && (
                               <span className="text-sm font-medium truncate">{item.label}</span>
                             )}

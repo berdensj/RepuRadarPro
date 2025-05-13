@@ -1,0 +1,106 @@
+You are a full-stack developer working on RepuRadarPro, a reputation management SaaS dashboard. Your task is to upgrade the **sidebar navigation** based on the following modern SaaS UX recommendations.
+
+---
+
+## 🎯 OBJECTIVE
+Improve the sidebar’s structure, role-awareness, and usability. Add support for active state highlights, responsive design, collapsible menu groups, icons, and user role filtering.
+
+---
+
+## 🔧 TASKS TO IMPLEMENT
+
+### 1. ✅ **Add Icons to Sidebar Items**
+- Use a consistent icon set like **Font Awesome**, **Lucide**, or **Heroicons**
+- Example mappings:
+  - Dashboard → 🏠
+  - Reviews → 💬
+  - Analytics → 📊
+  - Reports → 📈
+  - Settings → ⚙️
+  - Admin Panel → 🛠️
+
+---
+
+### 2. ✅ **Active State Highlighting**
+- Add visual feedback to show the current page (e.g., background highlight, left border, or bold icon)
+- Highlight should persist based on current route or URL hash
+
+---
+
+### 3. ✅ **Collapsible Sidebar**
+- Add a toggle icon (hamburger or arrow) to collapse/expand the sidebar
+- When collapsed, show only icons with tooltips on hover
+- Use localStorage or session state to remember sidebar state
+
+---
+
+### 4. ✅ **Group Items into Sections**
+- Organize menu items into clear sections:
+  - **Overview**
+    - Dashboard
+    - Reports
+  - **Review Management**
+    - Reviews
+    - AI Replies
+  - **Insights**
+    - Analytics
+  - **Account**
+    - Settings
+    - Billing
+  - **Admin Tools** *(Admins only)*
+    - User Management
+    - Role Controls
+    - Logs
+
+---
+
+### 5. ✅ **Role-Based Navigation**
+- Filter sidebar items by user role (e.g., admin, manager, staff)
+- Only show:
+  - **Admin Tools** section to system or agency admins
+  - **Billing** to owners
+  - Hide advanced options from trial or Free Plan users if needed
+
+---
+
+### 6. ✅ **User Profile Block**
+- At the bottom or top of the sidebar, show:
+  - User avatar or initials
+  - Business name or role
+  - Logout button
+  - Optional: Plan name or upgrade CTA
+
+---
+
+### 7. ✅ **Responsive Design**
+- Make sidebar fully responsive:
+  - On screens < 768px: collapse to hamburger menu
+  - Add swipe-open drawer behavior for mobile
+- Ensure accessibility (ARIA tags, keyboard nav)
+
+---
+
+### BONUS FEATURES (Optional)
+- Notification badges on menu items (e.g., “3 unresponded reviews”)
+- Search field at top to quickly jump to sections
+- Dark mode toggle in user profile block
+
+---
+
+## 📁 STRUCTURE RECOMMENDATIONS
+- Place sidebar logic in `/components/sidebar.js`
+- Use a config-driven menu file (`sidebarConfig.js`) for dynamic rendering
+- Apply styles in `sidebar.css` or using Tailwind if available
+
+---
+
+## ✅ FINAL STEP
+After implementation:
+- Test all routes and role filters
+- Confirm active state reflects current page
+- Update `README.md` with:
+  - Sidebar role structure
+  - Responsive behavior
+  - Icon usage
+
+Begin by reviewing the current sidebar file and apply each change in modular stages.
