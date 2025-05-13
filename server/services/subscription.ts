@@ -85,81 +85,98 @@ export async function initializeSubscriptionPlans() {
   const plans = [
     {
       name: 'Free',
-      displayName: 'Free',
-      description: 'For individuals getting started with online reviews',
+      displayName: 'Free Plan',
+      description: 'Basic reputation monitoring to get started',
       price: 0,
       features: [
-        'Monitor up to 25 reviews',
-        'Basic analytics',
-        'Email notifications',
-        'Single location support'
+        '1 business location',
+        'Google reviews only',
+        '20 AI replies/month',
+        'Manual reply approval only',
+        'No analytics, SMS, or integrations',
+        'Review history limited to 7 days',
+        '"Powered by RepuRadarPro" branding',
+        'Email support'
       ],
       maxLocations: 1,
       maxUsers: 1,
       isPopular: false,
     },
     {
-      name: 'Basic',
-      displayName: 'Basic',
+      name: 'Starter',
+      displayName: 'Starter',
       description: 'For small businesses managing their online presence',
       price: 2900, // $29/month
       annualPrice: 27840, // $232/year = $29 * 12 * 0.8 (20% discount)
       features: [
-        'Monitor up to 100 reviews',
-        'Advanced analytics',
-        'Email notifications',
-        'Multi-location support',
-        'Review response suggestions',
-        'Weekly report emails'
+        '1 location',
+        'Google reviews',
+        '100 AI replies/month',
+        'Basic analytics',
+        'Scheduled/manual replies',
+        'Email support'
       ],
-      maxLocations: 3,
-      maxUsers: 2,
+      maxLocations: 1,
+      maxUsers: 1,
       isPopular: false,
-      stripePriceId: 'price_basic_monthly',
-      stripeAnnualPriceId: 'price_basic_annual',
+      stripePriceId: 'price_starter_monthly',
+      stripeAnnualPriceId: 'price_starter_annual',
     },
     {
-      name: 'Pro',
-      displayName: 'Pro',
+      name: 'Growth',
+      displayName: 'Growth',
       description: 'For growing businesses with multiple locations',
       price: 7900, // $79/month
       annualPrice: 75840, // $632/year = $79 * 12 * 0.8 (20% discount)
       features: [
-        'Unlimited review monitoring',
-        'Advanced analytics & reporting',
-        'Priority email notifications',
-        'Multi-location support',
-        'AI-powered review responses',
-        'Competitor tracking',
-        'Sentiment analysis',
-        'Keyword trend detection',
-        'Custom review request templates'
+        '5 locations included',
+        'Google, Yelp, Facebook integrations',
+        'Unlimited AI replies',
+        'Full analytics dashboard',
+        'SMS/email requests (250/month)',
+        'Auto-replies + 3 team users',
+        '$10/location overage'
       ],
-      maxLocations: 10,
-      maxUsers: 5,
+      maxLocations: 5,
+      maxUsers: 3,
       isPopular: true,
-      stripePriceId: 'price_pro_monthly',
-      stripeAnnualPriceId: 'price_pro_annual',
+      stripePriceId: 'price_growth_monthly',
+      stripeAnnualPriceId: 'price_growth_annual',
+    },
+    {
+      name: 'Agency',
+      displayName: 'Agency',
+      description: 'For agencies managing multiple clients',
+      price: 24900, // $249/month
+      annualPrice: 239040, // $1,992/year = $249 * 12 * 0.8 (20% discount)
+      features: [
+        '15 locations included',
+        'White-labeling + client reports',
+        'Role-based access (admin/client)',
+        'API access',
+        '$7/location overage'
+      ],
+      maxLocations: 15,
+      maxUsers: 10,
+      isPopular: false,
+      stripePriceId: 'price_agency_monthly',
+      stripeAnnualPriceId: 'price_agency_annual',
     },
     {
       name: 'Enterprise',
       displayName: 'Enterprise',
-      description: 'For large organizations with advanced needs',
-      price: 19900, // $199/month
-      annualPrice: 191040, // $1,592/year = $199 * 12 * 0.8 (20% discount)
+      description: 'Custom solutions for large organizations',
+      price: 79900, // $799/month
+      annualPrice: 767040, // $6,392/year = $799 * 12 * 0.8 (20% discount)
       features: [
-        'Everything in Pro plan',
-        'Unlimited locations',
-        'Unlimited users',
-        'White-label reports',
-        'API access',
-        'Custom integrations',
-        'Dedicated account manager',
-        'Priority support',
-        'Agency dashboard',
-        'Custom review domains'
+        '50 locations included',
+        'SSO + advanced permissions',
+        'CRM integrations (Salesforce, Slack, etc.)',
+        'Custom AI tone tuning',
+        'Dedicated onboarding & support',
+        'Volume discounts ($5/$3 per extra location)'
       ],
-      maxLocations: 100,
+      maxLocations: 50,
       maxUsers: 25,
       isPopular: false,
       stripePriceId: 'price_enterprise_monthly',
