@@ -50,10 +50,16 @@ const AdminReportsPage = lazy(() => import("@/pages/admin/reports-page").then(mo
 const UserOnboardingPage = lazy(() => import("@/pages/onboarding").then(module => ({ default: module.default })));
 const ClientAdminUsersPage = lazy(() => import("@/pages/client-admin/users-page").then(module => ({ default: module.default })));
 
-// Loading spinner component
+// Loading spinner component with accessibility improvements
 const LoadingSpinner = () => (
-  <div className="flex items-center justify-center min-h-screen">
-    <Loader2 className="h-10 w-10 animate-spin text-primary" />
+  <div 
+    className="flex items-center justify-center min-h-screen"
+    role="status"
+    aria-live="polite"
+    aria-busy="true"
+  >
+    <Loader2 className="h-10 w-10 animate-spin text-primary" aria-hidden="true" />
+    <span className="sr-only">Loading content, please wait...</span>
   </div>
 );
 
