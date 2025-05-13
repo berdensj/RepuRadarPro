@@ -725,7 +725,12 @@ export default function ClientAdminUsersPage() {
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setEditUserOpen(true);
+                                }}
+                              >
                                 <Edit className="h-4 w-4 mr-2" /> Edit User
                               </DropdownMenuItem>
                               <DropdownMenuItem
