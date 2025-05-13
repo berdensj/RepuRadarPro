@@ -275,7 +275,7 @@ export function Sidebar({ className }: SidebarProps) {
                                   ? "bg-primary/10 text-primary" 
                                   : "text-slate-700 hover:bg-slate-100"
                               )}
-                              onClick={() => toggleGroup(item.label.toLowerCase())}
+                              onClick={() => toggleGroup(item.label === "Configuration" ? "config" : item.label.toLowerCase())}
                             >
                               <div className="relative">
                                 <Icon className="w-6 h-6" />
