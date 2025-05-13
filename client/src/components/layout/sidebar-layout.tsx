@@ -59,13 +59,13 @@ export function SidebarLayout({
   
   return (
     <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
-      {/* Sidebar - fixed on mobile, relative on desktop */}
+      {/* Sidebar - fixed position for both mobile and desktop */}
       <div className={cn(
-        "transition-all duration-300 ease-in-out z-40 bg-white border-r border-slate-200",
+        "transition-all duration-300 ease-in-out z-40 bg-white border-r border-slate-200 h-screen fixed left-0 top-0",
         isMobile ? (
           mobileMenuOpen 
-            ? "fixed left-0 top-0 h-full w-[85%] max-w-[300px] shadow-xl" 
-            : "fixed left-0 top-0 h-full w-0 -translate-x-full"
+            ? "w-[85%] max-w-[300px] shadow-xl" 
+            : "w-0 -translate-x-full"
         ) : (
           sidebarCollapsed ? "w-20" : "w-64"
         )
@@ -76,10 +76,10 @@ export function SidebarLayout({
         />
       </div>
       
-      {/* Main content */}
+      {/* Main content - adjusted with left margin for fixed sidebar */}
       <main className={cn(
-        "flex-1 overflow-auto transition-all duration-300 ease-in-out",
-        !isMobile && (sidebarCollapsed ? "ml-20" : "ml-64"),
+        "flex-1 overflow-auto transition-all duration-300 ease-in-out h-screen",
+        isMobile ? "ml-0" : (sidebarCollapsed ? "ml-20" : "ml-64"),
         className
       )}>
         {/* Mobile header with toggle */}
@@ -98,6 +98,13 @@ export function SidebarLayout({
               {pageTitle && <h1 className="text-lg font-semibold truncate">{pageTitle}</h1>}
               {!pageTitle && <span className="text-primary text-lg font-semibold">RepuRadar</span>}
             </div>
+          </div>
+        )}
+        
+        {/* Desktop header for page title */}
+        {!isMobile && pageTitle && (
+          <div className="sticky top-0 z-20 flex items-center p-4 bg-white border-b border-gray-200 shadow-sm">
+            <h1 className="text-xl font-semibold">{pageTitle}</h1>
           </div>
         )}
         

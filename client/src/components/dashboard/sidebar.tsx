@@ -107,14 +107,14 @@ export function Sidebar({
       <aside 
         ref={sidebarRef}
         className={cn(
-          "bg-white border-r border-slate-200 z-20 transition-all duration-300",
+          "bg-white border-r border-slate-200 z-20 transition-all duration-300 h-screen overflow-hidden",
           sidebarCollapsed ? "lg:w-20" : "lg:w-64", 
-          isMobile ? "fixed h-full shadow-xl" : "relative",
+          isMobile ? "fixed shadow-xl" : "relative",
           mobileMenuOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full lg:translate-x-0 lg:w-auto",
           className
         )}
       >
-        <div className="sticky top-0 flex flex-col h-full">
+        <div className="flex flex-col h-full">
           {/* Mobile Header */}
           <div className="flex items-center justify-between p-4 border-b border-slate-200 lg:hidden">
             <div className="text-primary text-xl font-bold flex items-center">
@@ -182,8 +182,8 @@ export function Sidebar({
             </div>
           )}
           
-          {/* Navigation */}
-          <nav className="flex-grow overflow-y-auto py-2 px-2">
+          {/* Navigation - Scrollable */}
+          <nav className="flex-grow overflow-y-auto py-2 px-2 sidebar-nav">
             <ul className="space-y-1">
               {roleBasedNavItems.map((item, index) => {
                 // Display separator
