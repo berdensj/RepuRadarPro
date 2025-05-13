@@ -41,28 +41,33 @@ export function ProtectedRoute({
   }
 
   // Check for permission-based access
-  if (requiredPermission && permissions && !permissions[requiredPermission]) {
-    return (
-      <Route path={path}>
-        <AccessDeniedPage />
-      </Route>
-    );
-  }
-
-  // Check for role-based access
-  if (requiredRole && user.role !== requiredRole) {
-    // Special case: 'systemAdmin' role is only for system-level admin users
-    // Regular 'admin' users should not access system admin routes
-    if (requiredRole === 'systemAdmin' && user.role === 'admin') {
+  if (requiredPermission && permissions) {
+    // Check if the permission exists and is false
+    if (permissions.hasOwnProperty(requiredPermission) && !permissions[requiredPermission as keyof typeof permissions]) {
       return (
         <Route path={path}>
           <AccessDeniedPage />
         </Route>
       );
     }
-    
-    // If any other role is required, check exact match
-    if (user.role !== requiredRole) {
+  }
+
+  // Check for role-based access
+  if (requiredRole) {
+    // Special case: 'systemAdmin' role is only for platform owners
+    // This is a pseudo-role that's checked differently
+    if (requiredRole === 'systemAdmin') {
+      // System admin routes require both admin role AND specific permissions
+      if (user.role !== 'admin' || !permissions?.canManageStaff) {
+        return (
+          <Route path={path}>
+            <AccessDeniedPage />
+          </Route>
+        );
+      }
+    }
+    // For all other roles, do a direct comparison
+    else if (user.role !== requiredRole) {
       return (
         <Route path={path}>
           <AccessDeniedPage />

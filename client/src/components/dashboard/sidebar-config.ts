@@ -283,20 +283,45 @@ export function createNavStructure(expandedGroups: Record<string, boolean>) {
     ]
   };
   
-  // Admin-only navigation items
-  const adminNavItems: GroupNavItem = {
+  // Client Admin navigation items (for business owners)
+  const clientAdminNavItems: GroupNavItem = {
     type: 'group',
     icon: ShieldCheck,
     label: "Admin",
-    tooltip: "Administration tools",
+    tooltip: "Admin tools",
     expanded: expandedGroups.admin,
     children: [
       {
         type: 'item',
         icon: Users,
         label: "Users",
-        href: "/admin/users",
+        href: "/client-admin/users",
         tooltip: "Manage users"
+      },
+      {
+        type: 'item',
+        icon: BadgeDollarSign,
+        label: "Locations",
+        href: "/client-admin/locations",
+        tooltip: "Manage locations"
+      }
+    ]
+  };
+
+  // System Admin navigation items (for platform owner)
+  const systemAdminNavItems: GroupNavItem = {
+    type: 'group',
+    icon: ShieldCheck,
+    label: "System Admin",
+    tooltip: "System administration tools",
+    expanded: expandedGroups.systemAdmin,
+    children: [
+      {
+        type: 'item',
+        icon: Users,
+        label: "Users",
+        href: "/admin/users",
+        tooltip: "Manage all users"
       },
       {
         type: 'item',
@@ -330,7 +355,8 @@ export function createNavStructure(expandedGroups: Record<string, boolean>) {
     managementNavItems,
     configNavItems,
     accountNavItems,
-    adminNavItems,
+    clientAdminNavItems,
+    systemAdminNavItems,
     separators: {
       analyticsSeparator,
       managementSeparator,
@@ -359,7 +385,8 @@ export function generateSidebarNavigation(
     managementNavItems,
     configNavItems,
     accountNavItems,
-    adminNavItems,
+    clientAdminNavItems,
+    systemAdminNavItems,
     separators
   } = createNavStructure(expandedGroups);
   
@@ -378,12 +405,22 @@ export function generateSidebarNavigation(
     accountNavItems,
   ];
   
-  // Add admin items based on permissions
+  // Special handling for system admins vs client admins
+  // System admins can see system admin pages
+  if (permissions?.canManageUsers && permissions?.canManageStaff) {
+    return [
+      ...baseNavItems,
+      separators.adminSeparator,
+      systemAdminNavItems
+    ];
+  }
+  
+  // Client admins can only see client admin pages
   if (permissions?.canManageUsers) {
     return [
       ...baseNavItems,
       separators.adminSeparator,
-      adminNavItems
+      clientAdminNavItems
     ];
   }
   

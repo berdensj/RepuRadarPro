@@ -48,7 +48,8 @@ export function useSidebarGroups() {
         management: false,
         config: false,
         account: false,
-        admin: false
+        admin: false,
+        systemAdmin: false
       };
     } catch (e) {
       return {
@@ -57,7 +58,8 @@ export function useSidebarGroups() {
         management: false,
         config: false,
         account: false,
-        admin: false
+        admin: false,
+        systemAdmin: false
       };
     }
   })();

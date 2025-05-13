@@ -2402,6 +2402,121 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // CLIENT ADMIN ROUTES
+  // Get users for a specific client (organization)
+  app.get("/api/client/users", async (req, res, next) => {
+    try {
+      // In a real implementation, we would filter by organization ID
+      // For now, just return some placeholder data
+      const clientId = req.user?.id;
+      
+      // Get all locations belonging to this client
+      const locations = await storage.getLocations(clientId);
+      
+      // Fetch users (in a real implementation, filter by organization)
+      // This is a simplified version that just returns some data
+      const users = [
+        {
+          id: 101,
+          username: "manager1",
+          email: "manager1@example.com",
+          fullName: "Location Manager 1",
+          role: "manager",
+          profilePicture: null,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          locationCount: 1
+        },
+        {
+          id: 102,
+          username: "manager2",
+          email: "manager2@example.com",
+          fullName: "Location Manager 2",
+          role: "manager",
+          profilePicture: null,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          locationCount: 1
+        },
+        {
+          id: 103,
+          username: "staff1",
+          email: "staff1@example.com",
+          fullName: "Staff Member 1",
+          role: "staff",
+          profilePicture: null,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          locationCount: 0
+        },
+        {
+          id: 104,
+          username: "user1",
+          email: "user1@example.com",
+          fullName: "Regular User 1",
+          role: "user",
+          profilePicture: null,
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          locationCount: 0
+        }
+      ];
+      
+      res.json(users);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Get location managers
+  app.get("/api/client/location-managers", async (req, res, next) => {
+    try {
+      // In a real implementation, we would fetch from database
+      // For now, return placeholder data
+      const locationManagers = [
+        { id: 1, userId: 101, locationId: 4 }, // Manager 1 manages Downtown Office
+        { id: 2, userId: 102, locationId: 5 }, // Manager 2 manages Uptown Branch
+      ];
+      
+      res.json(locationManagers);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Create location manager assignment
+  app.post("/api/client/location-managers", async (req, res, next) => {
+    try {
+      const { userId, locationId } = req.body;
+      
+      // In a real implementation, we would insert into database
+      // For now, return a success response with mock data
+      const newAssignment = {
+        id: Math.floor(Math.random() * 1000) + 1,
+        userId,
+        locationId
+      };
+      
+      res.status(201).json(newAssignment);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Delete location manager assignment
+  app.delete("/api/client/location-managers", async (req, res, next) => {
+    try {
+      const { userId, locationId } = req.body;
+      
+      // In a real implementation, we would delete from database
+      // For now, return a success response
+      res.status(200).json({ success: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // SYSTEM ADMIN ROUTES
   // Admin-only routes for user management
   app.get("/api/admin/users", requireRole('admin'), async (req, res, next) => {
     try {
