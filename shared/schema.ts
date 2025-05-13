@@ -342,6 +342,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   competitors: many(competitors),
   ownedAgencies: many(agencies),
   crmIntegrations: many(crmIntegrations),
+  managedLocations: many(locationManagers),
 }));
 
 // Review relations
@@ -364,6 +365,7 @@ export const locationsRelations = relations(locations, ({ one, many }) => ({
   }),
   reviews: many(reviews),
   reviewRequests: many(reviewRequests),
+  managers: many(locationManagers),
 }));
 
 // Alert relations
@@ -526,4 +528,32 @@ export const crmIntegrationsRelations = relations(crmIntegrations, ({ one }) => 
     fields: [crmIntegrations.templateId],
     references: [reviewTemplates.id]
   })
+}));
+
+// Location managers table - for assigning users to manage specific locations
+export const locationManagers = pgTable("location_managers", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  locationId: integer("location_id").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertLocationManagerSchema = createInsertSchema(locationManagers).pick({
+  userId: true,
+  locationId: true,
+});
+
+export type InsertLocationManager = z.infer<typeof insertLocationManagerSchema>;
+export type LocationManager = typeof locationManagers.$inferSelect;
+
+// Location manager relations
+export const locationManagersRelations = relations(locationManagers, ({ one }) => ({
+  user: one(users, {
+    fields: [locationManagers.userId],
+    references: [users.id],
+  }),
+  location: one(locations, {
+    fields: [locationManagers.locationId],
+    references: [locations.id],
+  }),
 }));

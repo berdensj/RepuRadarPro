@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 
 // Define valid roles
-const validRoles = ['admin', 'staff', 'user'] as const;
+const validRoles = ['admin', 'staff', 'manager', 'user'] as const;
 type UserRole = typeof validRoles[number];
 
 // Define role hierarchy
 const roleHierarchy: Record<UserRole, UserRole[]> = {
-  'admin': ['admin', 'staff', 'user'],
-  'staff': ['staff', 'user'],
+  'admin': ['admin', 'staff', 'manager', 'user'],
+  'staff': ['staff', 'manager', 'user'],
+  'manager': ['manager', 'user'],
   'user': ['user']
 };
 
@@ -79,6 +80,8 @@ export function attachPermissions(req: Request, res: Response, next: NextFunctio
       canManageIntegrations: allowedRoles.includes('admin') || allowedRoles.includes('staff'),
       canViewReports: true, // All authenticated users can view reports
       canBulkEditReviews: allowedRoles.includes('admin') || allowedRoles.includes('staff'),
+      isLocationManager: userRole === 'manager', // Specific for location managers
+      canManageAssignedLocations: allowedRoles.includes('manager'),
     };
   }
   
@@ -98,6 +101,8 @@ function getDefaultPermissions() {
     canManageIntegrations: false,
     canViewReports: true, // All authenticated users can view reports
     canBulkEditReviews: false,
+    isLocationManager: false,
+    canManageAssignedLocations: false,
   };
 }
 
@@ -151,6 +156,8 @@ declare global {
         canManageIntegrations: boolean;
         canViewReports: boolean;
         canBulkEditReviews: boolean;
+        isLocationManager: boolean;
+        canManageAssignedLocations: boolean;
       };
     }
   }
