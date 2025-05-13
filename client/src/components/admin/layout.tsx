@@ -200,9 +200,10 @@ export function AdminLayout({ children, pageTitle }: AdminLayoutProps) {
                 size="sm" 
                 onClick={handleLogout}
                 disabled={logoutMutation.isPending}
-                className="mr-1"
+                className="mr-1 gap-1"
               >
-                <LogOut className="h-5 w-5" />
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">{logoutMutation.isPending ? "Signing out..." : "Sign out"}</span>
               </Button>
               <Button 
                 variant="ghost" 
@@ -222,9 +223,21 @@ export function AdminLayout({ children, pageTitle }: AdminLayoutProps) {
             {sidebarCollapsed ? (
               <ChartLine className="h-6 w-6 text-primary" />
             ) : (
-              <div className="font-bold flex items-center text-lg">
-                <ChartLine className="h-5 w-5 mr-2 text-primary" />
-                Admin Portal
+              <div className="flex justify-between w-full items-center">
+                <div className="font-bold flex items-center text-lg">
+                  <ChartLine className="h-5 w-5 mr-2 text-primary" />
+                  Admin Portal
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={handleLogout}
+                  disabled={logoutMutation.isPending}
+                  className="gap-1"
+                >
+                  <LogOut className="h-4 w-4" />
+                  {!sidebarCollapsed && (logoutMutation.isPending ? "Signing out..." : "Sign out")}
+                </Button>
               </div>
             )}
           </div>
