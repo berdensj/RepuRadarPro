@@ -91,4 +91,43 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+  
+  /* Custom color picker sliders */
+  #hue + .react-aria-Slider {
+    --slider-track-background: linear-gradient(
+      to right,
+      #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000
+    );
+  }
+  
+  #saturation + .react-aria-Slider {
+    --slider-track-background: linear-gradient(
+      to right,
+      hsla(var(--hue), 0%, 50%, 1),
+      hsla(var(--hue), 100%, 50%, 1)
+    );
+  }
+  
+  #lightness + .react-aria-Slider {
+    --slider-track-background: linear-gradient(
+      to right,
+      hsla(var(--hue), var(--saturation), 0%, 1),
+      hsla(var(--hue), var(--saturation), 50%, 1),
+      hsla(var(--hue), var(--saturation), 100%, 1)
+    );
+  }
+  
+  /* Theme transition animation */
+  :root, .dark {
+    --transition-duration: 0.3s;
+  }
+  
+  *:not(.no-transition) {
+    transition: 
+      background-color var(--transition-duration) ease, 
+      color var(--transition-duration) ease, 
+      border-color var(--transition-duration) ease, 
+      fill var(--transition-duration) ease,
+      stroke var(--transition-duration) ease;
+  }
 }

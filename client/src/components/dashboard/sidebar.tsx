@@ -5,6 +5,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { ColorPalettePicker } from "@/components/ui/color-palette-picker";
 import { 
   ChartLine, 
   LogOut, 
@@ -14,6 +15,7 @@ import {
   ChevronRight,
   Moon,
   Sun,
+  Paintbrush
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -416,6 +418,9 @@ export function Sidebar({
                     {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                   </Button>
                   
+                  {/* Color theme picker */}
+                  <ColorPalettePicker />
+                  
                   {/* Logout button */}
                   <Button 
                     variant="ghost" 
@@ -451,6 +456,11 @@ export function Sidebar({
                     >
                       {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
                     </Button>
+                    
+                    {/* Color theme picker */}
+                    <div className="mb-2">
+                      <ColorPalettePicker />
+                    </div>
                     
                     {/* Logout button */}
                     <Button 
