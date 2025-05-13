@@ -1,174 +1,225 @@
-import { useState } from "react";
-import { 
-  Card, 
-  CardContent, 
-  CardHeader,
-  CardTitle, 
-  CardFooter
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { X, Copy, CheckCheck, Send } from "lucide-react";
-import { StarRating } from "@/components/ui/star-rating";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { Review } from "@shared/schema";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import { Sparkles, Copy, Repeat, Clock } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import debounce from 'lodash.debounce';
+
+// Types for tone options
+type ToneOption = {
+  value: string;
+  label: string;
+  description: string;
+};
+
+// Define available tone options
+const toneOptions: ToneOption[] = [
+  { 
+    value: 'professional', 
+    label: 'Professional', 
+    description: 'Polite and businesslike' 
+  },
+  { 
+    value: 'friendly', 
+    label: 'Friendly', 
+    description: 'Warm and conversational' 
+  },
+  { 
+    value: 'sympathetic', 
+    label: 'Sympathetic', 
+    description: 'Understanding and apologetic' 
+  },
+  { 
+    value: 'direct', 
+    label: 'Direct', 
+    description: 'Clear and straightforward' 
+  },
+  { 
+    value: 'thankful', 
+    label: 'Thankful', 
+    description: 'Grateful and appreciative' 
+  }
+];
 
 interface AIReplyPanelProps {
-  review: Review | null;
-  onClose: () => void;
-  onApplyReply: (reviewId: number, reply: string) => void;
+  reviewId: number;
+  reviewContent: string;
+  reviewRating: number;
+  className?: string;
 }
 
-type ReplyTone = 'professional' | 'friendly' | 'apologetic';
-
-export function AIReplyPanel({ review, onClose, onApplyReply }: AIReplyPanelProps) {
-  const [generatedReply, setGeneratedReply] = useState<string>("");
-  const [selectedTone, setSelectedTone] = useState<ReplyTone>("professional");
-  const [copied, setCopied] = useState(false);
-  const { toast } = useToast();
-
-  const generateReplyMutation = useMutation({
-    mutationFn: async ({ reviewId, tone }: { reviewId: number, tone: string }) => {
-      const response = await apiRequest(
-        "POST",
-        `/api/reviews/${reviewId}/generate-reply`,
-        { tone }
-      );
-      return response.json();
-    },
-    onSuccess: (data) => {
-      setGeneratedReply(data.reply);
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to generate reply",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
+export function AIReplyPanel({ 
+  reviewId, 
+  reviewContent, 
+  reviewRating,
+  className 
+}: AIReplyPanelProps) {
+  // State for selected tone
+  const [tone, setTone] = useState(() => {
+    // Get tone preference from localStorage or default to 'professional'
+    const savedTone = localStorage.getItem('preferred_ai_tone');
+    return savedTone || 'professional';
   });
-
-  const handleGenerateReply = () => {
-    if (review) {
-      generateReplyMutation.mutate({ 
-        reviewId: review.id, 
-        tone: selectedTone 
+  
+  // State to track if a regeneration is in progress
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  
+  const { toast } = useToast();
+  
+  // Handle tone change
+  const handleToneChange = (value: string) => {
+    setTone(value);
+    // Save preference in localStorage
+    localStorage.setItem('preferred_ai_tone', value);
+  };
+  
+  // Copy reply to clipboard
+  const handleCopyToClipboard = () => {
+    if (reply) {
+      navigator.clipboard.writeText(reply);
+      toast({
+        title: "Copied!",
+        description: "Reply copied to clipboard",
       });
     }
   };
-
-  const handleCopyText = () => {
-    navigator.clipboard.writeText(generatedReply);
-    setCopied(true);
-    toast({
-      title: "Copied!",
-      description: "Reply copied to clipboard",
-    });
+  
+  // Regenerate AI Reply with debounce to prevent spam
+  const regenerateReply = useCallback(() => {
+    if (isRegenerating) return;
     
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleApplyReply = () => {
-    if (review) {
-      onApplyReply(review.id, generatedReply);
+    setIsRegenerating(true);
+    aiReplyQuery.refetch().finally(() => {
+      setTimeout(() => setIsRegenerating(false), 1000); // Add a small delay to prevent spam
+    });
+  }, [isRegenerating]);
+  
+  // Debounce regenerate function to prevent multiple rapid calls
+  const debouncedRegenerate = useMemo(
+    () => debounce(regenerateReply, 500),
+    [regenerateReply]
+  );
+  
+  // AI Reply query with dependencies
+  const aiReplyQuery = useQuery({
+    queryKey: [`/api/ai/reply/${reviewId}`, tone, reviewContent, isRegenerating],
+    queryFn: async () => {
+      const res = await apiRequest("POST", "/api/ai/reply", {
+        reviewId,
+        tone,
+        reviewContent,
+        rating: reviewRating
+      });
+      return await res.json();
+    },
+    enabled: !!reviewId && !!reviewContent,
+    staleTime: 1000 * 60 * 30, // Cache for 30 minutes unless regenerated
+  });
+  
+  // Memoize the AI reply to prevent unnecessary re-renders
+  const reply = useMemo(() => {
+    if (aiReplyQuery.isSuccess && aiReplyQuery.data) {
+      return aiReplyQuery.data.reply;
     }
-  };
-
-  if (!review) return null;
-
+    return '';
+  }, [aiReplyQuery.isSuccess, aiReplyQuery.data]);
+  
+  // If the reviewId changes, we should re-fetch
+  useEffect(() => {
+    if (reviewId) {
+      aiReplyQuery.refetch();
+    }
+  }, [reviewId]);
+  
+  // Clear debounce on unmount
+  useEffect(() => {
+    return () => {
+      debouncedRegenerate.cancel();
+    };
+  }, [debouncedRegenerate]);
+  
   return (
-    <Card className="h-full">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-lg font-semibold">AI Reply Generator</CardTitle>
-        <Button variant="ghost" size="sm" onClick={onClose}>
-          <X className="h-4 w-4" />
-        </Button>
-      </CardHeader>
-      
-      <CardContent>
-        <div className="p-3 rounded-lg bg-blue-50 mb-4">
-          <p className="text-sm italic text-slate-600 mb-2">
-            Responding to: <span className="font-medium">{review.reviewerName}'s review</span>
-          </p>
-          <StarRating rating={review.rating} className="mb-2" />
-          <p className="text-sm">{review.reviewText}</p>
+    <Card className={className}>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-md flex items-center">
+            <Sparkles className="h-4 w-4 mr-2 text-primary" />
+            AI-Powered Reply Suggestion
+          </CardTitle>
+          {aiReplyQuery.isFetching && !aiReplyQuery.isLoading && (
+            <Clock className="h-4 w-4 animate-pulse text-muted-foreground" />
+          )}
         </div>
-
-        <div className="mb-2 flex justify-between items-center">
-          <h3 className="font-medium text-sm">Suggested Reply:</h3>
-          <div className="flex space-x-2">
-            <Button 
-              size="sm" 
-              variant={selectedTone === "professional" ? "default" : "outline"}
-              className="text-xs h-6 px-2"
-              onClick={() => setSelectedTone("professional")}
-            >
-              Professional
-            </Button>
-            <Button 
-              size="sm" 
-              variant={selectedTone === "friendly" ? "default" : "outline"}
-              className="text-xs h-6 px-2"
-              onClick={() => setSelectedTone("friendly")}
-            >
-              Friendly
-            </Button>
-            <Button 
-              size="sm" 
-              variant={selectedTone === "apologetic" ? "default" : "outline"}
-              className="text-xs h-6 px-2"
-              onClick={() => setSelectedTone("apologetic")}
-            >
-              Apologetic
-            </Button>
+      </CardHeader>
+      <CardContent className="pb-3">
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="tone-select">Response Tone</Label>
+            <Select value={tone} onValueChange={handleToneChange}>
+              <SelectTrigger id="tone-select" className="mt-1.5">
+                <SelectValue placeholder="Select tone" />
+              </SelectTrigger>
+              <SelectContent>
+                {toneOptions.map((toneOption) => (
+                  <SelectItem key={toneOption.value} value={toneOption.value}>
+                    <div className="flex flex-col">
+                      <span>{toneOption.label}</span>
+                      <span className="text-xs text-muted-foreground">{toneOption.description}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div>
+            <Label htmlFor="ai-reply">Generated Reply</Label>
+            {aiReplyQuery.isLoading ? (
+              <div className="space-y-2 mt-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+              </div>
+            ) : (
+              <Textarea
+                id="ai-reply"
+                className="mt-1.5 min-h-[120px]"
+                value={reply}
+                readOnly
+              />
+            )}
           </div>
         </div>
-        
-        <Textarea
-          value={generatedReply}
-          onChange={(e) => setGeneratedReply(e.target.value)}
-          placeholder={generateReplyMutation.isPending ? "Generating reply..." : "Click 'Generate Reply' to create a response"}
-          className="w-full min-h-[200px] mb-4"
-          disabled={generateReplyMutation.isPending}
-        />
-
-        <div className="flex space-x-2">
-          <Button 
-            className="w-full" 
-            onClick={handleGenerateReply}
-            disabled={generateReplyMutation.isPending || !review}
-          >
-            {generateReplyMutation.isPending ? "Generating..." : "Generate Reply"}
-          </Button>
-        </div>
       </CardContent>
-      
-      <CardFooter className="flex justify-between border-t pt-4">
+      <CardFooter className="flex justify-between pt-0">
         <Button 
-          variant="default" 
-          onClick={handleApplyReply}
-          disabled={!generatedReply}
-          className="flex-1 mr-2"
+          variant="outline" 
+          size="sm" 
+          onClick={debouncedRegenerate}
+          disabled={aiReplyQuery.isLoading || isRegenerating}
         >
-          <Send className="mr-2 h-4 w-4" />
-          Use This Reply
+          <Repeat className="h-4 w-4 mr-2" />
+          Regenerate
         </Button>
         <Button 
-          variant="outline"
-          onClick={handleCopyText}
-          disabled={!generatedReply}
-          className="flex-1"
+          variant="secondary" 
+          size="sm" 
+          onClick={handleCopyToClipboard}
+          disabled={!reply || aiReplyQuery.isLoading}
         >
-          {copied ? (
-            <CheckCheck className="mr-2 h-4 w-4" />
-          ) : (
-            <Copy className="mr-2 h-4 w-4" />
-          )}
-          {copied ? "Copied!" : "Copy Text"}
+          <Copy className="h-4 w-4 mr-2" />
+          Copy to Clipboard
         </Button>
       </CardFooter>
     </Card>
   );
 }
+
+export default AIReplyPanel;

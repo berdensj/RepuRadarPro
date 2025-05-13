@@ -36,9 +36,15 @@ import {
 
 interface SidebarProps {
   className?: string;
+  sidebarCollapsed?: boolean;
+  onToggleSidebar?: () => void;
 }
 
-export function Sidebar({ className }: SidebarProps) {
+export function Sidebar({ 
+  className,
+  sidebarCollapsed: propsSidebarCollapsed,
+  onToggleSidebar
+}: SidebarProps) {
   const { user, permissions, logoutMutation } = useAuth();
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -48,7 +54,15 @@ export function Sidebar({ className }: SidebarProps) {
   
   // Use custom hooks for sidebar state management
   const { expandedGroups, toggleGroup } = useSidebarGroups();
-  const { sidebarCollapsed, toggleSidebar } = useSidebarCollapsed();
+  const internalSidebarState = useSidebarCollapsed();
+  
+  // Use either props or internal state for sidebar collapsed state
+  const sidebarCollapsed = propsSidebarCollapsed !== undefined 
+    ? propsSidebarCollapsed 
+    : internalSidebarState.sidebarCollapsed;
+    
+  // Use either provided toggle function or internal one
+  const toggleSidebar = onToggleSidebar || internalSidebarState.toggleSidebar;
   
   // Toggle dark mode
   const toggleDarkMode = () => {
