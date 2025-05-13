@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useEffect } from "react";
 import {
   useQuery,
   useMutation,
@@ -65,6 +65,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryFn: getQueryFn({ on401: "returnNull" }),
     enabled: !!user,
   });
+  
+  // Set user role in localStorage when user data is available
+  useEffect(() => {
+    if (user?.role) {
+      localStorage.setItem('userRole', user.role);
+    }
+  }, [user]);
 
 
   
@@ -76,6 +83,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
       queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
+      
+      // Store the user role in localStorage for access control
+      if (user.role) {
+        localStorage.setItem('userRole', user.role);
+        console.log("User role:", user.role);
+      }
       
       toast({
         title: "Login successful",
@@ -131,6 +144,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
+      
+      // Clear the stored user role
+      localStorage.removeItem('userRole');
+      
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",

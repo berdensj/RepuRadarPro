@@ -124,12 +124,15 @@ export function AdminLayout({ children, pageTitle }: AdminLayoutProps) {
         { icon: MessageSquarePlus, label: "Feedback", href: "/admin/feedback" },
       ]
     },
-    {
-      title: "Navigation",
-      items: [
-        { icon: Home, label: "Return to Dashboard", href: "/" },
-      ]
-    }
+    // Only show the "Return to Dashboard" button for true system admins (role="admin")
+    ...(user?.role === 'admin' ? [
+      {
+        title: "Navigation",
+        items: [
+          { icon: Home, label: "Return to Dashboard", href: "/" },
+        ]
+      }
+    ] : [])
   ];
   
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);

@@ -406,8 +406,8 @@ export function generateSidebarNavigation(
   ];
   
   // Special handling for system admins vs client admins
-  // System admins can see system admin pages
-  if (permissions?.canManageUsers && permissions?.canManageStaff) {
+  // System admins (platform owners with role="admin") can see system admin pages
+  if (permissions?.canManageUsers && permissions?.canManageStaff && localStorage.getItem('userRole') === 'admin') {
     return [
       ...baseNavItems,
       separators.adminSeparator,
