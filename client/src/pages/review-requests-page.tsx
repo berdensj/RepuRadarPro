@@ -948,7 +948,7 @@ const ReviewRequestsPage = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {reviewRequests.map((request: ReviewRequest) => (
+                      {reviewRequests && Array.isArray(reviewRequests) ? reviewRequests.map((request: ReviewRequest) => (
                         <TableRow key={request.id}>
                           <TableCell className="font-medium">{request.recipientName}</TableCell>
                           <TableCell>
