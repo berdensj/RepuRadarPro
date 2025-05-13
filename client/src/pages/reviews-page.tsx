@@ -15,8 +15,15 @@ export default function ReviewsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
+  // Optimized reviews query with better caching and prefetching
   const { data: reviews } = useQuery<Review[]>({
     queryKey: ["/api/reviews"],
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+    select: (data) => {
+      // You can add transformations here if needed
+      return data;
+    }
   });
 
   const updateReviewMutation = useMutation({

@@ -97,11 +97,9 @@ function Router() {
       <ProtectedRoute path="/subscription" component={withSidebarLayout(SubscriptionPage, "Subscription")} />
       <ProtectedRoute path="/help" component={withSidebarLayout(HelpPage, "Help & Support")} />
       <ProtectedRoute path="/onboarding">
-        {() => (
-          <Suspense fallback={<LoadingSpinner />}>
-            <UserOnboardingPage />
-          </Suspense>
-        )}
+        <Suspense fallback={<LoadingSpinner />}>
+          <UserOnboardingPage />
+        </Suspense>
       </ProtectedRoute>
       
       {/* Client Admin Section */}

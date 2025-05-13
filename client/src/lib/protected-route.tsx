@@ -2,18 +2,23 @@ import { useAuth } from "@/hooks/use-auth";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2, ShieldAlert } from "lucide-react";
 import { Redirect, Route } from "wouter";
+import { Suspense, ReactNode } from "react";
+
+interface ProtectedRouteProps {
+  path: string;
+  component?: React.ComponentType<any>;
+  children?: ReactNode;
+  requiredRole?: string;
+  requiredPermission?: string;
+}
 
 export function ProtectedRoute({
   path,
   component: Component,
+  children,
   requiredRole,
   requiredPermission,
-}: {
-  path: string;
-  component: () => React.JSX.Element;
-  requiredRole?: string;
-  requiredPermission?: string;
-}) {
+}: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
   
   // Fetch user permissions
@@ -108,7 +113,14 @@ export function ProtectedRoute({
     }
   }
 
-  return <Route path={path} component={Component} />;
+  // Handle either component prop or children prop
+  return (
+    <Route path={path}>
+      {Component ? (
+        typeof Component === 'function' ? <Component /> : Component
+      ) : children}
+    </Route>
+  );
 }
 
 // Separate component for access denied page to avoid duplication
