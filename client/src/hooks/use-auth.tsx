@@ -69,7 +69,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Set user role in localStorage when user data is available
   useEffect(() => {
     if (user?.role) {
+      // Store the basic role
       localStorage.setItem('userRole', user.role);
+      
+      // Determine if the user is a system admin or client admin
+      // System admins are those with admin role AND username "admin"
+      const isSystemAdmin = user.role === 'admin' && user.username === 'admin';
+      localStorage.setItem('isSystemAdmin', isSystemAdmin ? 'true' : 'false');
+      
+      console.log("User authentication info:", {
+        role: user.role,
+        username: user.username,
+        isSystemAdmin
+      });
     }
   }, [user]);
 
@@ -145,8 +157,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
       
-      // Clear the stored user role
+      // Clear all stored user data
       localStorage.removeItem('userRole');
+      localStorage.removeItem('isSystemAdmin');
       
       toast({
         title: "Logged out",

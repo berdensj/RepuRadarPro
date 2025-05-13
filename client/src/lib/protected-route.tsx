@@ -57,8 +57,9 @@ export function ProtectedRoute({
     // Special case: 'systemAdmin' role is only for platform owners
     // This is a pseudo-role that's checked differently
     if (requiredRole === 'systemAdmin') {
-      // System admin routes require both admin role AND specific permissions
-      if (user.role !== 'admin' || !permissions?.canManageStaff) {
+      // System admin routes require isSystemAdmin to be true
+      const isSystemAdmin = localStorage.getItem('isSystemAdmin') === 'true';
+      if (!isSystemAdmin) {
         return (
           <Route path={path}>
             <AccessDeniedPage />

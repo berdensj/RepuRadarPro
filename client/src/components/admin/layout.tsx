@@ -124,8 +124,8 @@ export function AdminLayout({ children, pageTitle }: AdminLayoutProps) {
         { icon: MessageSquarePlus, label: "Feedback", href: "/admin/feedback" },
       ]
     },
-    // Only show the "Return to Dashboard" button for true system admins (role="admin")
-    ...(user?.role === 'admin' ? [
+    // Only show the "Return to Dashboard" button for true system admins
+    ...(localStorage.getItem('isSystemAdmin') === 'true' ? [
       {
         title: "Navigation",
         items: [
