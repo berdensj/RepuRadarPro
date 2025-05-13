@@ -281,12 +281,20 @@ export function Sidebar({
                                   : "text-slate-700 hover:bg-slate-100"
                               )}
                               onClick={() => toggleGroup(item.label === "Configuration" ? "config" : item.label.toLowerCase())}
+                              aria-expanded={isGroupExpanded}
+                              aria-controls={`${item.label.toLowerCase()}-submenu`}
+                              aria-haspopup="true"
+                              role="menuitem"
+                              aria-label={`${item.label} menu${isGroupExpanded ? ' (expanded)' : ' (collapsed)'}`}
                             >
                               <div className="relative">
-                                <Icon className="w-6 h-6" />
+                                <Icon className="w-6 h-6" aria-hidden="true" />
                                 {/* Group notification badge */}
                                 {item.label === "Reviews" && (
-                                  <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                                  <span 
+                                    className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+                                    aria-label="8 new reviews"
+                                  >
                                     8
                                   </span>
                                 )}
@@ -300,8 +308,13 @@ export function Sidebar({
                         
                         {/* Floating submenu for collapsed sidebar */}
                         {isGroupExpanded && (
-                          <div className="fixed left-20 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
-                            <div className="py-1" role="menu" aria-orientation="vertical">
+                          <div 
+                            id={`${item.label.toLowerCase()}-submenu`}
+                            className="fixed left-20 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50"
+                            role="menu"
+                            aria-labelledby={`${item.label.toLowerCase()}-menu-button`}
+                          >
+                            <div className="py-1" role="none">
                               {item.children.map((child) => (
                                 <a
                                   key={child.href}
@@ -313,10 +326,11 @@ export function Sidebar({
                                       : "text-gray-700 hover:bg-gray-100"
                                   )}
                                   role="menuitem"
+                                  aria-current={isRouteActive(child.href) ? "page" : undefined}
                                 >
                                   <div className="flex items-center">
-                                    <child.icon className="w-4 h-4 mr-2" />
-                                    {child.label}
+                                    <child.icon className="w-4 h-4 mr-2" aria-hidden="true" />
+                                    <span>{child.label}</span>
                                   </div>
                                 </a>
                               ))}
@@ -331,6 +345,7 @@ export function Sidebar({
                   return (
                     <li key={`group-${item.label}`} className="space-y-1">
                       <button
+                        id={`${item.label.toLowerCase()}-menu-button`}
                         className={cn(
                           "w-full flex justify-between items-center rounded-md py-2 px-3 text-sm font-medium",
                           hasActiveChild 
@@ -338,13 +353,20 @@ export function Sidebar({
                             : "text-slate-700 hover:bg-slate-100"
                         )}
                         onClick={() => toggleGroup(item.label === "Configuration" ? "config" : item.label.toLowerCase())}
+                        aria-expanded={isGroupExpanded}
+                        aria-controls={`${item.label.toLowerCase()}-submenu`}
+                        aria-haspopup="true"
+                        role="menuitem"
                       >
                         <div className="flex items-center">
                           <div className="relative">
-                            <Icon className="w-5 h-5 mr-3" />
+                            <Icon className="w-5 h-5 mr-3" aria-hidden="true" />
                             {/* Group notification badge for expanded view */}
                             {item.label === "Reviews" && (
-                              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                              <span 
+                                className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+                                aria-label="8 new reviews"
+                              >
                                 8
                               </span>
                             )}
@@ -356,6 +378,7 @@ export function Sidebar({
                             "w-4 h-4 transition-transform",
                             isGroupExpanded ? "transform rotate-180" : ""
                           )} 
+                          aria-hidden="true"
                         />
                       </button>
                       
