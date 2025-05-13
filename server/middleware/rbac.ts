@@ -138,6 +138,10 @@ export function hasPermission(user: Express.User | undefined, permission: string
       return allowedRoles.includes('admin') || allowedRoles.includes('staff');
     case 'viewReports':
       return true; // All authenticated users
+    case 'isLocationManager':
+      return userRole === 'manager';
+    case 'manageAssignedLocations':
+      return allowedRoles.includes('manager');
     default:
       return false;
   }
