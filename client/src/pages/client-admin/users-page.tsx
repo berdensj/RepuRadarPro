@@ -45,6 +45,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import ClientAdminLayout from "@/components/client-admin/layout";
 
 // Define types for users and locations
 interface UserWithLocationCount {
@@ -88,8 +89,6 @@ const locationManagerSchema = z.object({
   userId: z.string(),
   locationId: z.string(),
 });
-
-import ClientAdminLayout from "@/components/client-admin/layout";
 
 export default function ClientAdminUsersPage() {
   const { toast } = useToast();
@@ -422,506 +421,526 @@ export default function ClientAdminUsersPage() {
           <Link href="/client-admin/users" className="text-primary font-medium">User Management</Link>
         </div>
       
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">User Management</h1>
-        <div className="flex space-x-2">
-          <Dialog open={addUserOpen} onOpenChange={setAddUserOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <UserPlus2 className="mr-2 h-4 w-4" />
-                Add User
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Add New User</DialogTitle>
-                <DialogDescription>
-                  Create a new user account. They will receive an email with instructions to set their password.
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...newUserForm}>
-                <form onSubmit={newUserForm.handleSubmit(onSubmitNewUser)} className="space-y-4">
-                  <FormField
-                    control={newUserForm.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <FormControl>
-                          <Input placeholder="johndoe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={newUserForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input placeholder="john.doe@example.com" type="email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={newUserForm.control}
-                    name="fullName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Full Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder="John Doe" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={newUserForm.control}
-                    name="password"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <Input placeholder="••••••••" type="password" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={newUserForm.control}
-                    name="role"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Role</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">User Management</h1>
+          <div className="flex space-x-2">
+            <Dialog open={addUserOpen} onOpenChange={setAddUserOpen}>
+              <DialogTrigger asChild>
+                <Button>
+                  <UserPlus2 className="mr-2 h-4 w-4" />
+                  Add User
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add New User</DialogTitle>
+                  <DialogDescription>
+                    Create a new user account. They will receive an email with instructions to set their password.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...newUserForm}>
+                  <form onSubmit={newUserForm.handleSubmit(onSubmitNewUser)} className="space-y-4">
+                    <FormField
+                      control={newUserForm.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Username</FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a role" />
-                            </SelectTrigger>
+                            <Input placeholder="johndoe" {...field} />
                           </FormControl>
-                          <SelectContent>
-                            <SelectItem value="user">User</SelectItem>
-                            <SelectItem value="manager">Location Manager</SelectItem>
-                            <SelectItem value="staff">Staff</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Staff can access all locations. Location managers need specific location assignments.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <DialogFooter className="pt-4">
-                    <Button type="submit" disabled={createUserMutation.isPending}>
-                      {createUserMutation.isPending ? "Creating..." : "Create User"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-          
-          <Dialog open={assignLocationOpen} onOpenChange={setAssignLocationOpen}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Assign Location</DialogTitle>
-                <DialogDescription>
-                  Assign {selectedUser?.fullName} to manage a specific location.
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...assignLocationForm}>
-                <form onSubmit={assignLocationForm.handleSubmit(onSubmitAssignLocation)} className="space-y-4">
-                  <FormField
-                    control={assignLocationForm.control}
-                    name="locationId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Location</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={newUserForm.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
                           <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a location" />
-                            </SelectTrigger>
+                            <Input placeholder="john.doe@example.com" type="email" {...field} />
                           </FormControl>
-                          <SelectContent>
-                            {locations.map((location) => (
-                              <SelectItem 
-                                key={location.id} 
-                                value={location.id.toString()}
-                                disabled={selectedUser ? isUserAssignedToLocation(selectedUser.id, location.id) : false}
-                              >
-                                {location.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          Select a location to assign to this user.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <DialogFooter className="pt-4">
-                    <Button type="submit" disabled={assignLocationManagerMutation.isPending}>
-                      {assignLocationManagerMutation.isPending ? "Assigning..." : "Assign Location"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={newUserForm.control}
+                      name="fullName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="John Doe" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={newUserForm.control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Password</FormLabel>
+                          <FormControl>
+                            <Input placeholder="******" type="password" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={newUserForm.control}
+                      name="role"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Role</FormLabel>
+                          <Select
+                            value={field.value}
+                            onValueChange={field.onChange}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a role" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="user">User</SelectItem>
+                              <SelectItem value="staff">Staff</SelectItem>
+                              <SelectItem value="manager">Location Manager</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>
+                            This determines the permissions the user will have.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <DialogFooter>
+                      <Button 
+                        type="submit" 
+                        disabled={createUserMutation.isPending}
+                      >
+                        {createUserMutation.isPending ? (
+                          <>
+                            <div className="animate-spin mr-2 h-4 w-4 border-2 border-background border-t-transparent rounded-full" />
+                            Creating...
+                          </>
+                        ) : (
+                          "Create User"
+                        )}
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+            <Button variant="outline">
+              <Download className="mr-2 h-4 w-4" />
+              Export
+            </Button>
+          </div>
         </div>
-      </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Users</CardTitle>
-          <CardDescription>
-            Manage users and their access to your organization's locations.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
-            <div className="relative w-full md:w-[300px]">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-400" />
-              <Input
-                placeholder="Search users..."
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              {searchQuery && (
-                <button
-                  className="absolute right-2 top-2.5"
-                  onClick={() => setSearchQuery("")}
-                >
-                  <X className="h-4 w-4 text-slate-400" />
-                </button>
-              )}
-            </div>
-            
-            <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-              <Select value={roleFilter} onValueChange={setRoleFilter}>
-                <SelectTrigger className="w-full md:w-[150px]">
-                  <SelectValue placeholder="Filter by role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Roles</SelectItem>
-                  <SelectItem value="staff">Staff</SelectItem>
-                  <SelectItem value="manager">Managers</SelectItem>
-                  <SelectItem value="user">Regular Users</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select value={locationFilter} onValueChange={setLocationFilter}>
-                <SelectTrigger className="w-full md:w-[170px]">
-                  <SelectValue placeholder="Filter by locations" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Locations</SelectItem>
-                  <SelectItem value="multi">Multi-Location</SelectItem>
-                  <SelectItem value="single">Single Location</SelectItem>
-                  <SelectItem value="none">No Locations</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Button variant="outline" className="md:w-auto">
-                <Download className="mr-2 h-4 w-4" />
-                Export
-              </Button>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div>
+            <div className="flex space-x-2">
+              <div className="relative w-full">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  type="search" 
+                  placeholder="Search users..." 
+                  className="pl-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-2.5 top-2.5 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-          
-          {usersLoading ? (
-            <div className="flex justify-center items-center h-32">
-              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          ) : (
-            <div className="border rounded-md">
+          <div>
+            <Select
+              value={roleFilter}
+              onValueChange={setRoleFilter}
+            >
+              <SelectTrigger>
+                <div className="flex items-center">
+                  <Lock className="mr-2 h-4 w-4" />
+                  <span>Role: {roleFilter === "all" ? "All Roles" : roleFilter}</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Roles</SelectItem>
+                <SelectItem value="user">User</SelectItem>
+                <SelectItem value="staff">Staff</SelectItem>
+                <SelectItem value="manager">Location Manager</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Select
+              value={locationFilter}
+              onValueChange={setLocationFilter}
+            >
+              <SelectTrigger>
+                <div className="flex items-center">
+                  <Building className="mr-2 h-4 w-4" />
+                  <span>
+                    {locationFilter === "all" && "All Locations"}
+                    {locationFilter === "multi" && "Multiple Locations"}
+                    {locationFilter === "single" && "Single Location"}
+                    {locationFilter === "none" && "No Locations"}
+                  </span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Locations</SelectItem>
+                <SelectItem value="multi">Multiple Locations</SelectItem>
+                <SelectItem value="single">Single Location</SelectItem>
+                <SelectItem value="none">No Locations</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <Card>
+          <CardContent className="pt-6">
+            {usersLoading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+              </div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No users match your search criteria.
+              </div>
+            ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[250px]">User</TableHead>
+                    <TableHead>User</TableHead>
                     <TableHead>Role</TableHead>
+                    <TableHead>Locations</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Location Access</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-slate-500">
-                        No users found. Try adjusting your filters or create a new user.
+                  {filteredUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-full flex items-center justify-center bg-slate-100">
+                            {user.profilePicture ? (
+                              <img 
+                                src={user.profilePicture} 
+                                alt={user.fullName} 
+                                className="w-9 h-9 rounded-full object-cover"
+                              />
+                            ) : (
+                              <User className="h-5 w-5 text-slate-500" />
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-medium">{user.fullName}</div>
+                            <div className="text-xs text-slate-500">{user.email}</div>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {editingRole === user.id ? (
+                          <Select
+                            defaultValue={user.role}
+                            onValueChange={(value) => handleRoleChange(user.id, value)}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="user">User</SelectItem>
+                              <SelectItem value="staff">Staff</SelectItem>
+                              <SelectItem value="manager">Manager</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <Badge 
+                              className={
+                                user.role === "manager" 
+                                  ? "bg-blue-100 text-blue-800 hover:bg-blue-100" 
+                                  : user.role === "staff" 
+                                  ? "bg-purple-100 text-purple-800 hover:bg-purple-100" 
+                                  : "bg-gray-100 text-gray-800 hover:bg-gray-100"
+                              }
+                            >
+                              {user.role === "manager" && "Location Manager"}
+                              {user.role === "staff" && "Staff"}
+                              {user.role === "user" && "User"}
+                            </Badge>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-6 w-6"
+                              onClick={() => setEditingRole(user.id)}
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          {user.locationCount === 0 ? (
+                            <span className="text-sm text-muted-foreground">None assigned</span>
+                          ) : (
+                            getUserLocationAssignments(user.id).map(({ managerId, location }) => (
+                              <div key={managerId} className="flex items-center gap-1">
+                                <span className="text-sm">{location?.name}</span>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-5 w-5 rounded-full"
+                                  onClick={() => {
+                                    if (location) {
+                                      deleteLocationManagerMutation.mutate({ 
+                                        userId: user.id, 
+                                        locationId: location.id 
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={user.isActive ? "default" : "destructive"}>
+                          {user.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                              <span className="sr-only">Actions</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onClick={() => handleEditUser(user)}
+                            >
+                              <Edit className="mr-2 h-4 w-4" />
+                              <span>Edit Details</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setAssignLocationOpen(true);
+                              }}
+                            >
+                              <Building className="mr-2 h-4 w-4" />
+                              <span>Assign Location</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => setConfirmDeleteUser(user.id)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              <span>Delete User</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-700">
-                              {user.profilePicture ? (
-                                <img src={user.profilePicture} alt={user.fullName} className="w-8 h-8 rounded-full" />
-                              ) : (
-                                <User className="w-4 h-4" />
-                              )}
-                            </div>
-                            <div>
-                              <div className="font-medium">{user.fullName}</div>
-                              <div className="text-xs text-slate-500">{user.email}</div>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {editingRole === user.id ? (
-                            <Select
-                              defaultValue={user.role}
-                              onValueChange={(value) => handleRoleChange(user.id, value)}
-                              onOpenChange={() => setEditingRole(null)}
-                            >
-                              <SelectTrigger className="w-[140px]">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="user">User</SelectItem>
-                                <SelectItem value="manager">Location Manager</SelectItem>
-                                <SelectItem value="staff">Staff</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            <div className="flex gap-1 items-center">
-                              <Badge
-                                variant={
-                                  user.role === "staff"
-                                    ? "outline"
-                                    : user.role === "manager"
-                                    ? "secondary"
-                                    : "default"
-                                }
-                                className="cursor-pointer"
-                                onClick={() => setEditingRole(user.id)}
-                              >
-                                {user.role === "user" && "Regular User"}
-                                {user.role === "manager" && "Location Manager"}
-                                {user.role === "staff" && "Staff"}
-                              </Badge>
-                              <Edit className="h-3 w-3 text-slate-400 cursor-pointer" onClick={() => setEditingRole(user.id)} />
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant={user.isActive ? "default" : "destructive"}>
-                            {user.isActive ? "Active" : "Inactive"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-1">
-                            {user.locationCount === 0 ? (
-                              <span className="text-xs text-slate-500">No locations assigned</span>
-                            ) : (
-                              <div className="space-y-1">
-                                {getUserLocationAssignments(user.id).map(({ managerId, location }) => (
-                                  <div key={managerId} className="flex items-center gap-1.5">
-                                    <Building className="h-3 w-3 text-slate-400" />
-                                    <span className="text-xs">{location?.name}</span>
-                                    <button
-                                      onClick={() => 
-                                        deleteLocationManagerMutation.mutate({ 
-                                          userId: user.id, 
-                                          locationId: location?.id || 0 
-                                        })
-                                      }
-                                      className="text-slate-400 hover:text-destructive"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            {user.role === "manager" && (
-                              <Button
-                                variant="link"
-                                size="sm"
-                                className="p-0 h-auto text-xs"
-                                onClick={() => {
-                                  setSelectedUser(user);
-                                  setAssignLocationOpen(true);
-                                }}
-                              >
-                                Assign location
-                              </Button>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-5 w-5" />
-                                <span className="sr-only">Actions</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                onClick={() => handleEditUser(user)}
-                              >
-                                <Edit className="h-4 w-4 mr-2" /> Edit User
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setSelectedUser(user);
-                                  setAssignLocationOpen(true);
-                                }}
-                              >
-                                <Building className="h-4 w-4 mr-2" /> Manage Locations
-                              </DropdownMenuItem>
-                              <DropdownMenuItem>
-                                <Lock className="h-4 w-4 mr-2" /> Reset Password
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                className="text-destructive focus:text-destructive"
-                                onClick={() => setConfirmDeleteUser(user.id)}
-                              >
-                                <Trash2 className="h-4 w-4 mr-2" /> Delete User
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-
-                          <AlertDialog open={confirmDeleteUser === user.id} onOpenChange={(open) => !open && setConfirmDeleteUser(null)}>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This will permanently delete the user "{user.fullName}". This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                  onClick={() => deleteUserMutation.mutate(user.id)}
-                                >
-                                  {deleteUserMutation.isPending && confirmDeleteUser === user.id ? (
-                                    <>
-                                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-destructive-foreground border-t-transparent rounded-full" />
-                                      Deleting...
-                                    </>
-                                  ) : (
-                                    "Delete"
-                                  )}
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                  ))}
                 </TableBody>
               </Table>
-            </div>
-          )}
-        </CardContent>
-        <CardFooter className="flex justify-between">
-          <div className="text-sm text-slate-500">
-            Showing {filteredUsers.length} of {users.length} users
-          </div>
-        </CardFooter>
-      </Card>
-      
-      {/* Edit User Dialog */}
-      <Dialog open={editUserOpen} onOpenChange={(open) => {
-        setEditUserOpen(open);
-        if (!open) setSelectedUser(null);
-      }}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>
-              Update user information for {selectedUser?.fullName}.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <FormLabel className="text-right">Name</FormLabel>
-              <Input 
-                id="fullName" 
-                value={editFullName}
-                onChange={(e) => setEditFullName(e.target.value)} 
-                className="col-span-3" 
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <FormLabel className="text-right">Email</FormLabel>
-              <Input 
-                id="email" 
-                value={editEmail}
-                onChange={(e) => setEditEmail(e.target.value)}
-                className="col-span-3" 
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <FormLabel className="text-right">Status</FormLabel>
-              <Select 
-                value={editIsActive ? "active" : "inactive"}
-                onValueChange={(value) => setEditIsActive(value === "active")}
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Assign Location Dialog */}
+        <Dialog open={assignLocationOpen} onOpenChange={setAssignLocationOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Assign Location</DialogTitle>
+              <DialogDescription>
+                Assign a location to the selected user.
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...assignLocationForm}>
+              <form onSubmit={assignLocationForm.handleSubmit(onSubmitAssignLocation)} className="space-y-4">
+                <FormField
+                  control={assignLocationForm.control}
+                  name="locationId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a location" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {locations.map((location) => (
+                            <SelectItem 
+                              key={location.id} 
+                              value={location.id.toString()}
+                              disabled={selectedUser && isUserAssignedToLocation(selectedUser.id, location.id)}
+                            >
+                              {location.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <DialogFooter>
+                  <Button 
+                    type="submit" 
+                    disabled={assignLocationManagerMutation.isPending}
+                  >
+                    {assignLocationManagerMutation.isPending ? (
+                      <>
+                        <div className="animate-spin mr-2 h-4 w-4 border-2 border-background border-t-transparent rounded-full" />
+                        Assigning...
+                      </>
+                    ) : (
+                      "Assign Location"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete User Confirmation Dialog */}
+        <AlertDialog open={confirmDeleteUser !== null} onOpenChange={(open) => !open && setConfirmDeleteUser(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the user account and remove their data from our servers.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  if (confirmDeleteUser !== null) {
+                    deleteUserMutation.mutate(confirmDeleteUser);
+                  }
+                }}
+                className="bg-red-600 hover:bg-red-700"
               >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
+                {deleteUserMutation.isPending ? (
+                  <>
+                    <div className="animate-spin mr-2 h-4 w-4 border-2 border-background border-t-transparent rounded-full" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete User"
+                )}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+        
+        {/* Edit User Dialog */}
+        <Dialog open={editUserOpen} onOpenChange={setEditUserOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+              <DialogDescription>
+                Update user details
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <FormLabel htmlFor="fullName">Full Name</FormLabel>
+                <Input 
+                  id="fullName" 
+                  value={editFullName} 
+                  onChange={(e) => setEditFullName(e.target.value)} 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <FormLabel htmlFor="email">Email</FormLabel>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  value={editEmail} 
+                  onChange={(e) => setEditEmail(e.target.value)} 
+                />
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <input 
+                  type="checkbox" 
+                  id="isActive" 
+                  checked={editIsActive} 
+                  onChange={(e) => setEditIsActive(e.target.checked)}
+                  className="rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <FormLabel htmlFor="isActive" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                  Account Active
+                </FormLabel>
+              </div>
             </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditUserOpen(false)}>
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              onClick={() => {
-                if (selectedUser) {
-                  updateUserMutation.mutate({
-                    id: selectedUser.id,
-                    fullName: editFullName,
-                    email: editEmail,
-                    isActive: editIsActive
-                  });
-                }
-              }}
-              disabled={updateUserMutation.isPending}
-            >
-              {updateUserMutation.isPending ? (
-                <>
-                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-background border-t-transparent rounded-full" />
-                  Saving...
-                </>
-              ) : (
-                "Save Changes"
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  </ClientAdminLayout>
+            
+            <DialogFooter>
+              <Button 
+                type="submit" 
+                onClick={() => {
+                  if (selectedUser) {
+                    updateUserMutation.mutate({
+                      id: selectedUser.id,
+                      fullName: editFullName,
+                      email: editEmail,
+                      isActive: editIsActive
+                    });
+                  }
+                }}
+                disabled={updateUserMutation.isPending}
+              >
+                {updateUserMutation.isPending ? (
+                  <>
+                    <div className="animate-spin mr-2 h-4 w-4 border-2 border-background border-t-transparent rounded-full" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </ClientAdminLayout>
   );
 }
