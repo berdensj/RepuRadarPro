@@ -1,0 +1,93 @@
+You are a full-stack SaaS developer working on RepuRadarPro, a reputation management platform. Your task is to upgrade the **System Admin Portal** to make it more functional, user-friendly, and scalable.
+
+---
+
+## 🧭 OBJECTIVE:
+Implement the following enhancements to the System Admin Portal to support advanced user management, review oversight, system health monitoring, and improved UI/UX.
+
+---
+
+## 🔧 TASKS TO IMPLEMENT
+
+### 1. **Advanced User Management**
+- Add ability to view, search, and filter users by:
+  - Email
+  - Business type
+  - Plan (Starter, Growth, etc.)
+  - Status (Active, Trialing, Suspended)
+- Implement **Role-Based Access Control (RBAC)**:
+  - Roles: Super Admin, Admin, Manager, Viewer
+  - Add dropdown to change user role
+- Add “Login as this user” feature (impersonation for support)
+- Add bulk action tools: Activate / Deactivate / Reset password
+
+---
+
+### 2. **Review Oversight & Sentiment Analysis**
+- Add sentiment tagging to reviews: Positive, Neutral, Negative
+  - Use GPT or rules-based logic for basic implementation
+- Add filters to view:
+  - Reviews needing reply
+  - Reviews with negative sentiment
+- Display quick-reply templates for admins to test AI-generated responses
+
+---
+
+### 3. **Analytics & Usage Dashboard**
+- Show key platform-wide KPIs:
+  - Total clients
+  - Active clients this month
+  - Total reviews pulled
+  - Total AI replies generated
+- Enable filtering by date range and plan type
+- Include export buttons (CSV, PDF)
+
+---
+
+### 4. **System Health Monitoring**
+- Display status for review integrations:
+  - Google My Business
+  - Yelp
+  - Facebook
+- Add last successful sync time per platform
+- Add section to view error logs:
+  - API response errors
+  - OpenAI failures
+  - Failed review imports
+
+---
+
+### 5. **Support & Feedback Tools**
+- Add internal notes field on each user account for support staff
+- Add an “Admin Only” activity log (who changed what and when)
+- Create a form/button for admins to submit internal feedback or feature suggestions
+- (Optional) Integrate with a tool like Crisp or Intercom for live chat
+
+---
+
+### 6. **User Interface Enhancements**
+- Make sidebar **collapsible** for better screen space
+- Highlight active page in sidebar
+- Add **breadcrumb navigation** at the top of each admin page
+- Add **Dark Mode toggle** (optional theme switch)
+
+---
+
+## 🧠 TECHNICAL NOTES
+- Use modular files for routes and views (e.g., `admin/users.js`, `admin/logs.js`)
+- Use Supabase or your existing DB to add new fields: `role`, `client_type`, `last_sync`, etc.
+- Use Chart.js or lightweight alternatives for dashboards
+- If review sentiment AI is not yet integrated, mock with static tags and TODOs
+
+---
+
+## 📦 AFTER IMPLEMENTATION
+- Update the `README.md` with:
+  - New admin portal sections
+  - Role definitions
+  - Usage instructions
+- Leave TODO comments for any features that require future integration (e.g., full billing sync with Stripe)
+
+---
+
+Start by scanning the current admin portal and then build each enhancement in the order of priority listed above. Prioritize role management, user filters, sentiment tools, and system health status.
