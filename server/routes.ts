@@ -86,6 +86,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         businessInfo: {
           businessName: user.businessName || "",
           industry: user.industry || "",
+          clientType: user.clientType || "",
+          clientTypeCustom: user.clientTypeCustom || "",
+          isAgency: user.isAgency || false,
           contactName: user.contactName || "",
           contactEmail: user.contactEmail || "",
           contactPhone: user.contactPhone || ""
