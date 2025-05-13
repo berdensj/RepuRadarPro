@@ -796,6 +796,64 @@ export default function ClientAdminUsersPage() {
           </div>
         </CardFooter>
       </Card>
+      
+      {/* Edit User Dialog */}
+      <Dialog open={editUserOpen} onOpenChange={setEditUserOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Update user information for {selectedUser?.fullName}.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <FormLabel className="text-right">Name</FormLabel>
+              <Input 
+                id="fullName" 
+                defaultValue={selectedUser?.fullName} 
+                className="col-span-3" 
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <FormLabel className="text-right">Email</FormLabel>
+              <Input 
+                id="email" 
+                defaultValue={selectedUser?.email} 
+                className="col-span-3" 
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <FormLabel className="text-right">Status</FormLabel>
+              <Select defaultValue={selectedUser?.isActive ? "active" : "inactive"}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditUserOpen(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" onClick={() => {
+              toast({
+                title: "User updated",
+                description: "The user information has been updated."
+              });
+              setEditUserOpen(false);
+            }}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
