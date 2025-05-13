@@ -59,12 +59,12 @@ export function SidebarLayout({
   
   return (
     <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
-      {/* Sidebar - fixed position for both mobile and desktop */}
+      {/* Sidebar - static position so it scrolls with page */}
       <div className={cn(
-        "transition-all duration-300 ease-in-out z-40 bg-white border-r border-slate-200 h-screen fixed left-0 top-0",
+        "transition-all duration-300 ease-in-out z-40 bg-white border-r border-slate-200 h-screen",
         isMobile ? (
           mobileMenuOpen 
-            ? "w-[85%] max-w-[300px] shadow-xl" 
+            ? "fixed w-[85%] max-w-[300px] shadow-xl left-0 top-0" 
             : "w-0 -translate-x-full"
         ) : (
           sidebarCollapsed ? "w-20" : "w-64"
@@ -76,10 +76,10 @@ export function SidebarLayout({
         />
       </div>
       
-      {/* Main content - adjusted with left margin for fixed sidebar */}
+      {/* Main content */}
       <main className={cn(
         "flex-1 overflow-auto transition-all duration-300 ease-in-out h-screen",
-        isMobile ? "ml-0" : (sidebarCollapsed ? "ml-20" : "ml-64"),
+        isMobile ? "ml-0" : "",
         className
       )}>
         {/* Mobile header with toggle */}
