@@ -139,43 +139,95 @@ export function BarChart({
   
   // Render empty state when no data
   const renderEmptyState = () => (
-    <div className="flex flex-col items-center justify-center h-[200px] text-gray-400">
-      <LucideBarChart className="h-16 w-16 mb-2 opacity-30" />
+    <div 
+      className="flex flex-col items-center justify-center h-[200px] text-gray-400"
+      role="status"
+      aria-label="No data available"
+    >
+      <LucideBarChart className="h-16 w-16 mb-2 opacity-30" aria-hidden="true" />
       <p>{emptyMessage}</p>
     </div>
   );
   
   // Render loading state
   const renderLoadingState = () => (
-    <div className="flex flex-col items-center justify-center h-[200px] text-gray-400">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    <div 
+      className="flex flex-col items-center justify-center h-[200px] text-gray-400"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+      aria-label="Loading chart data"
+    >
+      <div 
+        className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"
+        aria-hidden="true"
+      ></div>
       <p className="mt-4">Loading data...</p>
     </div>
   );
   
+  // Create accessible text summary of chart data
+  const getChartSummary = () => {
+    if (data.length === 0) return `No data available for ${title}`;
+    
+    const values = data.map(item => item.value);
+    const maxValue = Math.max(...values);
+    const maxDate = data.find(item => item.value === maxValue)?.date;
+    const minValue = Math.min(...values);
+    const minDate = data.find(item => item.value === minValue)?.date;
+    const avgValue = values.reduce((sum, val) => sum + val, 0) / values.length;
+    
+    const formatDate = (dateStr: string) => {
+      try {
+        return format(new Date(dateStr), 'MMMM d, yyyy');
+      } catch (e) {
+        return dateStr;
+      }
+    };
+    
+    return `${title} bar chart showing ${yAxisLabel} over time. The chart contains ${data.length} data points from ${formatDate(data[0].date)} to ${formatDate(data[data.length-1].date)}. The highest ${yAxisLabel} is ${maxValue}${valueSuffix} on ${formatDate(maxDate || '')}, and the lowest is ${minValue}${valueSuffix} on ${formatDate(minDate || '')}. The average ${yAxisLabel} is ${Math.round(avgValue)}${valueSuffix}.`;
+  };
+
   return (
     <Card className={cn("overflow-hidden", className)}>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center space-x-2">
-          <span>{title}</span>
+          <span id={`chart-title-${title.replace(/\s+/g, '-').toLowerCase()}`}>{title}</span>
           {description && (
             <span className="relative group">
-              <Info className="h-4 w-4 text-muted-foreground cursor-help" />
-              <div className="absolute z-10 invisible group-hover:visible bottom-full left-1/2 transform -translate-x-1/2 w-64 p-3 bg-white shadow-lg rounded-md border text-sm">
+              <Info 
+                className="h-4 w-4 text-muted-foreground cursor-help" 
+                aria-hidden="true"
+              />
+              <div 
+                className="absolute z-10 invisible group-hover:visible bottom-full left-1/2 transform -translate-x-1/2 w-64 p-3 bg-white shadow-lg rounded-md border text-sm"
+                role="tooltip"
+                aria-hidden={true}
+              >
                 {description}
               </div>
             </span>
           )}
         </CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
+        {description && <CardDescription id={`chart-desc-${title.replace(/\s+/g, '-').toLowerCase()}`}>{description}</CardDescription>}
       </CardHeader>
       <CardContent ref={containerRef} className="p-0">
+        {/* ADA compliance: added visually hidden text description of chart data */}
+        <div className="sr-only" aria-live="polite">
+          {getChartSummary()}
+        </div>
+        
         {loading ? (
           renderLoadingState()
         ) : data.length === 0 ? (
           renderEmptyState()
         ) : (
-          <div style={{ width: '100%', height }}>
+          <div 
+            style={{ width: '100%', height }}
+            role="img"
+            aria-labelledby={`chart-title-${title.replace(/\s+/g, '-').toLowerCase()}`}
+            aria-describedby={description ? `chart-desc-${title.replace(/\s+/g, '-').toLowerCase()}` : undefined}
+          >
             <ResponsiveContainer width="100%" height="100%">
               <RechartsBarChart
                 data={data}

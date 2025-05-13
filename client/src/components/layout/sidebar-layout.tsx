@@ -68,16 +68,19 @@ export function SidebarLayout({
       </a>
       
       {/* Sidebar - static position so it scrolls with page */}
-      <div className={cn(
-        "transition-all duration-300 ease-in-out z-40 bg-white border-r border-slate-200 h-screen",
-        isMobile ? (
-          mobileMenuOpen 
-            ? "fixed w-[85%] max-w-[300px] shadow-xl left-0 top-0" 
-            : "w-0 -translate-x-full"
-        ) : (
-          sidebarCollapsed ? "w-20" : "w-64"
-        )
-      )}>
+      <div 
+        id="mobile-sidebar"
+        className={cn(
+          "transition-all duration-300 ease-in-out z-40 bg-white border-r border-slate-200 h-screen",
+          isMobile ? (
+            mobileMenuOpen 
+              ? "fixed w-[85%] max-w-[300px] shadow-xl left-0 top-0" 
+              : "w-0 -translate-x-full"
+          ) : (
+            sidebarCollapsed ? "w-20" : "w-64"
+          )
+        )}
+      >
         <Sidebar 
           sidebarCollapsed={sidebarCollapsed} 
           onToggleSidebar={toggleSidebar}
@@ -97,7 +100,7 @@ export function SidebarLayout({
       >
         {/* Mobile header with toggle */}
         {isMobile && (
-          <div className="sticky top-0 z-20 flex items-center justify-between p-3 bg-white border-b border-gray-200 shadow-sm">
+          <header className="sticky top-0 z-20 flex items-center justify-between p-3 bg-white border-b border-gray-200 shadow-sm" role="banner">
             <div className="flex items-center">
               <Button 
                 variant="ghost" 
@@ -105,20 +108,22 @@ export function SidebarLayout({
                 className="mr-2" 
                 onClick={toggleMobileMenu}
                 aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                aria-expanded={mobileMenuOpen}
+                aria-controls="mobile-sidebar"
               >
-                {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                {mobileMenuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
               </Button>
               {pageTitle && <h1 className="text-lg font-semibold truncate">{pageTitle}</h1>}
               {!pageTitle && <span className="text-primary text-lg font-semibold">RepuRadar</span>}
             </div>
-          </div>
+          </header>
         )}
         
         {/* Desktop header for page title */}
         {!isMobile && pageTitle && (
-          <div className="sticky top-0 z-20 flex items-center p-4 bg-white border-b border-gray-200 shadow-sm">
+          <header className="sticky top-0 z-20 flex items-center p-4 bg-white border-b border-gray-200 shadow-sm" role="banner">
             <h1 className="text-xl font-semibold">{pageTitle}</h1>
-          </div>
+          </header>
         )}
         
         {/* Content container with improved mobile spacing */}
@@ -133,6 +138,9 @@ export function SidebarLayout({
           className="fixed inset-0 bg-black/50 z-30"
           onClick={toggleMobileMenu}
           aria-hidden="true"
+          role="presentation"
+          tabIndex={-1}
+          aria-label="Close sidebar overlay"
         />
       )}
     </div>

@@ -384,13 +384,18 @@ export function Sidebar({
                       
                       {/* Group children */}
                       {isGroupExpanded && (
-                        <ul className="pl-8 mt-1 space-y-1">
+                        <ul 
+                          id={`${item.label.toLowerCase()}-submenu`}
+                          className="pl-8 mt-1 space-y-1"
+                          role="menu"
+                          aria-labelledby={`${item.label.toLowerCase()}-menu-button`}
+                        >
                           {item.children.map((child) => {
                             const isChildActive = isRouteActive(child.href);
                             const ChildIcon = child.icon;
                             
                             return (
-                              <li key={`child-${child.href}`}>
+                              <li key={`child-${child.href}`} role="none">
                                 <a
                                   href={child.href}
                                   className={cn(
@@ -399,11 +404,13 @@ export function Sidebar({
                                       ? "bg-primary/10 text-primary"
                                       : "text-slate-600 hover:bg-slate-100"
                                   )}
+                                  role="menuitem"
+                                  aria-current={isChildActive ? "page" : undefined}
                                 >
-                                  <ChildIcon className="w-4 h-4 mr-2" />
+                                  <ChildIcon className="w-4 h-4 mr-2" aria-hidden="true" />
                                   <span>{child.label}</span>
                                   {isChildActive && (
-                                    <div className="absolute left-0 w-1 h-8 bg-primary rounded-r-full" />
+                                    <div className="absolute left-0 w-1 h-8 bg-primary rounded-r-full" aria-hidden="true" />
                                   )}
                                 </a>
                               </li>
