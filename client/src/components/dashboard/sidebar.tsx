@@ -209,7 +209,7 @@ export function Sidebar({
                   const Icon = item.icon;
                   
                   return (
-                    <li key={`item-${item.href}`}>
+                    <li key={`item-${item.label}-${item.href}`}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <a 

@@ -80,7 +80,7 @@ export function createNavStructure(expandedGroups: Record<string, boolean>) {
     type: 'item',
     icon: BarChart2,
     label: "Dashboard",
-    href: "/reviews",
+    href: "/dashboard",
     tooltip: "View your main dashboard"
   };
   
