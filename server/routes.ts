@@ -1122,6 +1122,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Manager-specific routes for locations
+  app.get("/api/manager/locations", requireRole('manager'), async (req, res, next) => {
+    try {
+      // Get locations that this manager is assigned to
+      const managedLocations = await db.query.locationManagers.findMany({
+        where: eq(locationManagers.userId, req.user!.id),
+        with: {
+          location: true
+        }
+      });
+      
+      if (managedLocations && managedLocations.length > 0) {
+        const locations = managedLocations.map(ml => ml.location);
+        return res.json(locations);
+      }
+      return res.json([]);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Route to assign a manager to a location
+  app.post("/api/admin/location-managers", requireRole('admin'), async (req, res, next) => {
+    try {
+      const { userId, locationId } = req.body;
+      
+      if (!userId || !locationId) {
+        return res.status(400).json({ message: "User ID and Location ID are required" });
+      }
+      
+      // Verify user exists and is a manager
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      if (user.role !== 'manager') {
+        return res.status(400).json({ message: "User must have manager role to be assigned to a location" });
+      }
+      
+      // Verify location exists
+      const location = await storage.getLocation(locationId);
+      if (!location) {
+        return res.status(404).json({ message: "Location not found" });
+      }
+      
+      // Create the assignment
+      const [assignment] = await db.insert(locationManagers)
+        .values({
+          userId,
+          locationId
+        })
+        .returning();
+      
+      res.status(201).json(assignment);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
   // Permissions endpoint
   app.get("/api/permissions", async (req, res, next) => {
     try {
