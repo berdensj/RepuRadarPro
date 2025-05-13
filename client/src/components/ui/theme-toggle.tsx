@@ -31,12 +31,33 @@ export function ThemeToggle() {
     localStorage.setItem('repuradar_theme', newTheme);
   };
   
+  // Helper function to get or create status element for screen reader announcements
+  const getStatusElement = () => {
+    return document.getElementById('theme-status') || (() => {
+      const el = document.createElement('div');
+      el.id = 'theme-status';
+      el.setAttribute('aria-live', 'polite');
+      el.classList.add('sr-only');
+      document.body.appendChild(el);
+      return el;
+    })();
+  };
+
   const applyTheme = (theme: 'light' | 'dark') => {
-    if (theme === 'dark') {
+    const isDark = theme === 'dark';
+    
+    // Update DOM classes and attributes
+    if (isDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+    
+    document.documentElement.setAttribute('data-theme', theme);
+    
+    // Announce theme change to screen readers
+    const statusElement = getStatusElement();
+    statusElement.textContent = isDark ? 'Dark mode enabled' : 'Light mode enabled';
   };
 
   return (
@@ -46,11 +67,16 @@ export function ThemeToggle() {
       onClick={toggleTheme}
       aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
       title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+      aria-pressed={theme === 'dark'}
+      role="switch"
     >
+      <span className="sr-only">
+        {theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+      </span>
       {theme === 'light' ? (
-        <Moon className="h-5 w-5" />
+        <Moon className="h-5 w-5" aria-hidden="true" />
       ) : (
-        <Sun className="h-5 w-5" />
+        <Sun className="h-5 w-5" aria-hidden="true" />
       )}
     </Button>
   );

@@ -183,6 +183,13 @@ function App() {
       <AuthProvider>
         <ThemeProvider>
           <TooltipProvider>
+            {/* Screen reader announcements container */}
+            <div 
+              className="sr-only" 
+              aria-live="polite" 
+              id="aria-live-announcer"
+            ></div>
+            
             <Toaster />
             <Router />
           </TooltipProvider>
