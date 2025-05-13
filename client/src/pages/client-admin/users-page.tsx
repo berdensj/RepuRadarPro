@@ -416,9 +416,21 @@ export default function ClientAdminUsersPage() {
       <div className="container p-6 mx-auto">
         {/* Breadcrumb Navigation */}
         <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-4">
-          <Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
+          <Button 
+            variant="link" 
+            className="p-0 h-auto hover:text-primary transition-colors text-muted-foreground"
+            onClick={() => window.location.href = "/dashboard"}
+          >
+            Dashboard
+          </Button>
           <span>/</span>
-          <Link href="/client-admin/users" className="text-primary font-medium">User Management</Link>
+          <Button 
+            variant="link" 
+            className="p-0 h-auto text-primary font-medium"
+            onClick={() => window.location.href = "/client-admin/users"}
+          >
+            User Management
+          </Button>
         </div>
       
         <div className="flex justify-between items-center mb-6">

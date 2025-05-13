@@ -134,12 +134,14 @@ export default function ClientAdminLayout({ children }: AdminLayoutProps) {
             <Separator className="my-4" />
             
             <div className="space-y-1">
-              <Link href="/dashboard">
-                <Button variant="ghost" className="w-full justify-start">
-                  <ChevronLeft className="h-5 w-5 mr-2" />
-                  Return to Dashboard
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                className="w-full justify-start"
+                onClick={() => window.location.href = "/dashboard"}
+              >
+                <ChevronLeft className="h-5 w-5 mr-2" />
+                Return to Dashboard
+              </Button>
             </div>
           </div>
         </ScrollArea>
