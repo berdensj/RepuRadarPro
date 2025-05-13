@@ -95,6 +95,7 @@ export default function ClientAdminUsersPage() {
   const [roleFilter, setRoleFilter] = useState("all");
   const [locationFilter, setLocationFilter] = useState("all");
   const [addUserOpen, setAddUserOpen] = useState(false);
+  const [editUserOpen, setEditUserOpen] = useState(false);
   const [assignLocationOpen, setAssignLocationOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserWithLocationCount | null>(null);
   const [editingRole, setEditingRole] = useState<number | null>(null);
