@@ -922,6 +922,6 @@ export default function ClientAdminUsersPage() {
         </DialogContent>
       </Dialog>
     </div>
-    </ClientAdminLayout>
+  </ClientAdminLayout>
   );
 }
