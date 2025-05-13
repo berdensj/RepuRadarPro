@@ -37,6 +37,7 @@ import OnboardingPage from "@/pages/admin/onboarding-page";
 import AdminAnalyticsPage from "@/pages/admin/analytics-page";
 import AdminReportsPage from "@/pages/admin/reports-page";
 import UserOnboardingPage from "@/pages/onboarding";
+import ClientAdminUsersPage from "@/pages/client-admin/users-page";
 import { Route } from "wouter";
 
 function Router() {
@@ -64,14 +65,20 @@ function Router() {
       <ProtectedRoute path="/subscription" component={SubscriptionPage} />
       <ProtectedRoute path="/help" component={HelpPage} />
       <ProtectedRoute path="/onboarding" component={UserOnboardingPage} />
-      <ProtectedRoute path="/admin" component={AdminDashboardPage} requiredRole="admin" />
-      <ProtectedRoute path="/admin/users" component={AdminUsersPage} requiredRole="admin" />
-      <ProtectedRoute path="/admin/financial" component={AdminFinancialPage} requiredRole="admin" />
-      <ProtectedRoute path="/admin/system" component={AdminSystemPage} requiredRole="admin" />
-      <ProtectedRoute path="/admin/customers" component={AdminCustomersPage} requiredRole="admin" />
-      <ProtectedRoute path="/admin/onboarding" component={OnboardingPage} requiredRole="admin" />
-      <ProtectedRoute path="/admin/analytics" component={AdminAnalyticsPage} requiredRole="admin" />
-      <ProtectedRoute path="/admin/reports" component={AdminReportsPage} requiredRole="admin" />
+      
+      {/* Client Admin Section */}
+      <ProtectedRoute path="/client-admin/users" component={ClientAdminUsersPage} requiredPermission="canManageUsers" />
+      
+      {/* System Admin Section - Only accessible to system admin users */}
+      <ProtectedRoute path="/admin" component={AdminDashboardPage} requiredRole="systemAdmin" />
+      <ProtectedRoute path="/admin/users" component={AdminUsersPage} requiredRole="systemAdmin" />
+      <ProtectedRoute path="/admin/financial" component={AdminFinancialPage} requiredRole="systemAdmin" />
+      <ProtectedRoute path="/admin/system" component={AdminSystemPage} requiredRole="systemAdmin" />
+      <ProtectedRoute path="/admin/customers" component={AdminCustomersPage} requiredRole="systemAdmin" />
+      <ProtectedRoute path="/admin/onboarding" component={OnboardingPage} requiredRole="systemAdmin" />
+      <ProtectedRoute path="/admin/analytics" component={AdminAnalyticsPage} requiredRole="systemAdmin" />
+      <ProtectedRoute path="/admin/reports" component={AdminReportsPage} requiredRole="systemAdmin" />
+      
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
