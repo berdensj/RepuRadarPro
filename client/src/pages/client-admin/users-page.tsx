@@ -419,7 +419,7 @@ export default function ClientAdminUsersPage() {
           <Button 
             variant="link" 
             className="p-0 h-auto hover:text-primary transition-colors text-muted-foreground"
-            onClick={() => window.location.href = "/dashboard"}
+            onClick={() => window.location.href = "/reviews"}
           >
             Dashboard
           </Button>

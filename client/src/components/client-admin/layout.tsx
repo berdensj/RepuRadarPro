@@ -137,7 +137,7 @@ export default function ClientAdminLayout({ children }: AdminLayoutProps) {
               <Button 
                 variant="ghost" 
                 className="w-full justify-start"
-                onClick={() => window.location.href = "/dashboard"}
+                onClick={() => window.location.href = "/reviews"}
               >
                 <ChevronLeft className="h-5 w-5 mr-2" />
                 Return to Dashboard

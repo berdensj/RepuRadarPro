@@ -41,16 +41,15 @@ export function ProtectedRoute({
   }
   
   // Special case: If this is a client admin (admin role but not system admin) 
-  // trying to access the root dashboard, redirect to the main dashboard (not admin)
-  if ((path === '/' || path === '/dashboard') && user.role === 'admin') {
+  // trying to access the root dashboard, redirect to the client admin dashboard
+  if (path === '/' && user.role === 'admin') {
     const isSystemAdmin = localStorage.getItem('isSystemAdmin') === 'true';
     if (!isSystemAdmin) {
       console.log("Client admin detected, redirecting to appropriate dashboard");
-      // For client admins, redirect to client admin dashboard or main dashboard
-      const pageToRedirectTo = path === '/' ? '/dashboard' : '/client-admin/users';
+      // For client admins at root, redirect to client admin dashboard
       return (
         <Route path={path}>
-          <Redirect to={pageToRedirectTo} />
+          <Redirect to="/client-admin/users" />
         </Route>
       );
     }
