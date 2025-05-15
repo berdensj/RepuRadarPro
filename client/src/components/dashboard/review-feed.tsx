@@ -9,6 +9,7 @@ import {
   Filter,
   Loader2,
   MessageSquareText,
+  Sparkles,
 } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Review } from "@shared/schema";
@@ -28,9 +29,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useToast } from "@/hooks/use-toast";
 
 export function ReviewFeed() {
   const [platform, setPlatform] = useState<string | null>(null);
+  const { toast } = useToast();
 
   const { data: reviews, isLoading, error } = useQuery<Review[]>({
     queryKey: ["/api/reviews/recent"],
@@ -42,6 +45,10 @@ export function ReviewFeed() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/reviews/recent"] });
+      toast({
+        title: "Review resolved",
+        description: "The review has been marked as resolved",
+      });
     },
   });
 
@@ -57,6 +64,25 @@ export function ReviewFeed() {
       );
       return response.json();
     },
+    onSuccess: () => {
+      // Invalidate queries to make sure the AI reply is shown in related components
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews/recent"] });
+      // Also invalidate any specific review queries if they exist
+      queryClient.invalidateQueries({ queryKey: ["/api/reviews"] });
+      
+      toast({
+        title: "AI Reply Generated",
+        description: "An AI-powered response has been created for this review",
+        icon: <Sparkles className="h-4 w-4 text-primary" />,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to generate AI reply: ${error.message}`,
+        variant: "destructive",
+      });
+    }
   });
 
   // Ensure reviews is an array with error handling

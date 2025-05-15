@@ -125,7 +125,9 @@ export function AIReplyPanel({
   // Memoize the AI reply to prevent unnecessary re-renders
   const reply = useMemo(() => {
     if (aiReplyQuery.isSuccess && aiReplyQuery.data) {
-      return aiReplyQuery.data.reply;
+      // Handle both response formats (direct API call and stored replies)
+      return aiReplyQuery.data.reply || 
+             (aiReplyQuery.data.reply_text ? aiReplyQuery.data.reply_text : '');
     }
     return '';
   }, [aiReplyQuery.isSuccess, aiReplyQuery.data]);
