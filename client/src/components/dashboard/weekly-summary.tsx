@@ -114,8 +114,8 @@ export function WeeklySummary({ userId }: WeeklySummaryProps) {
     );
   }
   
-  // Use actual API data, or a placeholder if data is missing
-  const summary = data || {
+  // Create a more robust default object that matches our expected type
+  const defaultSummary: WeeklySummaryData = {
     reportType: "weekly_summary",
     generatedAt: new Date().toISOString(),
     metrics: {
@@ -137,6 +137,28 @@ export function WeeklySummary({ userId }: WeeklySummaryProps) {
       negative: null
     }
   };
+  
+  // Safely merge any data we received with our defaults
+  const summary = data ? {
+    ...defaultSummary,
+    ...data,
+    metrics: {
+      ...defaultSummary.metrics,
+      ...(data.metrics || {}),
+      sentimentBreakdown: {
+        ...defaultSummary.metrics.sentimentBreakdown,
+        ...(data.metrics?.sentimentBreakdown || {})
+      }
+    },
+    topPerformers: {
+      ...defaultSummary.topPerformers,
+      ...(data.topPerformers || {})
+    },
+    highlightedReviews: {
+      ...defaultSummary.highlightedReviews,
+      ...(data.highlightedReviews || {})
+    }
+  } : defaultSummary;
   
   return (
     <Card className="shadow-md">

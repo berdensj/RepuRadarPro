@@ -16,12 +16,12 @@ export function AlertCenter() {
   });
 
   // Parse keyword trends from alerts
-  const keywordTrends = alerts 
+  const keywordTrends = alerts && Array.isArray(alerts)
     ? alerts
         .filter(alert => alert.alertType === "keyword_trend")
         .map(alert => {
           try {
-            return JSON.parse(alert.content);
+            return JSON.parse(alert.content || '{}');
           } catch (e) {
             return null;
           }
@@ -96,24 +96,24 @@ export function AlertCenter() {
                 </div>
               ))}
             </div>
-          ) : negativeReviews && negativeReviews.length > 0 ? (
+          ) : negativeReviews && Array.isArray(negativeReviews) && negativeReviews.length > 0 ? (
             <div className="space-y-2">
               {negativeReviews.map(review => (
-                <div key={review.id} className="p-3 bg-red-50 rounded-md border-l-4 border-red-500">
+                <div key={review.id || Math.random()} className="p-3 bg-red-50 rounded-md border-l-4 border-red-500">
                   <div className="flex justify-between items-start">
                     <div>
                       <div className="flex items-center">
-                        {renderPlatformIcon(review.platform)}
-                        <span className="text-sm font-medium">{review.reviewerName}</span>
+                        {renderPlatformIcon(review.platform || 'unknown')}
+                        <span className="text-sm font-medium">{review.reviewerName || 'Anonymous'}</span>
                       </div>
-                      <StarRating rating={review.rating} size="sm" className="mt-1" />
+                      <StarRating rating={review.rating || 1} size="sm" className="mt-1" />
                     </div>
                     <span className="text-xs text-slate-500">
-                      {formatDistanceToNow(new Date(review.date), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(review.date || review.reviewDate || new Date()), { addSuffix: true })}
                     </span>
                   </div>
                   <div className="mt-2">
-                    <p className="text-xs text-slate-700 line-clamp-2">{review.reviewText}</p>
+                    <p className="text-xs text-slate-700 line-clamp-2">{review.reviewText || 'No review content'}</p>
                   </div>
                   <a href="#" className="text-xs text-primary hover:text-blue-700 mt-1 inline-block">
                     View details
