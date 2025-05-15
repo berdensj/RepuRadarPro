@@ -40,7 +40,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Calendar as CalendarComponent, DateRange } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -97,8 +97,16 @@ export default function AnalyticsPage() {
   const [selectedTone, setSelectedTone] = useState("professional");
   const { toast } = useToast();
   
+  // Define location interface
+  interface Location {
+    id: number;
+    name: string;
+    address: string;
+    userId: number;
+  }
+  
   // Fetch locations for filter dropdown
-  const { data: locations } = useQuery({
+  const { data: locations = [] } = useQuery<Location[]>({
     queryKey: ['/api/locations'],
     retry: 1,
   });
@@ -276,7 +284,14 @@ export default function AnalyticsPage() {
                     mode="range"
                     defaultMonth={dateRange.from}
                     selected={dateRange}
-                    onSelect={(value: DateRange | undefined) => value && setDateRange(value)}
+                    onSelect={(value: DateRange | undefined) => {
+                      if (value) {
+                        setDateRange({
+                          from: value.from,
+                          to: value.to || value.from
+                        });
+                      }
+                    }}
                     numberOfMonths={2}
                   />
                   <div className="p-3 border-t border-slate-200 flex justify-between">
