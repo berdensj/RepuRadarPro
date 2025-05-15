@@ -323,10 +323,9 @@ Remember, how you handle negative reviews can turn an unhappy customer into a lo
         <meta name="description" content="Get support, search the knowledge base, and find answers to your questions about RepuRadar." />
       </Helmet>
       
-      <DashboardLayout>
-        <div className="space-y-8">
-          <h1 className="text-3xl font-bold">Help & Support</h1>
-          
+      <div className="space-y-8">
+        <h1 className="text-3xl font-bold">Help & Support</h1>
+        
           <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
             <div className="space-y-6">
               <Card>
@@ -680,7 +679,7 @@ Remember, how you handle negative reviews can turn an unhappy customer into a lo
             </div>
           </div>
         </div>
-      </DashboardLayout>
+      </div>
     </>
   );
 };
