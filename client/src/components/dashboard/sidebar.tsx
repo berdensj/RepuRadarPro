@@ -440,13 +440,13 @@ export function Sidebar({
           
           {/* User Profile Section */}
           <div className={cn(
-            "mt-auto border-t border-slate-200 p-4",
+            "mt-auto border-t border-slate-200 p-2",
             sidebarCollapsed && "flex flex-col items-center"
           )}>
             {!sidebarCollapsed ? (
               // Full user profile section
               <div className="flex items-center">
-                <Avatar className="h-9 w-9 mr-3">
+                <Avatar className="h-7 w-7 mr-2">
                   {user?.profilePicture ? (
                     <AvatarImage src={user.profilePicture} alt={user.fullName || ''} />
                   ) : (
@@ -454,8 +454,8 @@ export function Sidebar({
                   )}
                 </Avatar>
                 <div className="flex-grow min-w-0">
-                  <p className="text-sm font-medium truncate">{user?.fullName}</p>
-                  <p className="text-xs text-slate-500 truncate">{user?.plan || "Free"} Plan</p>
+                  <p className="text-xs font-medium truncate">{user?.fullName}</p>
+                  <p className="text-[10px] text-slate-500 truncate">{user?.plan || "Free"} Plan</p>
                 </div>
                 <div className="flex items-center gap-1">
                   {/* Dark mode toggle */}
@@ -490,7 +490,7 @@ export function Sidebar({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div className="flex flex-col items-center">
-                    <Avatar className="h-10 w-10 mb-2">
+                    <Avatar className="h-8 w-8 mb-1">
                       {user?.profilePicture ? (
                         <AvatarImage src={user.profilePicture} alt={user.fullName || ''} />
                       ) : (
