@@ -97,12 +97,29 @@ export default function AnalyticsPage() {
   const [selectedTone, setSelectedTone] = useState("professional");
   const { toast } = useToast();
   
-  // Define location interface
+  // Define interfaces for data types
   interface Location {
     id: number;
     name: string;
     address: string;
     userId: number;
+  }
+  
+  interface Review {
+    id: number;
+    userId: number;
+    locationId: number;
+    customerName: string;
+    reviewText: string;
+    rating: number;
+    platform: string;
+    reviewDate: string;
+    date: string; // Alias for reviewDate used in some components
+    responseStatus: string;
+    responseText?: string;
+    responseDate?: string;
+    sentimentScore?: number;
+    aiReplied?: boolean;
   }
   
   // Fetch locations for filter dropdown
@@ -112,7 +129,7 @@ export default function AnalyticsPage() {
   });
   
   // Fetch reviews based on filters
-  const { data: reviews = [], isLoading: isLoadingReviews } = useQuery<any[]>({
+  const { data: reviews = [], isLoading: isLoadingReviews } = useQuery<Review[]>({
     queryKey: ['/api/reviews', selectedLocationId, periodFilter, sentimentFilter],
     retry: 1,
   });
@@ -127,9 +144,9 @@ export default function AnalyticsPage() {
       }]
     };
     
-    const positive = reviews.filter(r => r.sentimentScore >= 0.67).length;
-    const neutral = reviews.filter(r => r.sentimentScore >= 0.33 && r.sentimentScore < 0.67).length;
-    const negative = reviews.filter(r => r.sentimentScore < 0.33).length;
+    const positive = reviews.filter(r => typeof r.sentimentScore === 'number' && r.sentimentScore >= 0.67).length;
+    const neutral = reviews.filter(r => typeof r.sentimentScore === 'number' && r.sentimentScore >= 0.33 && r.sentimentScore < 0.67).length;
+    const negative = reviews.filter(r => typeof r.sentimentScore === 'number' && r.sentimentScore < 0.33).length;
     
     return {
       labels: ['Positive', 'Neutral', 'Negative'],
@@ -734,7 +751,7 @@ export default function AnalyticsPage() {
                             {reviews.slice(0, 6).map((review: Review) => (
                               <TableRow key={review.id}>
                                 <TableCell className="font-medium">
-                                  {format(new Date(review.date), 'MMM d, yyyy')}
+                                  {format(new Date(review.reviewDate), 'MMM d, yyyy')}
                                 </TableCell>
                                 <TableCell>
                                   <div className="line-clamp-2 text-sm">
@@ -913,7 +930,7 @@ export default function AnalyticsPage() {
                       {selectedReview.platform}
                     </Badge>
                     <span className="text-sm text-slate-500">
-                      {format(new Date(selectedReview.date), 'MMM d, yyyy')}
+                      {format(new Date(selectedReview.reviewDate), 'MMM d, yyyy')}
                     </span>
                   </div>
                   <div className="flex items-center">
