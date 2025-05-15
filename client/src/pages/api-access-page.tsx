@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/dashboard/layout";
+// No need to import DashboardLayout as the page is already wrapped with SidebarLayout in App.tsx
 import React, { useState } from "react";
 import { Helmet } from "react-helmet";
 import { useQuery } from "@tanstack/react-query";
@@ -838,9 +838,7 @@ const ApiAccessPage = () => {
         />
       </Helmet>
 
-      <div className="min-h-screen flex flex-col lg:flex-row">
-        <Sidebar />
-
+      <div className="min-h-screen">
         <main className="flex-1 p-4 lg:p-6 bg-slate-50 min-h-screen">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
@@ -1893,7 +1891,7 @@ function verifySignature(payload, signature) {
                 </div>
               </div>
 
-              <Alert variant="warning">
+              <Alert>
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>Important Security Notice</AlertTitle>
                 <AlertDescription>
