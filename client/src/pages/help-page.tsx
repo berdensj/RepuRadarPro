@@ -75,7 +75,7 @@ const searchSchema = z.object({
   query: z.string().min(2, 'Search query must be at least 2 characters'),
 });
 
-export default function HelpPage() {
+const HelpPage: React.FC = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -683,3 +683,5 @@ Remember, how you handle negative reviews can turn an unhappy customer into a lo
     </>
   );
 };
+
+export default HelpPage;
