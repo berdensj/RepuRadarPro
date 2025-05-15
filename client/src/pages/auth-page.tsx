@@ -129,6 +129,9 @@ export default function AuthPage() {
                       value={loginEmail} 
                       onChange={(e) => setLoginEmail(e.target.value)} 
                     />
+                    <div className="text-sm text-muted-foreground mt-1">
+                      Quick login: <Button type="button" variant="link" className="p-0 h-auto text-primary" onClick={() => setLoginEmail("admin")}>admin</Button> or <Button type="button" variant="link" className="p-0 h-auto text-primary" onClick={() => setLoginEmail("client")}>client</Button>
+                    </div>
                   </div>
                   
                   <div className="space-y-2">
@@ -140,6 +143,9 @@ export default function AuthPage() {
                       value={loginPassword} 
                       onChange={(e) => setLoginPassword(e.target.value)} 
                     />
+                    <div className="text-sm text-muted-foreground mt-1">
+                      Password: <Button type="button" variant="link" className="p-0 h-auto text-primary" onClick={() => setLoginPassword(loginEmail === "admin" ? "admin123" : "client123")}>fill default password</Button>
+                    </div>
                   </div>
                   
                   <Button 

@@ -44,6 +44,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Attach permissions to requests
   app.use(attachPermissions);
 
+  // Permissions endpoint
+  app.get("/api/permissions", requireAuthentication, (req, res) => {
+    res.json(req.permissions || {});
+  });
+
   // Onboarding routes
   app.get("/api/user/onboarding/status", async (req, res, next) => {
     try {

@@ -59,8 +59,10 @@ export function WeeklySummary({ userId }: WeeklySummaryProps) {
   
   const { data, isLoading, error, isError } = useQuery<WeeklySummaryData>({
     queryKey: ["/api/reports/weekly-summary", userId],
-    queryFn: async () => {
-      const response = await fetch("/api/reports/weekly-summary");
+    queryFn: async ({ queryKey }) => {
+      const response = await fetch(queryKey[0] as string, {
+        credentials: "include", // This is crucial for including auth cookies
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch weekly summary");
       }
