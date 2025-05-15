@@ -424,7 +424,6 @@ const ImportExportPage = () => {
         <div className="max-w-7xl mx-auto">
             {/* Header */}
             <header className="mb-6">
-              <h1 className="text-2xl font-semibold text-slate-800">Import & Export</h1>
               <p className="text-slate-500">
                 Import and export review data across multiple platforms
               </p>

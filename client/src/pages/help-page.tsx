@@ -324,7 +324,6 @@ Remember, how you handle negative reviews can turn an unhappy customer into a lo
       </Helmet>
       
       <div className="space-y-8">
-        <h1 className="text-3xl font-bold">Help & Support</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
           <div className="space-y-6">

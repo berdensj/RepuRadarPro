@@ -682,7 +682,6 @@ const DashboardBuilderPage = () => {
             {/* Header */}
             <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h1 className="text-2xl font-semibold text-slate-800">Dashboard Builder</h1>
                 <p className="text-slate-500">
                   Create and customize dashboards with your most important metrics
                 </p>

@@ -293,7 +293,7 @@ const CompetitorsPage = () => {
   return (
     <div className="container mx-auto py-6 space-y-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Competitor Analysis</h1>
+
         <Dialog open={addCompetitorOpen} onOpenChange={setAddCompetitorOpen}>
           <DialogTrigger asChild>
             <Button><PlusCircle className="mr-2 h-4 w-4" /> Add Competitor</Button>
