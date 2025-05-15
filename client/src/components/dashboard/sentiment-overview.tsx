@@ -1,15 +1,37 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { Doughnut } from 'react-chartjs-2';
-import { Skeleton } from "@/components/ui/skeleton";
-import { MessageSquare, AlertTriangle, ThumbsUp } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Loader2, RefreshCw, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-// Register ChartJS components
-ChartJS.register(ArcElement, Tooltip, Legend);
+interface SentimentData {
+  sentimentBreakdown: {
+    positive: number;
+    neutral: number;
+    negative: number;
+  };
+  counts: {
+    positive: number;
+    neutral: number;
+    negative: number;
+    total: number;
+  };
+}
 
 export function SentimentOverview() {
-  const { data: sentimentData, isLoading, error } = useQuery({
+  const { 
+    data, 
+    isLoading, 
+    error, 
+    isError, 
+    refetch 
+  } = useQuery<SentimentData>({
     queryKey: ["/api/metrics/sentiment"],
     queryFn: async () => {
       const response = await fetch("/api/metrics/sentiment");
@@ -17,145 +39,176 @@ export function SentimentOverview() {
         throw new Error("Failed to fetch sentiment data");
       }
       return response.json();
-    }
+    },
   });
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-6 w-48" />
-          </CardTitle>
-          <CardDescription>
-            <Skeleton className="h-4 w-64" />
-          </CardDescription>
+          <CardTitle>Sentiment Analysis</CardTitle>
+          <CardDescription>Customer review sentiment breakdown</CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-center py-8">
-          <div className="h-48 w-48">
-            <Skeleton className="h-full w-full rounded-full" />
-          </div>
+        <CardContent className="flex items-center justify-center h-[240px]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </CardContent>
       </Card>
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Sentiment Analysis</CardTitle>
-          <CardDescription>
-            Breakdown of review sentiment
-          </CardDescription>
+          <CardDescription>Customer review sentiment breakdown</CardDescription>
         </CardHeader>
-        <CardContent className="flex items-center justify-center py-8">
-          <div className="text-center text-slate-500">
-            <AlertTriangle className="h-8 w-8 mx-auto mb-2 text-yellow-500" />
-            <p>Error loading sentiment data</p>
-            <p className="text-xs">{error.message}</p>
-          </div>
+        <CardContent className="flex flex-col items-center justify-center h-[240px]">
+          <AlertCircle className="h-8 w-8 text-red-500 mb-4" />
+          <p className="text-sm text-slate-500 text-center mb-4">
+            {error instanceof Error ? error.message : "Failed to load sentiment data"}
+          </p>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <RefreshCw className="h-3 w-3 mr-2" />
+            Try Again
+          </Button>
         </CardContent>
       </Card>
     );
   }
 
-  // Default sentiment data if not available from API
-  const defaultData = {
-    positive: 70,
-    neutral: 20,
-    negative: 10
-  };
-
-  // Use API data if available, otherwise use defaults
-  const breakdown = sentimentData?.sentimentBreakdown || defaultData;
-
-  const chartData = {
-    labels: ['Positive', 'Neutral', 'Negative'],
-    datasets: [
-      {
-        data: [breakdown.positive, breakdown.neutral, breakdown.negative],
-        backgroundColor: [
-          'rgba(34, 197, 94, 0.8)', // green for positive
-          'rgba(234, 179, 8, 0.8)',  // yellow for neutral
-          'rgba(239, 68, 68, 0.8)',  // red for negative
-        ],
-        borderColor: [
-          'rgba(34, 197, 94, 1)',
-          'rgba(234, 179, 8, 1)',
-          'rgba(239, 68, 68, 1)',
-        ],
-        borderWidth: 1,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: true,
-    plugins: {
-      legend: {
-        position: 'bottom' as const,
-        labels: {
-          padding: 20,
-          usePointStyle: true,
-          pointStyle: 'circle'
-        }
-      },
-      tooltip: {
-        callbacks: {
-          label: function(context: any) {
-            return `${context.label}: ${context.raw}%`;
-          }
-        }
-      }
+  // Fallback to default data if API returns no data
+  const sentimentData = data || {
+    sentimentBreakdown: {
+      positive: 0,
+      neutral: 0,
+      negative: 0
     },
-    cutout: '70%'
+    counts: {
+      positive: 0,
+      neutral: 0,
+      negative: 0,
+      total: 0
+    }
+  };
+
+  // Calculate percentages to display in the chart
+  const { positive, neutral, negative } = sentimentData.sentimentBreakdown;
+  
+  // Colors for the sentiment types
+  const colors = {
+    positive: "bg-green-500",
+    neutral: "bg-amber-400",
+    negative: "bg-red-500",
+    positiveLight: "bg-green-100",
+    neutralLight: "bg-amber-100",
+    negativeLight: "bg-red-100"
+  };
+  
+  // Function to get text color class based on sentiment
+  const getTextColor = (sentiment: 'positive' | 'neutral' | 'negative') => {
+    if (sentiment === 'positive') return "text-green-600";
+    if (sentiment === 'neutral') return "text-amber-600";
+    return "text-red-600";
   };
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Sentiment Analysis</CardTitle>
-        <CardDescription>
-          Breakdown of review sentiment
-        </CardDescription>
+        <CardDescription>Customer review sentiment breakdown</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-52 relative">
-          <Doughnut data={chartData} options={chartOptions} />
-          <div className="absolute inset-0 flex items-center justify-center flex-col">
-            <ThumbsUp className="h-6 w-6 text-green-500 mb-1" />
-            <span className="text-2xl font-bold">{breakdown.positive}%</span>
-            <span className="text-xs text-slate-500">Positive</span>
+        {sentimentData.counts.total === 0 ? (
+          <div className="flex flex-col items-center justify-center h-[200px] text-center">
+            <p className="text-sm text-slate-500 mb-2">No sentiment data available</p>
+            <p className="text-xs text-slate-400">
+              Start collecting reviews to see sentiment analysis
+            </p>
           </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2 mt-4">
-          <div className="border rounded-md p-3 text-center">
-            <div className="flex items-center justify-center mb-1">
-              <div className="h-3 w-3 rounded-full bg-green-500 mr-1"></div>
-              <span className="text-sm font-medium">Positive</span>
+        ) : (
+          <div className="space-y-6">
+            {/* Horizontal bar chart visualization */}
+            <div className="w-full h-6 flex rounded-full overflow-hidden">
+              <div 
+                className={`${colors.positive} h-full`} 
+                style={{ width: `${positive}%` }}
+              ></div>
+              <div 
+                className={`${colors.neutral} h-full`}
+                style={{ width: `${neutral}%` }}
+              ></div>
+              <div 
+                className={`${colors.negative} h-full`}
+                style={{ width: `${negative}%` }}
+              ></div>
             </div>
-            <p className="text-xl font-bold">{breakdown.positive}%</p>
-          </div>
-          
-          <div className="border rounded-md p-3 text-center">
-            <div className="flex items-center justify-center mb-1">
-              <div className="h-3 w-3 rounded-full bg-yellow-500 mr-1"></div>
-              <span className="text-sm font-medium">Neutral</span>
+            
+            {/* Stats with counts and percentages */}
+            <div className="grid grid-cols-3 gap-2">
+              <div className="space-y-1">
+                <div className="text-xs text-slate-500">Positive</div>
+                <div className="flex items-baseline">
+                  <span className={`text-xl font-bold ${getTextColor('positive')}`}>
+                    {positive}%
+                  </span>
+                  <span className="text-xs text-slate-400 ml-1">
+                    ({sentimentData.counts.positive})
+                  </span>
+                </div>
+                <div className={`w-full h-1 ${colors.positiveLight} rounded-full`}>
+                  <div 
+                    className={`h-1 ${colors.positive} rounded-full`} 
+                    style={{ width: `${positive}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="text-xs text-slate-500">Neutral</div>
+                <div className="flex items-baseline">
+                  <span className={`text-xl font-bold ${getTextColor('neutral')}`}>
+                    {neutral}%
+                  </span>
+                  <span className="text-xs text-slate-400 ml-1">
+                    ({sentimentData.counts.neutral})
+                  </span>
+                </div>
+                <div className={`w-full h-1 ${colors.neutralLight} rounded-full`}>
+                  <div 
+                    className={`h-1 ${colors.neutral} rounded-full`} 
+                    style={{ width: `${neutral}%` }}
+                  ></div>
+                </div>
+              </div>
+              
+              <div className="space-y-1">
+                <div className="text-xs text-slate-500">Negative</div>
+                <div className="flex items-baseline">
+                  <span className={`text-xl font-bold ${getTextColor('negative')}`}>
+                    {negative}%
+                  </span>
+                  <span className="text-xs text-slate-400 ml-1">
+                    ({sentimentData.counts.negative})
+                  </span>
+                </div>
+                <div className={`w-full h-1 ${colors.negativeLight} rounded-full`}>
+                  <div 
+                    className={`h-1 ${colors.negative} rounded-full`} 
+                    style={{ width: `${negative}%` }}
+                  ></div>
+                </div>
+              </div>
             </div>
-            <p className="text-xl font-bold">{breakdown.neutral}%</p>
-          </div>
-          
-          <div className="border rounded-md p-3 text-center">
-            <div className="flex items-center justify-center mb-1">
-              <div className="h-3 w-3 rounded-full bg-red-500 mr-1"></div>
-              <span className="text-sm font-medium">Negative</span>
+            
+            {/* Total reviews indicator */}
+            <div className="pt-2 text-center border-t border-border">
+              <div className="text-xs text-slate-500">
+                Based on <span className="font-medium">{sentimentData.counts.total}</span> reviews
+              </div>
             </div>
-            <p className="text-xl font-bold">{breakdown.negative}%</p>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );

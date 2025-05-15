@@ -4,6 +4,8 @@ import { TrendGraph } from "@/components/dashboard/trend-graph";
 import { ReviewFeed } from "@/components/dashboard/review-feed";
 import { AlertCenter } from "@/components/dashboard/alert-center";
 import { TrialStatus } from "@/components/dashboard/trial-status";
+import { WeeklySummary } from "@/components/dashboard/weekly-summary";
+import DashboardLayout from "@/components/dashboard/layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Download } from "lucide-react";
@@ -55,46 +57,57 @@ export default function DashboardPage() {
     });
   };
 
+  const { data: userData } = useQuery({
+    queryKey: ["/api/user"],
+  });
+  
   return (
-    <>
+    <DashboardLayout>
       <Helmet>
         <title>Dashboard | RepuRadar</title>
         <meta name="description" content="Monitor and manage your professional reviews with RepuRadar's comprehensive dashboard. Track metrics, respond to reviews, and analyze trends." />
       </Helmet>
       
-      {/* Header */}
-      <header className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold text-slate-800">Dashboard</h1>
-          <p className="text-slate-500">Monitor and manage your professional reviews</p>
-        </div>
-        
-        <div className="mt-4 md:mt-0 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-            <Input
-              type="text"
-              placeholder="Search reviews..."
-              className="pl-9 pr-4 h-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+      {/* Main content */}
+      <div className="p-4 lg:p-6">
+        {/* Header */}
+        <header className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-slate-800">Dashboard</h1>
+            <p className="text-slate-500">Monitor and manage your professional reviews</p>
           </div>
           
-          <Button className="h-10">
-            <Download className="h-4 w-4 mr-2" />
-            Export
-          </Button>
+          <div className="mt-4 md:mt-0 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+              <Input
+                type="text"
+                placeholder="Search reviews..."
+                className="pl-9 pr-4 h-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            
+            <Button className="h-10">
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+          </div>
+        </header>
+        
+        {/* Trial Status Banner */}
+        <TrialStatus />
+        
+        {/* Weekly Summary (New!) */}
+        <div className="mb-6">
+          <WeeklySummary userId={userData?.id || 0} />
         </div>
-      </header>
-      
-      {/* Trial Status Banner */}
-      <TrialStatus />
 
-      {/* Summary Metrics */}
-      <SummaryMetrics />
+        {/* Summary Metrics */}
+        <SummaryMetrics />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Column (2/3 width on large screens) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Trend Graph */}
@@ -145,6 +158,7 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
-    </>
+      </div>
+    </DashboardLayout>
   );
 }
