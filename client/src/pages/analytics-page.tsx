@@ -71,7 +71,7 @@ ChartJS.register(
   Title
 );
 
-export default function AnalyticsPage() {
+function AnalyticsPageContent() {
   const [periodFilter, setPeriodFilter] = useState("30");
   const [selectedLocationId, setSelectedLocationId] = useState<string>("all");
   const [sentimentFilter, setSentimentFilter] = useState("all");
@@ -438,7 +438,7 @@ export default function AnalyticsPage() {
       <div className="min-h-screen flex flex-col lg:flex-row">
         <Sidebar />
         
-        <main className="flex-1 p-4 lg:p-6 bg-slate-50 min-h-screen">
+        <main className="p-4 lg:p-6 bg-slate-50 min-h-screen">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <header className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
