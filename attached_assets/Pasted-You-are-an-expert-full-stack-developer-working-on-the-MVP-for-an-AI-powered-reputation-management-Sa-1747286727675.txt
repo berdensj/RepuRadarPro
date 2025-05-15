@@ -1,0 +1,41 @@
+You are an expert full stack developer working on the MVP for an AI-powered reputation management SaaS called RepuRadarPro. Review the existing codebase and implement or upgrade the following core MVP features:
+
+---
+
+✅ 1. AI Review Reply Generator  
+- Ensure OpenAI API is connected and properly configured using GPT-4 or 3.5  
+- Prompt should include tone, platform, business type, and review text  
+- Save the generated reply to the `ai_replies` table with:
+  - `review_id`, `reply_text`, `tone`, `approved = false`
+
+✅ 2. ai_replied Flagging Logic  
+- Add a boolean column `ai_replied` to the `reviews` table (if missing)  
+- After an AI reply is saved, update the associated review’s `ai_replied` to `true`  
+- Ensure this field is used to **filter out already-processed reviews**
+
+✅ 3. Location Snapshot Reports  
+- Add a dashboard view to show per-location performance:  
+  - Total reviews, average rating, and sentiment breakdown  
+- Include a weekly summary snapshot view (basic chart or list is fine for MVP)
+
+✅ 4. Smart Sentiment Watcher  
+- Use OpenAI or a simple NLP model to tag each review as positive, neutral, or negative  
+- Add a column `sentiment` to the `reviews` table (if missing)  
+- Display sentiment counts and trends by location in the admin/client dashboard
+
+✅ 5. Executive Summary Digest  
+- Implement a weekly email (or PDF export) showing:
+  - Total new reviews
+  - Sentiment breakdown
+  - Top 3 reviews (by rating or length)
+- Allow admin to trigger this manually via dashboard (email automation can be added later)
+
+---
+
+💾 Database: Supabase (Postgres)  
+🧠 AI: OpenAI API (GPT-4)  
+📊 Dashboard: Softr, Vercel+React, or Replit-based frontend  
+📅 Timeline: All features must be available in dashboard view and database within MVP scope.
+
+First, check if any of these features are already implemented and enhance where necessary. Clearly label all new functions and components added. Optimize for clarity, modularity, and scalability.
+
