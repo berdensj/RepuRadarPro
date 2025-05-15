@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/dashboard/layout";
+// No need to import DashboardLayout as the page is already wrapped with SidebarLayout in App.tsx
 import { useState, useEffect } from "react";
 
 import { TrendGraph } from "@/components/dashboard/trend-graph";
@@ -1207,9 +1207,5 @@ function AnalyticsPageContent() {
 }
 
 export default function AnalyticsPage() {
-  return (
-    <DashboardLayout>
-      <AnalyticsPageContent />
-    </DashboardLayout>
-  );
+  return <AnalyticsPageContent />;
 }
