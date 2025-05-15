@@ -107,7 +107,7 @@ export function Sidebar({
       <aside 
         ref={sidebarRef}
         className={cn(
-          "bg-white border-r border-slate-200 z-20 transition-all duration-300 h-full overflow-visible",
+          "bg-white border-r border-slate-200 z-20 transition-all duration-300 h-full overflow-hidden",
           sidebarCollapsed ? "lg:w-20" : "lg:w-64", 
           isMobile ? "shadow-xl" : "relative",
           mobileMenuOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full lg:translate-x-0 lg:w-auto",
