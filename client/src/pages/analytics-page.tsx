@@ -40,7 +40,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarComponent, DateRange } from "@/components/ui/calendar";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -206,7 +206,7 @@ export default function AnalyticsPage() {
     setIsGeneratingResponse(true);
     
     try {
-      const generatedText = await generateReply(selectedReview.reviewText, selectedTone);
+      const generatedText = await generateReply(selectedReview.id, selectedTone);
       setResponseText(generatedText);
       toast({
         title: "Response Generated",
