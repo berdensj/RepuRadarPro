@@ -469,7 +469,6 @@ const ActivityLogsPage = () => {
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <header className="mb-6">
-              <h1 className="text-2xl font-semibold text-slate-800">Activity Logs</h1>
               <p className="text-slate-500">
                 View and manage your account activity and security alerts
               </p>

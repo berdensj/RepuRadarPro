@@ -495,7 +495,6 @@ const CommunicationsPage = () => {
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <header className="mb-6 px-2">
-              <h1 className="text-2xl font-semibold text-slate-800">Communications Center</h1>
               <p className="text-slate-500">
                 Manage all your customer communications in one place
               </p>

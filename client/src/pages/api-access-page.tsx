@@ -843,7 +843,6 @@ const ApiAccessPage = () => {
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <header className="mb-6">
-              <h1 className="text-2xl font-semibold text-slate-800">API Access</h1>
               <p className="text-slate-500">
                 Manage API keys, webhooks, and access to the RepuRadar API
               </p>
