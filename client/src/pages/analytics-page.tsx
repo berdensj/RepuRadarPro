@@ -739,11 +739,11 @@ export default function AnalyticsPage() {
                                 </TableCell>
                                 <TableCell>
                                   <div className="flex justify-center">
-                                    {review.sentiment_score >= 0.67 ? (
+                                    {review.sentimentScore && review.sentimentScore >= 0.67 ? (
                                       <Badge className="bg-green-100 text-green-800 hover:bg-green-200">
                                         Positive
                                       </Badge>
-                                    ) : review.sentiment_score >= 0.33 ? (
+                                    ) : review.sentimentScore && review.sentimentScore >= 0.33 ? (
                                       <Badge className="bg-blue-100 text-blue-800 hover:bg-blue-200">
                                         Neutral
                                       </Badge>
@@ -910,7 +910,7 @@ export default function AnalyticsPage() {
                     ))}
                   </div>
                 </div>
-                <p className="text-sm text-slate-800">{selectedReview.review_text}</p>
+                <p className="text-sm text-slate-800">{selectedReview.reviewText}</p>
               </div>
               
               <div className="flex items-center gap-2 mb-2">
