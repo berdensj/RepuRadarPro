@@ -1,7 +1,7 @@
 import DashboardLayout from "@/components/dashboard/layout";
 import React, { useState } from "react";
 import { Helmet } from "react-helmet";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -183,7 +183,7 @@ const ReportsPage = () => {
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ["/api/reports/schedules"] });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating report schedule:", error);
       toast({
         title: "Error",
@@ -259,7 +259,7 @@ const ReportsPage = () => {
       </Helmet>
 
       <DashboardLayout>
-        <main className="flex-1 p-4 lg:p-6 bg-slate-50 min-h-screen">
+        <div className="flex-1 p-4 lg:p-6 bg-slate-50 min-h-screen">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -365,7 +365,7 @@ const ReportsPage = () => {
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    {templatesData?.templates.map((template) => (
+                                    {templatesData?.templates.map((template: ReportTemplate) => (
                                       <SelectItem
                                         key={template.id}
                                         value={template.id.toString()}
@@ -394,7 +394,7 @@ const ReportsPage = () => {
                                 />
                               </FormControl>
                               <FormDescription>
-                                Enter email addresses separated by commas
+                                Enter the email addresses that should receive this report.
                               </FormDescription>
                               <FormMessage />
                             </FormItem>
@@ -402,10 +402,7 @@ const ReportsPage = () => {
                         />
                         
                         <DialogFooter>
-                          <Button variant="outline" type="button" onClick={() => setIsCreatingReport(false)}>
-                            Cancel
-                          </Button>
-                          <Button type="submit">Schedule Report</Button>
+                          <Button type="submit">Create Report</Button>
                         </DialogFooter>
                       </form>
                     </Form>
@@ -414,264 +411,131 @@ const ReportsPage = () => {
               </div>
             </header>
 
-            <Tabs
-              defaultValue="schedules"
-              value={activeTab}
-              onValueChange={setActiveTab}
-              className="w-full"
-            >
-              <TabsList className="mb-6">
-                <TabsTrigger value="schedules">
-                  <CalendarIcon className="h-4 w-4 mr-2" />
-                  Scheduled Reports
-                </TabsTrigger>
-                <TabsTrigger value="templates">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Report Templates
-                </TabsTrigger>
-                <TabsTrigger value="history">
-                  <FileBarChart2 className="h-4 w-4 mr-2" />
-                  Report History
-                </TabsTrigger>
+            <Tabs defaultValue="schedules" onValueChange={setActiveTab} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="schedules">Scheduled Reports</TabsTrigger>
+                <TabsTrigger value="templates">Report Templates</TabsTrigger>
               </TabsList>
-
-              {/* Scheduled Reports Tab */}
+              
               <TabsContent value="schedules">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Scheduled Reports</CardTitle>
+                    <CardTitle>Your Report Schedules</CardTitle>
                     <CardDescription>
-                      View and manage your automated report schedules
+                      View and manage your scheduled reports.
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     {isLoadingSchedules ? (
-                      <div className="flex justify-center p-8">
-                        <RefreshCw className="h-8 w-8 animate-spin text-slate-400" />
+                      <div className="flex items-center justify-center py-8">
+                        <RefreshCw className="h-8 w-8 animate-spin text-primary" />
                       </div>
                     ) : schedulesError ? (
-                      <div className="text-center text-red-500 p-4">
-                        Failed to load report schedules
+                      <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <p className="text-slate-500 mb-2">Failed to load schedules</p>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/reports/schedules"] })}
+                        >
+                          Try Again
+                        </Button>
+                      </div>
+                    ) : schedulesData?.schedules?.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-8">
+                        <FileText className="h-12 w-12 text-slate-300 mb-4" />
+                        <p className="text-slate-500 mb-4">No reports scheduled yet</p>
+                        <Button onClick={() => setIsCreatingReport(true)}>
+                          Create Your First Report
+                        </Button>
                       </div>
                     ) : (
-                      <div className="rounded-md border">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Report Name</TableHead>
-                              <TableHead className="hidden md:table-cell">Frequency</TableHead>
-                              <TableHead className="hidden md:table-cell">Recipients</TableHead>
-                              <TableHead className="hidden md:table-cell">Last Generated</TableHead>
-                              <TableHead>Status</TableHead>
-                              <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {schedulesData?.schedules.map((schedule) => (
-                              <TableRow key={schedule.id}>
-                                <TableCell>
-                                  <div className="font-medium">{schedule.name}</div>
-                                  <div className="text-sm text-slate-500 md:hidden">
-                                    {schedule.frequency}
-                                  </div>
-                                </TableCell>
-                                <TableCell className="hidden md:table-cell">
-                                  {schedule.frequency}
-                                </TableCell>
-                                <TableCell className="hidden md:table-cell">
-                                  {schedule.recipients}
-                                </TableCell>
-                                <TableCell className="hidden md:table-cell">
-                                  {schedule.lastGenerated}
-                                </TableCell>
-                                <TableCell>
-                                  {getStatusBadge(schedule.status)}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button variant="ghost" size="icon">
-                                        <MoreHorizontal className="h-4 w-4" />
-                                        <span className="sr-only">Open menu</span>
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                      <DropdownMenuSeparator />
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          handleGenerateNow(schedule.id, schedule.name)
-                                        }
-                                      >
-                                        <FileBarChart2 className="h-4 w-4 mr-2" />
-                                        Generate Now
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          handlePauseToggle(
-                                            schedule.id,
-                                            schedule.name,
-                                            schedule.status
-                                          )
-                                        }
-                                      >
-                                        {schedule.status === "active" ? (
-                                          <>
-                                            <span className="h-4 w-4 mr-2">⏸️</span>
-                                            Pause Report
-                                          </>
-                                        ) : (
-                                          <>
-                                            <span className="h-4 w-4 mr-2">▶️</span>
-                                            Activate Report
-                                          </>
-                                        )}
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem>
-                                        <Share2 className="h-4 w-4 mr-2" />
-                                        Share Report
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem>
-                                        <Settings className="h-4 w-4 mr-2" />
-                                        Edit Schedule
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* Templates Tab */}
-              <TabsContent value="templates">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <span>Report Templates</span>
-                      <Button size="sm">
-                        <PlusCircle className="h-4 w-4 mr-2" />
-                        Create Template
-                      </Button>
-                    </CardTitle>
-                    <CardDescription>
-                      Pre-defined report templates and custom templates
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoadingTemplates ? (
-                      <div className="flex justify-center p-8">
-                        <RefreshCw className="h-8 w-8 animate-spin text-slate-400" />
-                      </div>
-                    ) : templatesError ? (
-                      <div className="text-center text-red-500 p-4">
-                        Failed to load report templates
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {templatesData?.templates.map((template) => (
-                          <Card key={template.id} className="overflow-hidden">
-                            <CardHeader className="pb-2">
-                              <CardTitle className="text-lg flex justify-between items-start">
-                                <span>{template.name}</span>
-                                {template.isDefault && (
-                                  <Badge className="bg-slate-600">Default</Badge>
-                                )}
-                              </CardTitle>
-                              <CardDescription>
-                                {getTemplateTypeBadge(template.type)}
-                              </CardDescription>
-                            </CardHeader>
-                            <CardContent className="pb-2">
-                              <p className="text-sm text-slate-600">
-                                {template.description}
-                              </p>
-                              <p className="text-xs text-slate-500 mt-2">
-                                {template.sections} sections
-                              </p>
-                            </CardContent>
-                            <CardFooter className="pt-2 flex justify-between">
-                              <Button variant="ghost" size="sm">Preview</Button>
-                              <Button variant="outline" size="sm">Use Template</Button>
-                            </CardFooter>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </TabsContent>
-
-              {/* History Tab */}
-              <TabsContent value="history">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Report History</CardTitle>
-                    <CardDescription>
-                      View and download previously generated reports
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="rounded-md border">
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead>Report Name</TableHead>
-                            <TableHead className="hidden md:table-cell">Generated On</TableHead>
-                            <TableHead className="hidden md:table-cell">Generated By</TableHead>
-                            <TableHead className="hidden md:table-cell">Size</TableHead>
+                            <TableHead className="w-[240px]">Name</TableHead>
+                            <TableHead>Frequency</TableHead>
+                            <TableHead>Recipients</TableHead>
+                            <TableHead>Last Generated</TableHead>
+                            <TableHead>Status</TableHead>
                             <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {[1, 2, 3, 4, 5].map((i) => (
-                            <TableRow key={i}>
+                          {schedulesData?.schedules.map((schedule: ReportSchedule) => (
+                            <TableRow key={schedule.id}>
+                              <TableCell className="font-medium">
+                                <div className="font-medium">{schedule.name}</div>
+                                <div className="text-sm text-slate-500">
+                                  {schedule.description}
+                                </div>
+                              </TableCell>
+                              <TableCell>{schedule.frequency}</TableCell>
+                              <TableCell>{schedule.recipients}</TableCell>
+                              <TableCell>{schedule.lastGenerated}</TableCell>
                               <TableCell>
-                                <div className="font-medium">
-                                  {i % 3 === 0
-                                    ? "Weekly Reviews Digest"
-                                    : i % 2 === 0
-                                    ? "Monthly Performance Report"
-                                    : "Quarterly Business Intelligence"}
-                                </div>
-                                <div className="text-sm text-slate-500 md:hidden">
-                                  May {i + 5}, 2025
-                                </div>
-                              </TableCell>
-                              <TableCell className="hidden md:table-cell">
-                                May {i + 5}, 2025
-                              </TableCell>
-                              <TableCell className="hidden md:table-cell">
-                                <div className="flex items-center gap-2">
-                                  <UserIcon className="h-4 w-4 text-slate-400" />
-                                  {i % 2 === 0 ? "John Smith" : "Automated"}
-                                </div>
-                              </TableCell>
-                              <TableCell className="hidden md:table-cell">
-                                {Math.floor(Math.random() * 800) + 200} KB
+                                {getStatusBadge(schedule.status)}
                               </TableCell>
                               <TableCell className="text-right">
-                                <Button variant="outline" size="sm">
-                                  Download
-                                </Button>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                      <span className="sr-only">Open menu</span>
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                    <DropdownMenuItem
+                                      onClick={() => handleGenerateNow(schedule.id, schedule.name)}
+                                    >
+                                      <RefreshCw className="mr-2 h-4 w-4" />
+                                      Generate Now
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                      <Settings className="mr-2 h-4 w-4" />
+                                      Edit Schedule
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                      onClick={() => 
+                                        handlePauseToggle(
+                                          schedule.id, 
+                                          schedule.name, 
+                                          schedule.status
+                                        )
+                                      }
+                                    >
+                                      {schedule.status === "active" ? (
+                                        <>
+                                          <span className="mr-2">⏸</span>
+                                          Pause Schedule
+                                        </>
+                                      ) : (
+                                        <>
+                                          <span className="mr-2">▶️</span>
+                                          Activate Schedule
+                                        </>
+                                      )}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                      <Share2 className="mr-2 h-4 w-4" />
+                                      Share Report
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
                               </TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
                       </Table>
-                    </div>
+                    )}
                   </CardContent>
-                  <CardFooter className="flex justify-between">
+                  <CardFooter className="flex items-center justify-between">
                     <Button variant="outline" size="sm">
                       Previous
                     </Button>
                     <div className="text-sm text-slate-500">
-                      Page 1 of 4
+                      Page 1 of 1
                     </div>
                     <Button variant="outline" size="sm">
                       Next
@@ -679,10 +543,79 @@ const ReportsPage = () => {
                   </CardFooter>
                 </Card>
               </TabsContent>
+              
+              <TabsContent value="templates">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Report Templates</CardTitle>
+                    <CardDescription>
+                      Pre-configured report templates for your business needs.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingTemplates ? (
+                      <div className="flex items-center justify-center py-8">
+                        <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+                      </div>
+                    ) : templatesError ? (
+                      <div className="flex flex-col items-center justify-center py-8 text-center">
+                        <p className="text-slate-500 mb-2">Failed to load templates</p>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/reports/templates"] })}
+                        >
+                          Try Again
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {templatesData?.templates.map((template: ReportTemplate) => (
+                          <Card key={template.id} className="overflow-hidden">
+                            <CardHeader className="pb-3">
+                              <div className="flex items-center justify-between">
+                                <div className="space-y-1">
+                                  <CardTitle>{template.name}</CardTitle>
+                                  <CardDescription className="line-clamp-2">
+                                    {template.description}
+                                  </CardDescription>
+                                </div>
+                                {template.isDefault && (
+                                  <Badge variant="outline" className="ml-2">Default</Badge>
+                                )}
+                              </div>
+                            </CardHeader>
+                            <CardContent className="pt-0">
+                              <div className="flex items-center space-x-4 text-sm mb-4">
+                                <div className="flex items-center">
+                                  {getTemplateTypeBadge(template.type)}
+                                </div>
+                                <div className="flex items-center">
+                                  <FileBarChart2 className="mr-1 h-4 w-4 text-slate-400" />
+                                  <span>{template.sections} sections</span>
+                                </div>
+                              </div>
+                              <Button 
+                                className="w-full" 
+                                variant="outline"
+                                onClick={() => {
+                                  setIsCreatingReport(true);
+                                  form.setValue("templateId", template.id.toString());
+                                }}
+                              >
+                                Use Template
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
             </Tabs>
           </div>
-        </main>
-      </div>
+        </div>
+      </DashboardLayout>
     </>
   );
 };

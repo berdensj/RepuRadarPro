@@ -2558,6 +2558,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // API for getting sentiment metrics
+  app.get("/api/metrics/sentiment", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // Get reviews for this user
+      const reviews = await storage.getReviewsByUserId(req.user.id);
+      
+      // Count reviews by sentiment
+      const sentimentCounts = {
+        positive: 0,
+        neutral: 0,
+        negative: 0,
+        total: 0
+      };
+      
+      reviews.forEach(review => {
+        sentimentCounts.total++;
+        
+        if (review.sentiment === 'positive') {
+          sentimentCounts.positive++;
+        } else if (review.sentiment === 'neutral') {
+          sentimentCounts.neutral++;
+        } else if (review.sentiment === 'negative') {
+          sentimentCounts.negative++;
+        }
+      });
+      
+      // Calculate percentages
+      const sentimentBreakdown = {
+        positive: sentimentCounts.total ? Math.round((sentimentCounts.positive / sentimentCounts.total) * 100) : 0,
+        neutral: sentimentCounts.total ? Math.round((sentimentCounts.neutral / sentimentCounts.total) * 100) : 0,
+        negative: sentimentCounts.total ? Math.round((sentimentCounts.negative / sentimentCounts.total) * 100) : 0
+      };
+      
+      res.json({
+        sentimentBreakdown,
+        counts: sentimentCounts
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
   // Use reports service for generating reports
   
   // User reports API for getting reports and scheduling them
