@@ -122,57 +122,11 @@ const ReportsPage = () => {
   } = useQuery({
     queryKey: ["/api/reports/schedules"],
     queryFn: async () => {
-      // Mock data until backend is implemented
-      return {
-        schedules: [
-          {
-            id: 1,
-            name: "Monthly Performance Report",
-            description: "Comprehensive review of platform performance",
-            frequency: "Monthly (1st)",
-            recipients: "3 recipients",
-            lastGenerated: "May 1, 2025",
-            status: "active",
-          },
-          {
-            id: 2,
-            name: "Weekly Reviews Digest",
-            description: "Summary of new reviews and response metrics",
-            frequency: "Weekly (Monday)",
-            recipients: "5 recipients",
-            lastGenerated: "May 6, 2025",
-            status: "active",
-          },
-          {
-            id: 3,
-            name: "Quarterly Business Intelligence",
-            description: "In-depth analysis of business trends and metrics",
-            frequency: "Quarterly",
-            recipients: "7 recipients",
-            lastGenerated: "April 1, 2025",
-            status: "active",
-          },
-          {
-            id: 4,
-            name: "Competitor Benchmark Report",
-            description: "Comparison with key competitors",
-            frequency: "Monthly (15th)",
-            recipients: "4 recipients",
-            lastGenerated: "April 15, 2025",
-            status: "paused",
-          },
-          {
-            id: 5,
-            name: "Location Performance Summary",
-            description: "Performance metrics for each business location",
-            frequency: "Monthly (5th)",
-            recipients: "2 recipients",
-            lastGenerated: "May 5, 2025",
-            status: "active",
-          },
-        ],
-        total: 5,
-      };
+      const response = await fetch("/api/reports/schedules");
+      if (!response.ok) {
+        throw new Error("Failed to fetch report schedules");
+      }
+      return await response.json();
     },
   });
 
@@ -184,60 +138,11 @@ const ReportsPage = () => {
   } = useQuery({
     queryKey: ["/api/reports/templates"],
     queryFn: async () => {
-      // Mock data until backend is implemented
-      return {
-        templates: [
-          {
-            id: 1,
-            name: "Executive Dashboard",
-            description: "High-level metrics for executive review",
-            type: "executive",
-            sections: "5",
-            isDefault: true,
-          },
-          {
-            id: 2,
-            name: "Performance Analytics",
-            description: "Detailed performance metrics and trends",
-            type: "performance",
-            sections: "8",
-            isDefault: false,
-          },
-          {
-            id: 3,
-            name: "Sentiment Analysis",
-            description: "Customer sentiment trends and insights",
-            type: "sentiment",
-            sections: "6",
-            isDefault: false,
-          },
-          {
-            id: 4,
-            name: "User Engagement Report",
-            description: "User interaction and engagement metrics",
-            type: "user",
-            sections: "7",
-            isDefault: false,
-          },
-          {
-            id: 5,
-            name: "Financial Summary",
-            description: "Revenue and financial performance",
-            type: "executive",
-            sections: "4",
-            isDefault: false,
-          },
-          {
-            id: 6,
-            name: "Custom Template",
-            description: "User-defined custom template",
-            type: "custom",
-            sections: "Variable",
-            isDefault: false,
-          },
-        ],
-        total: 6,
-      };
+      const response = await fetch("/api/reports/templates");
+      if (!response.ok) {
+        throw new Error("Failed to fetch report templates");
+      }
+      return await response.json();
     },
   });
 
@@ -251,20 +156,41 @@ const ReportsPage = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof createReportSchema>) => {
-    // Simulate creating a new report
-    console.log("Creating new report:", values);
-    
-    toast({
-      title: "Report Scheduled",
-      description: "Your new report has been scheduled successfully.",
-    });
-    
-    setIsCreatingReport(false);
-    form.reset();
-    
-    // Invalidate queries to refresh data
-    queryClient.invalidateQueries({ queryKey: ["/api/reports/schedules"] });
+  const onSubmit = async (values: z.infer<typeof createReportSchema>) => {
+    try {
+      const response = await fetch("/api/reports/schedule", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to create report schedule");
+      }
+      
+      const data = await response.json();
+      
+      toast({
+        title: "Report Scheduled",
+        description: "Your new report has been scheduled successfully.",
+      });
+      
+      setIsCreatingReport(false);
+      form.reset();
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ["/api/reports/schedules"] });
+    } catch (error) {
+      console.error("Error creating report schedule:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create report schedule",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleGenerateNow = (reportId: number, reportName: string) => {
@@ -332,9 +258,7 @@ const ReportsPage = () => {
         />
       </Helmet>
 
-      <div className="min-h-screen flex flex-col lg:flex-row">
-        <Sidebar />
-
+      <DashboardLayout>
         <main className="flex-1 p-4 lg:p-6 bg-slate-50 min-h-screen">
           <div className="max-w-7xl mx-auto">
             {/* Header */}

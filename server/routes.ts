@@ -13,11 +13,13 @@ import {
 } from "@shared/schema";
 import { generateAIReply, analyzeReviewSentiment } from "./lib/openai";
 import { requireRole, attachPermissions } from "./middleware/rbac";
+import { requireAuthentication } from "./middleware/auth";
 
 // Import external services
 import { importGooglePlacesReviews } from "./services/google-places";
 import { importYelpReviews } from "./services/yelp";
 import { importFacebookReviews } from "./services/facebook";
+import { reportsService } from "./services/reports-service";
 import { importAppleMapsReviews } from "./services/apple-maps";
 import { processReviewRequest } from "./services/review-request";
 import { 
@@ -2550,6 +2552,144 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         templates,
         total: templates.length
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  // Use reports service for generating reports
+  
+  // User reports API for getting reports and scheduling them
+  app.get("/api/reports/weekly-summary", requireAuthentication, async (req, res, next) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const report = await reportsService.generateWeeklySummary(req.user.id);
+      res.json(report);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/reports/templates", requireAuthentication, async (req, res, next) => {
+    try {
+      // Return report templates available to the user
+      const templates = [
+        {
+          id: 1,
+          name: "Executive Dashboard",
+          description: "High-level metrics for executive review",
+          type: "executive",
+          sections: "5",
+          isDefault: true,
+        },
+        {
+          id: 2,
+          name: "Performance Analytics",
+          description: "Detailed performance metrics and trends",
+          type: "performance",
+          sections: "8",
+          isDefault: false,
+        },
+        {
+          id: 3,
+          name: "Sentiment Analysis",
+          description: "Customer sentiment trends and insights",
+          type: "sentiment",
+          sections: "6",
+          isDefault: false,
+        },
+        {
+          id: 4,
+          name: "User Engagement Report",
+          description: "User interaction and engagement metrics",
+          type: "user",
+          sections: "7",
+          isDefault: false,
+        },
+        {
+          id: 5,
+          name: "Financial Summary",
+          description: "Revenue and financial performance",
+          type: "executive",
+          sections: "4",
+          isDefault: false,
+        }
+      ];
+      
+      res.json({
+        templates,
+        total: templates.length
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/reports/schedules", requireAuthentication, async (req, res, next) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      // In a production implementation, this would fetch from database
+      const schedules = [
+        {
+          id: 1,
+          name: "Weekly Review Summary",
+          description: "A summary of review activity for the past week",
+          frequency: "Weekly (Monday)",
+          recipients: "you@example.com",
+          lastGenerated: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          status: "active"
+        },
+        {
+          id: 2,
+          name: "Monthly Performance Metrics",
+          description: "Detailed metrics for month-end review",
+          frequency: "Monthly (1st)",
+          recipients: "you@example.com, manager@example.com",
+          lastGenerated: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          status: "active"
+        }
+      ];
+      
+      res.json({
+        schedules,
+        total: schedules.length
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.post("/api/reports/schedule", requireAuthentication, async (req, res, next) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const { name, description, frequency, recipients, templateId } = req.body;
+      
+      // Validate the request
+      if (!name || !frequency || !recipients || !templateId) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      // In a production implementation, this would create a schedule in the database
+      res.status(201).json({
+        id: Math.floor(Math.random() * 1000),
+        name,
+        description,
+        frequency,
+        recipients,
+        templateId,
+        status: "active",
+        createdAt: new Date().toISOString(),
+        lastGenerated: null
       });
     } catch (error) {
       next(error);
