@@ -258,8 +258,7 @@ const ReportsPage = () => {
         />
       </Helmet>
 
-      <DashboardLayout>
-        <div className="flex-1 p-4 lg:p-6 bg-slate-50 min-h-screen">
+      <div className="flex-1 p-4 lg:p-6 bg-slate-50 min-h-screen">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -615,8 +614,7 @@ const ReportsPage = () => {
             </Tabs>
           </div>
         </div>
-      </DashboardLayout>
-    </>
+      </>
   );
 };
 
