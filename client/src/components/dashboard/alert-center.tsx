@@ -74,14 +74,14 @@ export function AlertCenter() {
 
   return (
     <Card className="h-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg font-semibold">Alert Center</CardTitle>
+      <CardHeader className="pb-2 sm:pb-4">
+        <CardTitle className="text-base sm:text-lg font-semibold">Alert Center</CardTitle>
       </CardHeader>
       
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-4 sm:space-y-5 px-3 sm:px-6">
         {/* Negative Reviews Alert */}
         <div>
-          <h3 className="font-medium text-sm text-slate-600 mb-2">Recent Negative Reviews</h3>
+          <h3 className="font-medium text-xs sm:text-sm text-slate-600 mb-1.5 sm:mb-2">Recent Negative Reviews</h3>
           
           {isLoadingNegative ? (
             <div className="space-y-2">
@@ -99,23 +99,23 @@ export function AlertCenter() {
           ) : negativeReviews && Array.isArray(negativeReviews) && negativeReviews.length > 0 ? (
             <div className="space-y-2">
               {negativeReviews.map(review => (
-                <div key={review.id || Math.random()} className="p-3 bg-red-50 rounded-md border-l-4 border-red-500">
-                  <div className="flex justify-between items-start">
+                <div key={review.id || Math.random()} className="p-2 sm:p-3 bg-red-50 rounded-md border-l-4 border-red-500">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-0">
                     <div>
                       <div className="flex items-center">
                         {renderPlatformIcon(review.platform || 'unknown')}
-                        <span className="text-sm font-medium">{review.reviewerName || 'Anonymous'}</span>
+                        <span className="text-xs sm:text-sm font-medium">{review.reviewerName || 'Anonymous'}</span>
                       </div>
                       <StarRating rating={review.rating || 1} size="sm" className="mt-1" />
                     </div>
-                    <span className="text-xs text-slate-500">
-                      {formatDistanceToNow(new Date(review.date || review.reviewDate || new Date()), { addSuffix: true })}
+                    <span className="text-[10px] sm:text-xs text-slate-500">
+                      {formatDistanceToNow(new Date(review.date || new Date()), { addSuffix: true })}
                     </span>
                   </div>
-                  <div className="mt-2">
+                  <div className="mt-1 sm:mt-2">
                     <p className="text-xs text-slate-700 line-clamp-2">{review.reviewText || 'No review content'}</p>
                   </div>
-                  <a href="#" className="text-xs text-primary hover:text-blue-700 mt-1 inline-block">
+                  <a href="#" className="text-[10px] sm:text-xs text-primary hover:text-blue-700 mt-1 inline-block">
                     View details
                   </a>
                 </div>
@@ -130,7 +130,7 @@ export function AlertCenter() {
         
         {/* Keyword Trend Detection */}
         <div>
-          <h3 className="font-medium text-sm text-slate-600 mb-2">Keyword Trends Detected</h3>
+          <h3 className="font-medium text-xs sm:text-sm text-slate-600 mb-1.5 sm:mb-2">Keyword Trends Detected</h3>
           
           {isLoadingAlerts ? (
             <div className="space-y-2">
@@ -149,18 +149,18 @@ export function AlertCenter() {
               {sampleKeywordTrends.map((trend, index) => (
                 <div 
                   key={index} 
-                  className={`p-3 rounded-md border-l-4 ${
+                  className={`p-2 sm:p-3 rounded-md border-l-4 ${
                     trend.keyword === "Staff Friendliness" 
                       ? "bg-green-50 border-green-500" 
                       : "bg-amber-50 border-amber-500"
                   }`}
                 >
-                  <div className="flex justify-between">
-                    <span className="text-sm font-medium flex items-center">
-                      <TrendingUp className="h-3 w-3 mr-1" />
+                  <div className="flex flex-wrap justify-between items-center gap-1">
+                    <span className="text-xs sm:text-sm font-medium flex items-center">
+                      <TrendingUp className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
                       {trend.keyword}
                     </span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    <span className={`text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full ${
                       trend.keyword === "Staff Friendliness"
                         ? "bg-green-200 text-green-800"
                         : "bg-amber-200 text-amber-800"
@@ -168,7 +168,7 @@ export function AlertCenter() {
                       {trend.trend === "increasing" ? "+" : "-"}{trend.percentage}%
                     </span>
                   </div>
-                  <p className="text-xs text-slate-700 mt-1">{trend.description}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-700 mt-0.5 sm:mt-1">{trend.description}</p>
                 </div>
               ))}
             </div>
@@ -177,47 +177,47 @@ export function AlertCenter() {
         
         {/* Improvement Tips */}
         <div>
-          <h3 className="font-medium text-sm text-slate-600 mb-2">Improvement Tips</h3>
+          <h3 className="font-medium text-xs sm:text-sm text-slate-600 mb-1.5 sm:mb-2">Improvement Tips</h3>
           <div className="space-y-3">
             <div className="flex items-start">
-              <div className="bg-blue-100 p-2 rounded-full text-primary mr-3 mt-0.5">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-full text-primary mr-2 sm:mr-3 mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="8" x2="16" y1="12" y2="12"></line>
                   <line x1="12" x2="12" y1="16" y2="8"></line>
                   <circle cx="12" cy="12" r="10"></circle>
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-medium">Address Billing Concerns</h3>
-                <p className="text-sm text-slate-600 mt-1">Review your billing processes and provide staff training to ensure accurate charges.</p>
+                <h3 className="text-xs sm:text-sm font-medium">Address Billing Concerns</h3>
+                <p className="text-xs sm:text-sm text-slate-600 mt-0.5 sm:mt-1">Review your billing processes and provide staff training to ensure accurate charges.</p>
               </div>
             </div>
             
             <div className="flex items-start">
-              <div className="bg-blue-100 p-2 rounded-full text-primary mr-3 mt-0.5">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-full text-primary mr-2 sm:mr-3 mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="8" x2="16" y1="12" y2="12"></line>
                   <line x1="12" x2="12" y1="16" y2="8"></line>
                   <circle cx="12" cy="12" r="10"></circle>
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-medium">Improve Appointment Scheduling</h3>
-                <p className="text-sm text-slate-600 mt-1">Consider adjusting your scheduling system to reduce patient wait times.</p>
+                <h3 className="text-xs sm:text-sm font-medium">Improve Appointment Scheduling</h3>
+                <p className="text-xs sm:text-sm text-slate-600 mt-0.5 sm:mt-1">Consider adjusting your scheduling system to reduce patient wait times.</p>
               </div>
             </div>
             
             <div className="flex items-start">
-              <div className="bg-blue-100 p-2 rounded-full text-primary mr-3 mt-0.5">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="bg-blue-100 p-1.5 sm:p-2 rounded-full text-primary mr-2 sm:mr-3 mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 sm:h-4 sm:w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="8" x2="16" y1="12" y2="12"></line>
                   <line x1="12" x2="12" y1="16" y2="8"></line>
                   <circle cx="12" cy="12" r="10"></circle>
                 </svg>
               </div>
               <div>
-                <h3 className="text-sm font-medium">Respond to Negative Reviews</h3>
-                <p className="text-sm text-slate-600 mt-1">Promptly address negative feedback to demonstrate your commitment to improvement.</p>
+                <h3 className="text-xs sm:text-sm font-medium">Respond to Negative Reviews</h3>
+                <p className="text-xs sm:text-sm text-slate-600 mt-0.5 sm:mt-1">Promptly address negative feedback to demonstrate your commitment to improvement.</p>
               </div>
             </div>
           </div>
