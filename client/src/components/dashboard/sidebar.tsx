@@ -464,9 +464,9 @@ export function Sidebar({
                     size="icon" 
                     onClick={toggleTheme}
                     aria-label={theme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
-                    className="h-8 w-8"
+                    className="h-6 w-6"
                   >
-                    {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                    {theme === 'dark' ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
                   </Button>
                   
                   {/* Color theme picker */}
@@ -479,9 +479,9 @@ export function Sidebar({
                     onClick={handleLogout}
                     disabled={logoutMutation.isPending}
                     aria-label="Sign out"
-                    className="h-8 w-8"
+                    className="h-6 w-6"
                   >
-                    <LogOut className="h-4 w-4" />
+                    <LogOut className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
@@ -503,14 +503,14 @@ export function Sidebar({
                       size="icon" 
                       onClick={toggleTheme}
                       aria-label={theme === 'dark' ? "Switch to light mode" : "Switch to dark mode"}
-                      className="h-8 w-8 mb-2"
+                      className="h-6 w-6 mb-1"
                     >
-                      {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                      {theme === 'dark' ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
                     </Button>
                     
                     {/* Color theme picker */}
-                    <div className="mb-2">
-                      <ColorPalettePicker />
+                    <div className="mb-1">
+                      <ColorPalettePicker size="small" />
                     </div>
                     
                     {/* Logout button */}
@@ -521,7 +521,7 @@ export function Sidebar({
                       disabled={logoutMutation.isPending}
                       aria-label="Sign out"
                     >
-                      <LogOut className="h-4 w-4" />
+                      <LogOut className="h-3 w-3" />
                     </Button>
                   </div>
                 </TooltipTrigger>
