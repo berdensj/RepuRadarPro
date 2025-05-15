@@ -1344,25 +1344,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Permissions endpoint
-  app.get("/api/permissions", async (req, res, next) => {
-    try {
-      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
-      
-      // Permissions are attached to the request by the attachPermissions middleware
-      res.json(req.permissions || {
-        canManageUsers: false,
-        canManageStaff: false,
-        canViewAllLocations: false,
-        canEditSettings: false,
-        canDeleteReviews: false,
-        canManageIntegrations: false,
-        canViewReports: false,
-        canBulkEditReviews: false,
-      });
-    } catch (error) {
-      next(error);
-    }
-  });
+  // The permissions endpoint is already defined at line 48, so we're removing this duplicate
 
   // Admin Dashboard API endpoints
   app.get("/api/admin/dashboard", requireRole('admin'), async (req, res, next) => {
