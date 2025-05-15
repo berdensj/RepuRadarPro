@@ -104,7 +104,7 @@ export default function AnalyticsPage() {
   });
   
   // Fetch reviews based on filters
-  const { data: reviews, isLoading: isLoadingReviews } = useQuery({
+  const { data: reviews = [], isLoading: isLoadingReviews } = useQuery<any[]>({
     queryKey: ['/api/reviews', selectedLocationId, periodFilter, sentimentFilter],
     retry: 1,
   });
@@ -119,9 +119,9 @@ export default function AnalyticsPage() {
       }]
     };
     
-    const positive = reviews.filter(r => r.sentiment_score >= 0.67).length;
-    const neutral = reviews.filter(r => r.sentiment_score >= 0.33 && r.sentiment_score < 0.67).length;
-    const negative = reviews.filter(r => r.sentiment_score < 0.33).length;
+    const positive = reviews.filter(r => r.sentimentScore >= 0.67).length;
+    const neutral = reviews.filter(r => r.sentimentScore >= 0.33 && r.sentimentScore < 0.67).length;
+    const negative = reviews.filter(r => r.sentimentScore < 0.33).length;
     
     return {
       labels: ['Positive', 'Neutral', 'Negative'],
@@ -198,7 +198,7 @@ export default function AnalyticsPage() {
     setIsGeneratingResponse(true);
     
     try {
-      const generatedText = await generateReply(selectedReview.review_text, selectedTone);
+      const generatedText = await generateReply(selectedReview.reviewText, selectedTone);
       setResponseText(generatedText);
       toast({
         title: "Response Generated",
@@ -723,7 +723,7 @@ export default function AnalyticsPage() {
                                 </TableCell>
                                 <TableCell>
                                   <div className="line-clamp-2 text-sm">
-                                    {review.review_text}
+                                    {review.reviewText}
                                   </div>
                                 </TableCell>
                                 <TableCell className="text-center">
