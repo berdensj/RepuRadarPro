@@ -220,25 +220,30 @@ export function ReviewFeed() {
                 key={review.id}
                 className="border border-slate-200 rounded-lg p-4"
               >
-                <div className="flex items-center justify-between mb-2">
+                {/* Enhanced header for better mobile layout */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
                   <div className="flex items-center">
                     {renderPlatformIcon(review.platform)}
-                    <h3 className="font-medium">{review.reviewerName}</h3>
+                    <h3 className="font-medium truncate max-w-[180px] sm:max-w-none">{review.reviewerName}</h3>
                   </div>
-                  <div className="flex items-center">
+                  <div className="flex items-center flex-wrap gap-2">
                     <StarRating
                       rating={review.rating}
                       className="mr-2"
                     />
-                    <span className="text-sm text-slate-500">
+                    <span className="text-xs sm:text-sm text-slate-500 whitespace-nowrap">
                       {formatDistanceToNow(new Date(review.date), {
                         addSuffix: true,
                       })}
                     </span>
                   </div>
                 </div>
-                <p className="text-sm mb-3">{review.reviewText}</p>
-                <div className="flex flex-wrap gap-2">
+                
+                {/* Review text with better readability on all screen sizes */}
+                <p className="text-sm mb-3 break-words">{review.reviewText}</p>
+                
+                {/* Action buttons with improved layout on small screens */}
+                <div className="flex flex-wrap gap-2 justify-start sm:justify-end">
                   <Button
                     variant="outline"
                     size="sm"
