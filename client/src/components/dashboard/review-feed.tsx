@@ -223,7 +223,9 @@ export function ReviewFeed() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-2">
                   <div className="flex items-center">
                     {renderPlatformIcon(review.platform)}
-                    <h3 className="font-medium truncate max-w-[180px] sm:max-w-none">{review.reviewerName}</h3>
+                    <h3 className="font-medium truncate max-w-[180px] sm:max-w-none">
+                      {review.reviewerName || "Anonymous Customer"}
+                    </h3>
                   </div>
                   <div className="flex items-center flex-wrap gap-2">
                     <StarRating

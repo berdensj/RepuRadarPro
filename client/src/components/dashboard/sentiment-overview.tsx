@@ -64,12 +64,12 @@ export function SentimentOverview({
         ></div>
       </div>
       
-      {/* Stats with percentages */}
-      <div className="grid grid-cols-3 gap-2">
+      {/* Stats with percentages - enhanced responsive layout */}
+      <div className="grid grid-cols-3 gap-1 sm:gap-2">
         <div className="space-y-1">
           <div className="text-xs text-slate-500">Positive</div>
           <div className="flex items-baseline">
-            <span className={`text-xl font-bold ${getTextColor('positive')}`}>
+            <span className={`text-sm sm:text-xl font-bold ${getTextColor('positive')}`}>
               {positive}%
             </span>
           </div>
@@ -84,7 +84,7 @@ export function SentimentOverview({
         <div className="space-y-1">
           <div className="text-xs text-slate-500">Neutral</div>
           <div className="flex items-baseline">
-            <span className={`text-xl font-bold ${getTextColor('neutral')}`}>
+            <span className={`text-sm sm:text-xl font-bold ${getTextColor('neutral')}`}>
               {neutral}%
             </span>
           </div>
@@ -99,7 +99,7 @@ export function SentimentOverview({
         <div className="space-y-1">
           <div className="text-xs text-slate-500">Negative</div>
           <div className="flex items-baseline">
-            <span className={`text-xl font-bold ${getTextColor('negative')}`}>
+            <span className={`text-sm sm:text-xl font-bold ${getTextColor('negative')}`}>
               {negative}%
             </span>
           </div>
@@ -119,9 +119,9 @@ export function SentimentOverview({
     return (
       <Card>
         {showHeader && (
-          <CardHeader>
-            <CardTitle>Sentiment Analysis</CardTitle>
-            <CardDescription>Customer review sentiment breakdown</CardDescription>
+          <CardHeader className="pb-2 sm:pb-6">
+            <CardTitle className="text-base sm:text-lg">Sentiment Analysis</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">Customer review sentiment breakdown</CardDescription>
           </CardHeader>
         )}
         <CardContent>
