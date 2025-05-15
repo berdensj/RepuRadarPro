@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/dashboard/layout";
+// No need to import DashboardLayout as the page is already wrapped with SidebarLayout in App.tsx
 import { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { apiRequest, queryClient } from '@/lib/queryClient';
