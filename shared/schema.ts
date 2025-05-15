@@ -83,7 +83,9 @@ export const reviews = pgTable("reviews", {
   response: text("response"),
   externalId: text("external_id"), // ID from external platform (Google, Yelp)
   sentimentScore: real("sentiment_score"),
+  sentiment: text("sentiment"), // positive, neutral, negative
   keywords: jsonb("keywords"),
+  ai_replied: boolean("ai_replied").default(false), // Whether an AI reply has been generated
 });
 
 export const insertReviewSchema = createInsertSchema(reviews).pick({
@@ -98,7 +100,9 @@ export const insertReviewSchema = createInsertSchema(reviews).pick({
   response: true,
   externalId: true,
   sentimentScore: true,
+  sentiment: true,
   keywords: true,
+  ai_replied: true,
 });
 
 // Metrics table for storing aggregated metrics
@@ -139,6 +143,25 @@ export const insertAlertSchema = createInsertSchema(alerts).pick({
   isRead: true,
 });
 
+// AI Replies table
+export const aiReplies = pgTable("ai_replies", {
+  id: serial("id").primaryKey(),
+  reviewId: integer("review_id").notNull().references(() => reviews.id, { onDelete: "cascade" }),
+  reply_text: text("reply_text").notNull(),
+  tone: text("tone").notNull().default("professional"),
+  approved: boolean("approved").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at"),
+});
+
+export const insertAiReplySchema = createInsertSchema(aiReplies).pick({
+  reviewId: true,
+  reply_text: true,
+  tone: true,
+  approved: true,
+  updatedAt: true,
+});
+
 // Type exports
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -151,6 +174,9 @@ export type Metrics = typeof metrics.$inferSelect;
 
 export type InsertAlert = z.infer<typeof insertAlertSchema>;
 export type Alert = typeof alerts.$inferSelect;
+
+export type InsertAiReply = z.infer<typeof insertAiReplySchema>;
+export type AiReply = typeof aiReplies.$inferSelect;
 
 // Locations table for multi-location management
 export const locations = pgTable("locations", {
@@ -346,7 +372,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 }));
 
 // Review relations
-export const reviewsRelations = relations(reviews, ({ one }) => ({
+export const reviewsRelations = relations(reviews, ({ one, many }) => ({
   user: one(users, {
     fields: [reviews.userId],
     references: [users.id],
@@ -355,6 +381,7 @@ export const reviewsRelations = relations(reviews, ({ one }) => ({
     fields: [reviews.locationId],
     references: [locations.id],
   }),
+  aiReplies: many(aiReplies),
 }));
 
 // Location relations
@@ -444,6 +471,14 @@ export const agencyClientsRelations = relations(agencyClients, ({ one }) => ({
   client: one(users, {
     fields: [agencyClients.clientUserId],
     references: [users.id],
+  }),
+}));
+
+// AI Reply relations
+export const aiRepliesRelations = relations(aiReplies, ({ one }) => ({
+  review: one(reviews, {
+    fields: [aiReplies.reviewId],
+    references: [reviews.id],
   }),
 }));
 
