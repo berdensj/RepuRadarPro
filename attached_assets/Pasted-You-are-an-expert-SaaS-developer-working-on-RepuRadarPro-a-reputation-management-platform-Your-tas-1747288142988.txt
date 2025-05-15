@@ -1,0 +1,52 @@
+You are an expert SaaS developer working on RepuRadarPro, a reputation management platform. Your task is to analyze the current MVP codebase and compare it against high-demand features inspired by Birdeye, focusing on what clients value most.
+
+---
+
+🔍 First, audit the following feature areas to see if they exist in the codebase. If any are missing or incomplete, implement them using modular, well-documented code.
+
+✅ 1. Simplified Dashboard
+- Ensure the dashboard is clean, easy to navigate, and client-friendly
+- Must include: total reviews, average rating, recent reviews, sentiment overview
+- If missing, add a dashboard UI component with these widgets
+
+✅ 2. AI-Driven Review Replies
+- Check that OpenAI GPT integration is working
+- Ensure reviews are auto-tagged with `ai_replied` once processed
+- If not found, implement a module that calls GPT-4 and stores `reply_text`, `tone`, `review_id`, and `approved = false` in `ai_replies`
+
+✅ 3. Customizable Reports (Light MVP version)
+- Enable downloadable or emailed weekly summary reports
+- Include per-location: review count, sentiment breakdown, top review
+- If not found, implement a function that aggregates this data and outputs a JSON or email draft
+
+✅ 4. Automated Review Request Logic (Stub/Placeholder OK for MVP)
+- Stub a function to support sending review request emails or SMS via SendGrid or Twilio
+- Include a manual trigger via dashboard for now
+
+✅ 5. Sentiment Analysis Tagging
+- Check for a `sentiment` field in the `reviews` table
+- Use OpenAI or a basic keyword classifier to tag reviews as positive, neutral, or negative
+- Show sentiment breakdown on dashboard
+
+✅ 6. Tiered Pricing Awareness
+- Confirm system is aware of plan types (e.g. Free, Growth, Agency)
+- Prevent access to premium features if plan = Free
+- If this logic doesn’t exist, create a middleware guard for dashboard pages
+
+✅ 7. Easy Integration Layer (Optional)
+- Add documentation or stub files for how integrations could be added later (e.g. Google Business profile sync, webhook endpoints)
+
+---
+
+🧠 System Stack:
+- Supabase for DB + Auth
+- Make.com for automation (optional)
+- Replit-hosted frontend and logic (React, Node.js or Flask)
+- OpenAI for AI response generation
+
+📦 Output:
+- Clearly label all new files or modules added
+- Ensure backward compatibility
+- Include comments above each new function explaining purpose
+
+Only implement what is missing or clearly incomplete. Skip or stub out advanced automation if time-intensive. The goal is a clean, scalable MVP aligned with real-world client needs from platforms like Birdeye.
