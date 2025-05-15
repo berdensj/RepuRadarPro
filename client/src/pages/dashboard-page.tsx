@@ -118,18 +118,23 @@ export default function DashboardPage() {
         {/* Summary Metrics */}
         <SummaryMetrics />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column (2/3 width on large screens) */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Trend Graph */}
-            <TrendGraph />
+        {/* Improved responsive grid layout with better spacing on small screens */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Left Column (2/3 width on large screens, full width on smaller screens) */}
+          <div className="md:col-span-2 space-y-4 sm:space-y-6">
+            {/* Trend Graph - better padding on mobile */}
+            <div className="p-2 sm:p-0">
+              <TrendGraph />
+            </div>
 
-            {/* Review Feed */}
-            <ReviewFeed />
+            {/* Review Feed - better padding on mobile */}
+            <div className="p-2 sm:p-0">
+              <ReviewFeed />
+            </div>
           </div>
 
-          {/* Right Column (1/3 width on large screens) */}
-          <div className="space-y-6">
+          {/* Right Column (1/3 width on large screens, full width on mobile) */}
+          <div className="space-y-4 sm:space-y-6">
             {/* AI Reply Generator Panel (shown when a review is selected) */}
             {selectedReview ? (
               <div className="relative">
