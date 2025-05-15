@@ -421,7 +421,7 @@ const ImportExportPage = () => {
       </Helmet>
 
       <main className="flex-1 p-4 lg:p-6 bg-slate-50 min-h-screen">
-          <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto">
             {/* Header */}
             <header className="mb-6">
               <h1 className="text-2xl font-semibold text-slate-800">Import & Export</h1>
@@ -1351,9 +1351,7 @@ const ImportExportPage = () => {
                 </div>
               </TabsContent>
             </Tabs>
-          </div>
-        </main>
-      </div>
+        </div>
       </main>
     </div>
   );

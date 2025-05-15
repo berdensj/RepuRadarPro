@@ -67,7 +67,7 @@ export function SummaryMetrics() {
               <p className="text-sm font-medium text-slate-500">Average Rating</p>
               <div className="flex items-center mt-1 flex-wrap gap-1">
                 <span className="text-xl sm:text-2xl font-semibold mr-2">
-                  {metrics?.averageRating?.toFixed(1) || "0.0"}
+                  {metrics && typeof metrics.averageRating === 'number' ? metrics.averageRating.toFixed(1) : "0.0"}
                 </span>
                 <StarRating rating={metrics?.averageRating || 0} />
               </div>
