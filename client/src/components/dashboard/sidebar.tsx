@@ -340,8 +340,8 @@ export function Sidebar({
                                   aria-current={isRouteActive(child.href) ? "page" : undefined}
                                 >
                                   <div className="flex items-center">
-                                    <child.icon className="w-4 h-4 mr-2" aria-hidden="true" />
-                                    <span>{child.label}</span>
+                                    <child.icon className="w-3 h-3 mr-1.5" aria-hidden="true" />
+                                    <span className="text-xs">{child.label}</span>
                                   </div>
                                 </a>
                               ))}
@@ -371,11 +371,11 @@ export function Sidebar({
                       >
                         <div className="flex items-center">
                           <div className="relative">
-                            <Icon className="w-5 h-5 mr-3" aria-hidden="true" />
+                            <Icon className="w-4 h-4 mr-2" aria-hidden="true" />
                             {/* Group notification badge for expanded view */}
                             {item.label === "Reviews" && (
                               <span 
-                                className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+                                className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white"
                                 aria-label="8 new reviews"
                               >
                                 8
@@ -410,7 +410,7 @@ export function Sidebar({
                                 <a
                                   href={child.href}
                                   className={cn(
-                                    "flex items-center py-2 px-3 rounded-md text-sm transition-colors",
+                                    "flex items-center py-1 px-2 rounded-md text-xs transition-colors",
                                     isChildActive
                                       ? "bg-primary/10 text-primary"
                                       : "text-slate-600 hover:bg-slate-100"
@@ -418,10 +418,10 @@ export function Sidebar({
                                   role="menuitem"
                                   aria-current={isChildActive ? "page" : undefined}
                                 >
-                                  <ChildIcon className="w-4 h-4 mr-2" aria-hidden="true" />
-                                  <span>{child.label}</span>
+                                  <ChildIcon className="w-3 h-3 mr-1.5" aria-hidden="true" />
+                                  <span className="text-xs">{child.label}</span>
                                   {isChildActive && (
-                                    <div className="absolute left-0 w-1 h-8 bg-primary rounded-r-full" aria-hidden="true" />
+                                    <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" aria-hidden="true" />
                                   )}
                                 </a>
                               </li>
