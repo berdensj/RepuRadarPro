@@ -326,11 +326,11 @@ Remember, how you handle negative reviews can turn an unhappy customer into a lo
       <div className="space-y-8">
         <h1 className="text-3xl font-bold">Help & Support</h1>
         
-          <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Knowledge Base</CardTitle>
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6">
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Knowledge Base</CardTitle>
                   <CardDescription>
                     Search our documentation for quick answers to your questions.
                   </CardDescription>

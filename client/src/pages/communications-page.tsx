@@ -814,7 +814,7 @@ const CommunicationsPage = () => {
                             </div>
                           </div>
                         </div>
-                      ) : !isLoadingMessages && !messagesError && messagesData?.messages.length > 0 ? (
+                      ) : !isLoadingMessages && !messagesError && messagesData?.messages && messagesData.messages.length > 0 ? (
                         <div className="hidden lg:flex flex-1 items-center justify-center text-center p-8">
                           <div>
                             <Mail className="h-12 w-12 text-slate-300 mx-auto mb-4" />
