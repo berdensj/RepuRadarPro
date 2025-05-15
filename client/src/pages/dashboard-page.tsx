@@ -25,7 +25,8 @@ export default function DashboardPage() {
     queryKey: ["/api/reviews/recent"],
   });
 
-  const { data: userData } = useQuery({
+  // Add proper typing for the user data
+  const { data: userData } = useQuery<{ id: number; username: string; email: string }>({
     queryKey: ["/api/user"],
   });
 

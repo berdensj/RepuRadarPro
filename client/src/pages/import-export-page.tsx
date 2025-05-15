@@ -411,7 +411,7 @@ const ImportExportPage = () => {
   };
 
   return (
-    <>
+    <div className="w-full">
       <Helmet>
         <title>Import & Export | RepuRadar</title>
         <meta
@@ -1354,8 +1354,9 @@ const ImportExportPage = () => {
           </div>
         </main>
       </div>
-    </>
+      </main>
+    </div>
   );
-};
+}
 
 export default ImportExportPage;

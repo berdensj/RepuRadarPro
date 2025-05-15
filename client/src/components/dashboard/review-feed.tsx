@@ -73,7 +73,6 @@ export function ReviewFeed() {
       toast({
         title: "AI Reply Generated",
         description: "An AI-powered response has been created for this review",
-        icon: <Sparkles className="h-4 w-4 text-primary" />,
       });
     },
     onError: (error) => {

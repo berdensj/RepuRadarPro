@@ -5,7 +5,17 @@ import { ArrowDownIcon, ArrowUpIcon, MessageSquare, Star, ThumbsUp } from "lucid
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function SummaryMetrics() {
-  const { data: metrics, isLoading, error } = useQuery({
+  // Add proper typing for metrics
+  interface MetricsData {
+    averageRating: number;
+    totalReviews: number;
+    positivePercentage: number;
+    id?: number;
+    userId?: number;
+    date?: string;
+  }
+  
+  const { data: metrics, isLoading, error } = useQuery<MetricsData>({
     queryKey: ["/api/metrics"],
   });
 
