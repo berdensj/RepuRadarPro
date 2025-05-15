@@ -45,6 +45,11 @@ export function ProtectedRoute({
     );
   }
   
+  // For now, let's remove the special case redirection for client admins
+  // to fix access issues for testing the reporting system.
+  // We'll uncomment this later if needed.
+  
+  /* 
   // Special case: If this is a client admin (admin role but not system admin) 
   // trying to access the root dashboard, redirect to the reviews page
   if ((path === '/' || path === '/dashboard') && user.role === 'admin') {
@@ -64,6 +69,7 @@ export function ProtectedRoute({
       );
     }
   }
+  */
 
   // Check for permission-based access
   if (requiredPermission && permissions) {
