@@ -776,16 +776,16 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(reviews.date));
     
     // Count reviews by rating
-    const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    const ratingCounts: {[key: number]: number} = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     recentReviews.forEach(review => {
       const rating = Math.floor(review.rating);
       if (rating >= 1 && rating <= 5) {
-        ratingCounts[rating]++;
+        ratingCounts[rating as 1 | 2 | 3 | 4 | 5]++;
       }
     });
     
     // Count reviews by platform
-    const platformCounts = {};
+    const platformCounts: Record<string, number> = {};
     recentReviews.forEach(review => {
       if (!platformCounts[review.platform]) {
         platformCounts[review.platform] = 0;
