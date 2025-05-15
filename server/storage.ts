@@ -4,7 +4,8 @@ import {
   metrics, type Metrics, type InsertMetrics, 
   alerts, type Alert, type InsertAlert,
   locations, type Location, type InsertLocation,
-  crmIntegrations, type CrmIntegration, type InsertCrmIntegration
+  crmIntegrations, type CrmIntegration, type InsertCrmIntegration,
+  aiReplies, type AiReply, type InsertAiReply
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -34,11 +35,22 @@ export interface IStorage {
   getReviewsByPlatform(userId: number, platform: string): Promise<Review[]>;
   getReviewsByRating(userId: number, minRating: number, maxRating: number): Promise<Review[]>;
   getNegativeReviews(userId: number, limit: number): Promise<Review[]>;
+  getReviewsWithoutAIReplies(userId: number, limit?: number): Promise<Review[]>;
+  getReviewsByLocation(locationId: number): Promise<Review[]>;
+  getReviewsByLocationWithSentiment(locationId: number): Promise<Review[]>;
 
+  // AI Reply methods
+  getAiRepliesForReview(reviewId: number): Promise<AiReply[]>;
+  createAiReply(aiReply: InsertAiReply): Promise<AiReply>;
+  updateAiReply(id: number, aiReply: Partial<AiReply>): Promise<AiReply>;
+  getApprovedAiReply(reviewId: number): Promise<AiReply | undefined>;
+  
   // Metrics methods
   getUserMetrics(userId: number): Promise<Metrics | undefined>;
   createMetrics(metrics: InsertMetrics): Promise<Metrics>;
   updateMetrics(userId: number, metrics: Partial<Metrics>): Promise<Metrics>;
+  getLocationMetrics(locationId: number): Promise<any>;
+  getWeeklySummary(userId: number): Promise<any>;
 
   // Alert methods
   getAlertsByUserId(userId: number, limit?: number): Promise<Alert[]>;
@@ -62,6 +74,7 @@ export class MemStorage implements IStorage {
   private alerts: Map<number, Alert>;
   private locations: Map<number, Location>;
   private crmIntegrations: Map<number, CrmIntegration>;
+  private aiReplies: Map<number, AiReply>;
   sessionStore: session.Store;
   
   private userCurrentId: number;
@@ -70,6 +83,7 @@ export class MemStorage implements IStorage {
   private alertCurrentId: number;
   private locationCurrentId: number;
   private crmIntegrationCurrentId: number;
+  private aiReplyCurrentId: number;
 
   constructor() {
     this.users = new Map();
@@ -78,6 +92,7 @@ export class MemStorage implements IStorage {
     this.alerts = new Map();
     this.locations = new Map();
     this.crmIntegrations = new Map();
+    this.aiReplies = new Map();
     
     this.userCurrentId = 1;
     this.reviewCurrentId = 1;
@@ -85,6 +100,7 @@ export class MemStorage implements IStorage {
     this.alertCurrentId = 1;
     this.locationCurrentId = 1;
     this.crmIntegrationCurrentId = 1;
+    this.aiReplyCurrentId = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
@@ -370,6 +386,180 @@ export class MemStorage implements IStorage {
 
   async deleteCrmIntegration(id: number): Promise<void> {
     this.crmIntegrations.delete(id);
+  }
+
+  // Review Extension Methods for AI features
+  async getReviewsWithoutAIReplies(userId: number, limit?: number): Promise<Review[]> {
+    const reviews = Array.from(this.reviews.values())
+      .filter(r => r.userId === userId && !r.ai_replied)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return limit ? reviews.slice(0, limit) : reviews;
+  }
+
+  async getReviewsByLocation(locationId: number): Promise<Review[]> {
+    return Array.from(this.reviews.values())
+      .filter(r => r.locationId === locationId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  async getReviewsByLocationWithSentiment(locationId: number): Promise<Review[]> {
+    return Array.from(this.reviews.values())
+      .filter(r => r.locationId === locationId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
+
+  // AI Reply Methods
+  async getAiRepliesForReview(reviewId: number): Promise<AiReply[]> {
+    return Array.from(this.aiReplies.values())
+      .filter(reply => reply.reviewId === reviewId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async createAiReply(aiReply: InsertAiReply): Promise<AiReply> {
+    const id = this.aiReplyCurrentId++;
+    const now = new Date();
+    
+    const newReply: AiReply = {
+      id,
+      reviewId: aiReply.reviewId,
+      reply_text: aiReply.reply_text,
+      tone: aiReply.tone || 'professional',
+      approved: aiReply.approved || false,
+      createdAt: now,
+      updatedAt: aiReply.updatedAt || null
+    };
+    
+    this.aiReplies.set(id, newReply);
+    
+    // Update the review to mark it as having an AI reply
+    const review = await this.getReviewById(aiReply.reviewId);
+    if (review) {
+      await this.updateReview(review.id, { ai_replied: true });
+    }
+    
+    return newReply;
+  }
+
+  async updateAiReply(id: number, aiReply: Partial<AiReply>): Promise<AiReply> {
+    const existingReply = this.aiReplies.get(id);
+    if (!existingReply) {
+      throw new Error(`AI Reply with id ${id} not found`);
+    }
+    
+    const updatedReply = {
+      ...existingReply,
+      ...aiReply,
+      updatedAt: new Date()
+    };
+    
+    this.aiReplies.set(id, updatedReply);
+    return updatedReply;
+  }
+
+  async getApprovedAiReply(reviewId: number): Promise<AiReply | undefined> {
+    return Array.from(this.aiReplies.values())
+      .find(reply => reply.reviewId === reviewId && reply.approved);
+  }
+
+  // Location metrics methods
+  async getLocationMetrics(locationId: number): Promise<any> {
+    const reviews = await this.getReviewsByLocation(locationId);
+    
+    if (reviews.length === 0) {
+      return {
+        totalReviews: 0,
+        averageRating: 0,
+        sentimentBreakdown: {
+          positive: 0,
+          neutral: 0,
+          negative: 0
+        },
+        platforms: {}
+      };
+    }
+    
+    // Calculate metrics
+    const totalReviews = reviews.length;
+    const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalReviews;
+    
+    // Calculate sentiment breakdown
+    const sentimentBreakdown = {
+      positive: reviews.filter(r => r.sentiment === 'positive').length,
+      neutral: reviews.filter(r => r.sentiment === 'neutral').length,
+      negative: reviews.filter(r => r.sentiment === 'negative').length
+    };
+    
+    // Calculate platform breakdown
+    const platforms = reviews.reduce((acc, review) => {
+      acc[review.platform] = (acc[review.platform] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+    
+    return {
+      totalReviews,
+      averageRating,
+      sentimentBreakdown,
+      platforms
+    };
+  }
+
+  async getWeeklySummary(userId: number): Promise<any> {
+    const now = new Date();
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    
+    // Get all reviews from the past week
+    const reviews = Array.from(this.reviews.values())
+      .filter(r => r.userId === userId && new Date(r.date) >= oneWeekAgo);
+    
+    if (reviews.length === 0) {
+      return {
+        period: {
+          start: oneWeekAgo.toISOString(),
+          end: now.toISOString()
+        },
+        totalNewReviews: 0,
+        averageRating: 0,
+        sentimentBreakdown: {
+          positive: 0,
+          neutral: 0,
+          negative: 0
+        },
+        topReviews: []
+      };
+    }
+    
+    // Calculate metrics
+    const totalNewReviews = reviews.length;
+    const averageRating = reviews.reduce((sum, review) => sum + review.rating, 0) / totalNewReviews;
+    
+    // Calculate sentiment breakdown
+    const sentimentBreakdown = {
+      positive: reviews.filter(r => r.sentiment === 'positive').length,
+      neutral: reviews.filter(r => r.sentiment === 'neutral').length,
+      negative: reviews.filter(r => r.sentiment === 'negative').length
+    };
+    
+    // Get top reviews (by rating or review length)
+    const topReviews = [...reviews]
+      .sort((a, b) => {
+        // First sort by rating (descending)
+        if (b.rating !== a.rating) return b.rating - a.rating;
+        // Then by review length (descending)
+        return b.reviewText.length - a.reviewText.length;
+      })
+      .slice(0, 3); // Top 3 reviews
+    
+    return {
+      period: {
+        start: oneWeekAgo.toISOString(),
+        end: now.toISOString()
+      },
+      totalNewReviews,
+      averageRating,
+      sentimentBreakdown,
+      topReviews
+    };
   }
 }
 
