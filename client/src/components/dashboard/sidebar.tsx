@@ -229,14 +229,14 @@ export function Sidebar({
                             <div className="relative">
                               <Icon 
                                 className={cn("flex-shrink-0", 
-                                  sidebarCollapsed ? "w-6 h-6" : "w-5 h-5 mr-3"
+                                  sidebarCollapsed ? "w-5 h-5" : "w-4 h-4 mr-2"
                                 )} 
                                 aria-hidden="true"
                               />
                               {/* Notification badge - shown for certain menu items */}
                               {(item.label === "Alerts" || item.label === "Reviews") && (
                                 <span 
-                                  className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+                                  className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white"
                                   aria-label={`${item.label === "Alerts" ? "3" : "5"} new ${item.label.toLowerCase()}`}
                                   role="status"
                                   aria-live="polite"
@@ -248,10 +248,10 @@ export function Sidebar({
                               )}
                             </div>
                             {!sidebarCollapsed && (
-                              <span className="text-sm font-medium truncate">{item.label}</span>
+                              <span className="text-xs font-medium truncate">{item.label}</span>
                             )}
                             {isActive && !sidebarCollapsed && (
-                              <div className="absolute left-0 w-1 h-8 bg-primary rounded-r-full" />
+                              <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
                             )}
                           </a>
                         </TooltipTrigger>
@@ -279,7 +279,7 @@ export function Sidebar({
                           <TooltipTrigger asChild>
                             <button
                               className={cn(
-                                "w-full flex justify-center items-center rounded-md py-2 px-2",
+                                "w-full flex justify-center items-center rounded-md py-1 px-1.5",
                                 hasActiveChild 
                                   ? "bg-primary/10 text-primary" 
                                   : "text-slate-700 hover:bg-slate-100"
@@ -292,11 +292,11 @@ export function Sidebar({
                               aria-label={`${item.label} menu${isGroupExpanded ? ' (expanded)' : ' (collapsed)'}`}
                             >
                               <div className="relative">
-                                <Icon className="w-6 h-6" aria-hidden="true" />
+                                <Icon className="w-5 h-5" aria-hidden="true" />
                                 {/* Group notification badge */}
                                 {item.label === "Reviews" && (
                                   <span 
-                                    className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+                                    className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-red-500 text-[8px] font-bold text-white"
                                     aria-label="8 new reviews"
                                     role="status"
                                     aria-live="polite"
@@ -358,7 +358,7 @@ export function Sidebar({
                       <button
                         id={`${item.label.toLowerCase()}-menu-button`}
                         className={cn(
-                          "w-full flex justify-between items-center rounded-md py-2 px-3 text-sm font-medium",
+                          "w-full flex justify-between items-center rounded-md py-1 px-2 text-xs font-medium",
                           hasActiveChild 
                             ? "bg-primary/10 text-primary" 
                             : "text-slate-700 hover:bg-slate-100"
