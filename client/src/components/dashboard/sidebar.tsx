@@ -469,8 +469,15 @@ export function Sidebar({
                     {theme === 'dark' ? <Sun className="h-3 w-3" /> : <Moon className="h-3 w-3" />}
                   </Button>
                   
-                  {/* Color theme picker */}
-                  <ColorPalettePicker />
+                  {/* Color theme picker - using a smaller button */}
+                  <Button 
+                    variant="outline" 
+                    size="icon" 
+                    className="h-6 w-6 relative"
+                    aria-label="Customize theme colors"
+                  >
+                    <Paintbrush className="h-3 w-3" aria-hidden="true" />
+                  </Button>
                   
                   {/* Logout button */}
                   <Button 
@@ -510,7 +517,14 @@ export function Sidebar({
                     
                     {/* Color theme picker */}
                     <div className="mb-1">
-                      <ColorPalettePicker size="small" />
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-6 w-6 relative"
+                        aria-label="Customize theme colors"
+                      >
+                        <Paintbrush className="h-3 w-3" aria-hidden="true" />
+                      </Button>
                     </div>
                     
                     {/* Logout button */}
