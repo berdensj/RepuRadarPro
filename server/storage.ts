@@ -64,6 +64,21 @@ export interface IStorage {
   updateCrmIntegration(id: number, integration: Partial<CrmIntegration>): Promise<CrmIntegration>;
   deleteCrmIntegration(id: number): Promise<void>;
 
+  // AI Reply methods
+  getAiRepliesForReview(reviewId: number): Promise<AiReply[]>;
+  createAiReply(aiReply: InsertAiReply): Promise<AiReply>;
+  updateAiReply(id: number, aiReply: Partial<AiReply>): Promise<AiReply>;
+  getApprovedAiReply(reviewId: number): Promise<AiReply | undefined>;
+  
+  // Additional review methods
+  getReviewsWithoutAIReplies(userId: number, limit?: number): Promise<Review[]>;
+  getReviewsByLocation(locationId: number): Promise<Review[]>;
+  getReviewsByLocationWithSentiment(locationId: number): Promise<Review[]>;
+  
+  // Additional metrics methods
+  getLocationMetrics(locationId: number): Promise<any>;
+  getWeeklySummary(userId: number): Promise<any>;
+
   sessionStore: session.Store;
 }
 
