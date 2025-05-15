@@ -54,6 +54,7 @@ import {
   Activity,
   AlertCircle,
   Calendar as CalendarIcon,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   CircleSlash,
