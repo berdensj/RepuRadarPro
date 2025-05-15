@@ -485,6 +485,160 @@ export async function registerRoutes(app: Express): Promise<Server> {
       next(error);
     }
   });
+  
+  // AI Reply endpoints
+  app.post("/api/ai/reply", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const { reviewId, tone, reviewContent, rating } = req.body;
+      
+      if (!reviewId && !reviewContent) {
+        return res.status(400).json({ message: "Either reviewId or reviewContent is required" });
+      }
+      
+      let review;
+      
+      // If reviewId is provided, get the review from the database
+      if (reviewId) {
+        review = await storage.getReviewById(Number(reviewId));
+        
+        if (!review) {
+          return res.status(404).json({ message: "Review not found" });
+        }
+        
+        // Check if the review belongs to the user
+        if (review.userId !== req.user!.id) {
+          return res.status(403).json({ message: "Forbidden" });
+        }
+      } else {
+        // Otherwise, create a temporary review object for AI processing
+        review = {
+          reviewText: reviewContent,
+          rating: rating || 3,
+          reviewerName: "Customer",
+          platform: "Direct"
+        };
+      }
+      
+      // Get AI reply and save it to the database
+      const replyText = await generateAIReply(review as any, tone);
+      
+      // If we have a valid reviewId, create or update the AI reply in the database
+      if (reviewId) {
+        // Check if there's already an AI reply for this review
+        const existingReplies = await storage.getAiRepliesForReview(Number(reviewId));
+        
+        if (existingReplies.length > 0) {
+          // Update the existing reply
+          const latestReply = existingReplies[0];
+          await storage.updateAiReply(latestReply.id, { 
+            reply_text: replyText,
+            tone: tone || 'professional',
+            updatedAt: new Date()
+          });
+        } else {
+          // Create a new AI reply
+          await storage.createAiReply({
+            reviewId: Number(reviewId),
+            reply_text: replyText,
+            tone: tone || 'professional', 
+            approved: false
+          });
+          
+          // Update the review to mark it as having an AI reply
+          await storage.updateReview(Number(reviewId), { ai_replied: true });
+        }
+      }
+      
+      res.json({ reply: replyText });
+    } catch (error) {
+      console.error("Error generating AI reply:", error);
+      next(error);
+    }
+  });
+  
+  app.get("/api/ai/replies/:reviewId", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const reviewId = Number(req.params.reviewId);
+      const review = await storage.getReviewById(reviewId);
+      
+      if (!review) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      
+      // Check permissions (user owns the review or is admin)
+      if (review.userId !== req.user!.id && req.user!.role !== 'admin') {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      const replies = await storage.getAiRepliesForReview(reviewId);
+      res.json(replies);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.post("/api/ai/replies/:replyId/approve", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const replyId = Number(req.params.replyId);
+      
+      // Get the AI reply
+      const aiReplies = await storage.getAiRepliesForReview(replyId);
+      if (aiReplies.length === 0) {
+        return res.status(404).json({ message: "AI reply not found" });
+      }
+      
+      const aiReply = aiReplies[0];
+      
+      // Get the associated review to check permissions
+      const review = await storage.getReviewById(aiReply.reviewId);
+      
+      if (!review) {
+        return res.status(404).json({ message: "Associated review not found" });
+      }
+      
+      // Check if the review belongs to the user
+      if (review.userId !== req.user!.id && req.user!.role !== 'admin') {
+        return res.status(403).json({ message: "Forbidden" });
+      }
+      
+      // Mark the reply as approved
+      const updatedReply = await storage.updateAiReply(replyId, { 
+        approved: true, 
+        updatedAt: new Date() 
+      });
+      
+      // Also update the review with the approved reply
+      await storage.updateReview(review.id, { 
+        response: aiReply.reply_text,
+        isResolved: true
+      });
+      
+      res.json(updatedReply);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
+  app.get("/api/ai/pending-reviews", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
+      
+      const userId = req.user!.id;
+      const limit = Number(req.query.limit) || 10;
+      
+      // Get reviews without AI replies
+      const reviews = await storage.getReviewsWithoutAIReplies(userId, limit);
+      res.json(reviews);
+    } catch (error) {
+      next(error);
+    }
+  });
 
   // Metrics
   app.get("/api/metrics", async (req, res, next) => {
