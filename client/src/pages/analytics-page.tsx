@@ -1,4 +1,4 @@
-import DashboardLayout from "@/components/dashboard/layout";
+import SidebarLayout from "@/components/layout/sidebar-layout";
 import { useState, useEffect } from "react";
 
 import { TrendGraph } from "@/components/dashboard/trend-graph";
