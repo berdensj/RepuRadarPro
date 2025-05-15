@@ -3,7 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import DashboardLayout from '@/components/dashboard/layout';
+// No need to import DashboardLayout as the page is already wrapped with SidebarLayout in App.tsx
 import { Helmet } from 'react-helmet';
 import {
   Card,
