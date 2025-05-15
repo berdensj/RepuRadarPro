@@ -69,7 +69,7 @@ export function SummaryMetrics() {
                 <span className="text-xl sm:text-2xl font-semibold mr-2">
                   {metrics && typeof metrics.averageRating === 'number' ? metrics.averageRating.toFixed(1) : "0.0"}
                 </span>
-                <StarRating rating={metrics?.averageRating || 0} />
+                <StarRating rating={metrics && typeof metrics.averageRating === 'number' ? metrics.averageRating : 0} />
               </div>
             </div>
             <div className="h-10 w-10 sm:h-12 sm:w-12 bg-blue-100 rounded-full flex items-center justify-center text-primary shrink-0">
@@ -97,7 +97,9 @@ export function SummaryMetrics() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-slate-500">Total Reviews</p>
-              <p className="text-xl sm:text-2xl font-semibold mt-1">{metrics?.totalReviews || 0}</p>
+              <p className="text-xl sm:text-2xl font-semibold mt-1">
+                {metrics && typeof metrics.totalReviews === 'number' ? metrics.totalReviews : 0}
+              </p>
             </div>
             <div className="h-10 w-10 sm:h-12 sm:w-12 bg-indigo-100 rounded-full flex items-center justify-center text-secondary shrink-0">
               <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -119,7 +121,9 @@ export function SummaryMetrics() {
             <div>
               <p className="text-sm font-medium text-slate-500">Positive Reviews</p>
               <p className="text-xl sm:text-2xl font-semibold mt-1">
-                {metrics?.positivePercentage?.toFixed(0) || 0}%
+                {metrics && typeof metrics.positivePercentage === 'number' 
+                  ? `${metrics.positivePercentage.toFixed(0)}%`
+                  : "0%"}
               </p>
             </div>
             <div className="h-10 w-10 sm:h-12 sm:w-12 bg-green-100 rounded-full flex items-center justify-center text-success shrink-0">
