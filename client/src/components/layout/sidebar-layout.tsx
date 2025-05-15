@@ -68,11 +68,11 @@ export function SidebarLayout({
       </a>
       
       <div className="flex min-h-screen">
-        {/* Sidebar - now part of the main scrolling container */}
+        {/* Sidebar - static with all items visible */}
         <div 
           id="mobile-sidebar"
           className={cn(
-            "transition-all duration-300 ease-in-out z-40 bg-white border-r border-slate-200 sticky top-0 h-screen",
+            "transition-all duration-300 ease-in-out z-40 bg-white border-r border-slate-200 h-auto min-h-screen flex-shrink-0",
             isMobile ? (
               mobileMenuOpen 
                 ? "fixed w-[85%] max-w-[300px] shadow-xl left-0 top-0" 
@@ -82,10 +82,12 @@ export function SidebarLayout({
             )
           )}
         >
-          <Sidebar 
-            sidebarCollapsed={sidebarCollapsed} 
-            onToggleSidebar={toggleSidebar}
-          />
+          <div className="sticky top-0">
+            <Sidebar 
+              sidebarCollapsed={sidebarCollapsed} 
+              onToggleSidebar={toggleSidebar}
+            />
+          </div>
         </div>
         
         {/* Main content */}

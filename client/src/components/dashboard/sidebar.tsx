@@ -107,7 +107,7 @@ export function Sidebar({
       <aside 
         ref={sidebarRef}
         className={cn(
-          "bg-white border-r border-slate-200 z-20 transition-all duration-300 h-full overflow-hidden",
+          "bg-white border-r border-slate-200 z-20 transition-all duration-300 h-full overflow-visible",
           sidebarCollapsed ? "lg:w-20" : "lg:w-64", 
           isMobile ? "shadow-xl" : "relative",
           mobileMenuOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full lg:translate-x-0 lg:w-auto",
@@ -185,21 +185,21 @@ export function Sidebar({
           )}
           
           {/* Navigation */}
-          <nav className="flex-grow py-2 px-2 sidebar-nav">
-            <ul className="space-y-1">
+          <nav className="flex-grow py-1 px-2 sidebar-nav overflow-visible">
+            <ul className="space-y-0.5 text-xs">
               {roleBasedNavItems.map((item, index) => {
                 // Display separator
                 if (item.type === 'separator') {
                   return (
                     <li key={`separator-${index}`} className={cn(
-                      "pt-3 pb-1",
+                      "pt-2 pb-0.5",
                       sidebarCollapsed && "hidden"
                     )}>
                       <div className="mx-2">
                         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                           {item.label}
                         </p>
-                        <div className="mt-1 border-t border-slate-200"></div>
+                        <div className="mt-0.5 border-t border-slate-200"></div>
                       </div>
                     </li>
                   );
@@ -217,8 +217,8 @@ export function Sidebar({
                           <a 
                             href={item.href} 
                             className={cn(
-                              "flex items-center rounded-md transition-colors py-2",
-                              sidebarCollapsed ? "justify-center px-2" : "px-3",
+                              "flex items-center rounded-md transition-colors py-1",
+                              sidebarCollapsed ? "justify-center px-1.5" : "px-2",
                               isActive 
                                 ? "bg-primary/10 text-primary" 
                                 : "text-slate-700 hover:bg-slate-100"
