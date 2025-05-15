@@ -1208,8 +1208,8 @@ function AnalyticsPageContent() {
 
 export default function AnalyticsPage() {
   return (
-    <DashboardLayout>
+    <SidebarLayout>
       <AnalyticsPageContent />
-    </DashboardLayout>
+    </SidebarLayout>
   );
 }
