@@ -49,8 +49,11 @@ export function ReviewFeed() {
     mutationFn: async (reviewId: number) => {
       const response = await apiRequest(
         "POST",
-        `/api/reviews/${reviewId}/generate-reply`,
-        { tone: "professional" }
+        `/api/ai/reply`,
+        { 
+          reviewId,
+          tone: "professional" 
+        }
       );
       return response.json();
     },

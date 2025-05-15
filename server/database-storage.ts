@@ -28,7 +28,11 @@ import {
   agencyClients,
   crmIntegrations,
   type CrmIntegration,
-  type InsertCrmIntegration
+  type InsertCrmIntegration,
+  aiReplies,
+  type AiReply,
+  type InsertAiReply,
+  locationManagers
 } from "@shared/schema";
 import { IStorage } from "./storage";
 import { db } from "./db";
@@ -602,5 +606,203 @@ export class DatabaseStorage implements IStorage {
 
   async deleteCrmIntegration(id: number): Promise<void> {
     await db.delete(crmIntegrations).where(eq(crmIntegrations.id, id));
+  }
+
+  // AI Reply methods
+  async getAiRepliesForReview(reviewId: number): Promise<AiReply[]> {
+    return db
+      .select()
+      .from(aiReplies)
+      .where(eq(aiReplies.reviewId, reviewId))
+      .orderBy(desc(aiReplies.createdAt));
+  }
+
+  async createAiReply(insertAiReply: InsertAiReply): Promise<AiReply> {
+    const [aiReply] = await db
+      .insert(aiReplies)
+      .values(insertAiReply)
+      .returning();
+    
+    return aiReply;
+  }
+
+  async updateAiReply(id: number, partial: Partial<AiReply>): Promise<AiReply> {
+    const [updatedAiReply] = await db
+      .update(aiReplies)
+      .set({
+        ...partial,
+        updatedAt: new Date(),
+      })
+      .where(eq(aiReplies.id, id))
+      .returning();
+    
+    if (!updatedAiReply) {
+      throw new Error(`AI Reply with id ${id} not found`);
+    }
+    
+    return updatedAiReply;
+  }
+
+  async getApprovedAiReply(reviewId: number): Promise<AiReply | undefined> {
+    const [aiReply] = await db
+      .select()
+      .from(aiReplies)
+      .where(and(
+        eq(aiReplies.reviewId, reviewId),
+        eq(aiReplies.approved, true)
+      ))
+      .orderBy(desc(aiReplies.updatedAt))
+      .limit(1);
+    
+    return aiReply;
+  }
+
+  async getReviewsWithoutAIReplies(userId: number, limit?: number): Promise<Review[]> {
+    // Get all reviews for the user
+    const userReviews = await db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.userId, userId))
+      .orderBy(desc(reviews.date));
+    
+    // For each review, check if it has AI replies
+    const filteredReviews = [];
+    for (const review of userReviews) {
+      const aiReplyCount = await db
+        .select({ count: count() })
+        .from(aiReplies)
+        .where(eq(aiReplies.reviewId, review.id));
+      
+      if (aiReplyCount[0].count === 0) {
+        filteredReviews.push(review);
+      }
+      
+      // Exit early if we've reached the limit
+      if (limit && filteredReviews.length >= limit) {
+        break;
+      }
+    }
+    
+    return filteredReviews.slice(0, limit);
+  }
+
+  async getReviewsByLocation(locationId: number): Promise<Review[]> {
+    return db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.locationId, locationId))
+      .orderBy(desc(reviews.date));
+  }
+
+  async getReviewsByLocationWithSentiment(locationId: number): Promise<Review[]> {
+    return db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.locationId, locationId))
+      .orderBy(desc(reviews.date));
+  }
+  
+  async getLocationMetrics(locationId: number): Promise<any> {
+    // Get the total number of reviews for the location
+    const [totalResult] = await db
+      .select({ count: count() })
+      .from(reviews)
+      .where(eq(reviews.locationId, locationId));
+    
+    const totalReviews = totalResult?.count || 0;
+    
+    if (totalReviews === 0) {
+      return {
+        totalReviews: 0,
+        averageRating: 0,
+        positiveReviews: 0,
+        negativeReviews: 0,
+        recentTrend: 0,
+      };
+    }
+    
+    // Get average rating
+    const [avgResult] = await db
+      .select({ average: sql`AVG(${reviews.rating})` })
+      .from(reviews)
+      .where(eq(reviews.locationId, locationId));
+    
+    const averageRating = parseFloat(avgResult.average as string) || 0;
+    
+    // Get positive reviews count (rating >= 4)
+    const [positiveResult] = await db
+      .select({ count: count() })
+      .from(reviews)
+      .where(and(eq(reviews.locationId, locationId), sql`${reviews.rating} >= 4`));
+    
+    const positiveReviews = positiveResult?.count || 0;
+    
+    // Get negative reviews count (rating <= 2)
+    const [negativeResult] = await db
+      .select({ count: count() })
+      .from(reviews)
+      .where(and(eq(reviews.locationId, locationId), sql`${reviews.rating} <= 2`));
+    
+    const negativeReviews = negativeResult?.count || 0;
+    
+    // Get reviews by platform
+    const platforms = await db
+      .select({ platform: reviews.platform, count: count() })
+      .from(reviews)
+      .where(eq(reviews.locationId, locationId))
+      .groupBy(reviews.platform);
+    
+    return {
+      totalReviews,
+      averageRating,
+      positiveReviews,
+      negativeReviews,
+      platforms: platforms.map(p => ({ name: p.platform, count: p.count })),
+    };
+  }
+  
+  async getWeeklySummary(userId: number): Promise<any> {
+    // Get reviews from the past week
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    
+    const recentReviews = await db
+      .select()
+      .from(reviews)
+      .where(and(
+        eq(reviews.userId, userId),
+        sql`${reviews.date} >= ${weekAgo.toISOString()}`
+      ))
+      .orderBy(desc(reviews.date));
+    
+    // Count reviews by rating
+    const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+    recentReviews.forEach(review => {
+      const rating = Math.floor(review.rating);
+      if (rating >= 1 && rating <= 5) {
+        ratingCounts[rating]++;
+      }
+    });
+    
+    // Count reviews by platform
+    const platformCounts = {};
+    recentReviews.forEach(review => {
+      if (!platformCounts[review.platform]) {
+        platformCounts[review.platform] = 0;
+      }
+      platformCounts[review.platform]++;
+    });
+    
+    // Calculate average rating
+    const totalRating = recentReviews.reduce((sum, review) => sum + review.rating, 0);
+    const averageRating = recentReviews.length > 0 ? totalRating / recentReviews.length : 0;
+    
+    return {
+      totalReviews: recentReviews.length,
+      averageRating,
+      ratingCounts,
+      platformCounts,
+      reviews: recentReviews.slice(0, 5), // Return the 5 most recent reviews
+    };
   }
 }
