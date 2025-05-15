@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Form,
   FormControl,
@@ -401,7 +402,7 @@ const CompetitorsPage = () => {
                     <FormItem>
                       <FormLabel>Notes</FormLabel>
                       <FormControl>
-                        <Input as="textarea" className="h-24" placeholder="Additional notes..." {...field} />
+                        <Textarea className="h-24" placeholder="Additional notes..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -66,6 +66,7 @@ import {
   ChevronDown,
   Copy,
   Database,
+  Download,
   Edit,
   GripHorizontal,
   Layers,
@@ -1169,11 +1170,11 @@ const DashboardBuilderPage = () => {
             </Form>
           ) : (
             <>
-              <div className="mb-4">
+              <div className="mb-4 relative">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   placeholder="Search widgets..."
-                  className="w-full"
-                  startIcon={<Search className="h-4 w-4" />}
+                  className="w-full pl-10"
                 />
               </div>
 
