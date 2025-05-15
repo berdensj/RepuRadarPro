@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Helmet } from "react-helmet";
 import { useQuery } from "@tanstack/react-query";
+import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
