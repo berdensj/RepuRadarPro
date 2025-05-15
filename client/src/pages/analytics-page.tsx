@@ -254,7 +254,6 @@ export default function AnalyticsPage() {
         <header className="mb-6">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
             <div>
-              <h1 className="text-2xl font-semibold text-slate-800">Analytics & Insights</h1>
               <p className="text-slate-500">Monitor your reputation performance over time</p>
             </div>
             

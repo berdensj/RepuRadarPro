@@ -72,7 +72,6 @@ export default function DashboardPage() {
         {/* Header */}
         <header className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-800">Dashboard</h1>
             <p className="text-slate-500">Monitor and manage your professional reviews</p>
           </div>
           
