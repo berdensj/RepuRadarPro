@@ -15,6 +15,8 @@ import { Loader2 } from "lucide-react";
 // Non-lazy load for not-found page to prevent hydration issues
 import NotFoundPage from "@/pages/not-found";
 import TestSidebarPage from "@/pages/test-sidebar-page";
+import TestEnhancedSidebarPage from "@/pages/test-enhanced-sidebar";
+import ModernSidebarDemo from "@/pages/modern-sidebar-demo";
 
 // Lazy load components for better performance
 // Using dynamic imports with proper typing
@@ -179,6 +181,12 @@ function Router() {
       </Route>
       <Route path="/test-sidebar">
         {() => <TestSidebarPage />}
+      </Route>
+      <Route path="/enhanced-sidebar">
+        {() => <TestEnhancedSidebarPage />}
+      </Route>
+      <Route path="/modern-sidebar">
+        {() => <ModernSidebarDemo />}
       </Route>
       <Route>
         {() => <NotFoundPage />}

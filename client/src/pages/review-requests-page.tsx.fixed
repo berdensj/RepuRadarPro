@@ -1,0 +1,991 @@
+import { useState } from "react";
+import { Helmet } from "react-helmet";
+import { 
+  Card, 
+  CardContent, 
+  CardDescription, 
+  CardHeader, 
+  CardTitle 
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  MessageCircle, 
+  MoreVertical, 
+  Copy, 
+  Mail, 
+  Calendar, 
+  Send, 
+  Plus, 
+  Pencil, 
+  Trash2, 
+  Search, 
+  MessagesSquare, 
+  StopCircle, 
+  PlayCircle, 
+  ExternalLink,
+  Loader2,
+  Phone
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+
+// Define a schema for creating a review request
+const createRequestSchema = z.object({
+  customerName: z.string().min(2, "Customer name must be at least 2 characters long"),
+  customerEmail: z.string().email("Please enter a valid email address"),
+  customerPhone: z.string().optional(),
+  requestMethod: z.enum(["email", "sms", "both"]),
+  templateId: z.string(),
+  message: z.string().min(10, "Message must be at least 10 characters long"),
+  locationId: z.string(),
+});
+
+// Define a schema for editing a review request
+const editRequestSchema = createRequestSchema.extend({
+  id: z.number(),
+  status: z.enum(["scheduled", "sent", "cancelled"]),
+});
+
+// Mock data for review requests
+const mockRequests = [
+  {
+    id: 1,
+    customerName: "John Smith",
+    customerEmail: "john.smith@example.com",
+    customerPhone: "+1 (555) 123-4567",
+    requestMethod: "email",
+    templateId: "template-1",
+    message: "We hope you enjoyed your recent experience with us. Would you mind sharing your feedback?",
+    status: "scheduled",
+    scheduledDate: "2025-05-20T09:00:00Z",
+    locationId: "loc-1",
+    locationName: "Downtown Office"
+  },
+  {
+    id: 2,
+    customerName: "Sarah Johnson",
+    customerEmail: "sarah.j@example.com",
+    customerPhone: "+1 (555) 987-6543",
+    requestMethod: "sms",
+    templateId: "template-2",
+    message: "Thank you for your recent visit! We'd appreciate your feedback.",
+    status: "sent",
+    sentDate: "2025-05-10T14:30:00Z",
+    locationId: "loc-2",
+    locationName: "Westside Clinic"
+  },
+  {
+    id: 3,
+    customerName: "Michael Brown",
+    customerEmail: "michael.b@example.com",
+    customerPhone: "+1 (555) 456-7890",
+    requestMethod: "both",
+    templateId: "template-1",
+    message: "We value your opinion! Please take a moment to share your experience with us.",
+    status: "cancelled",
+    cancelledDate: "2025-05-12T10:15:00Z",
+    locationId: "loc-1",
+    locationName: "Downtown Office"
+  }
+];
+
+// Mock data for templates
+const mockTemplates = [
+  {
+    id: "template-1",
+    name: "Standard Request",
+    subject: "We'd love your feedback!",
+    content: "Hi [CUSTOMER_NAME],\n\nThank you for choosing [BUSINESS_NAME]. We hope you had a great experience. Would you mind taking a moment to share your feedback? Your opinion helps us improve our service.\n\n[REVIEW_LINK]"
+  },
+  {
+    id: "template-2",
+    name: "Follow-up Request",
+    subject: "Following up on your recent visit",
+    content: "Hi [CUSTOMER_NAME],\n\nWe wanted to follow up on your recent visit to [BUSINESS_NAME]. Your feedback is valuable to us and helps us ensure we're providing the best possible service.\n\n[REVIEW_LINK]"
+  },
+  {
+    id: "template-3",
+    name: "Service Completion",
+    subject: "How was your service experience?",
+    content: "Hi [CUSTOMER_NAME],\n\nThank you for allowing us to serve you recently. We hope everything met your expectations. We'd appreciate your honest feedback on your experience.\n\n[REVIEW_LINK]"
+  }
+];
+
+// Mock data for locations
+const mockLocations = [
+  { id: "loc-1", name: "Downtown Office" },
+  { id: "loc-2", name: "Westside Clinic" },
+  { id: "loc-3", name: "Northside Branch" }
+];
+
+// Component for the review requests page
+export default function ReviewRequestsPage() {
+  // State for requests
+  const [requests, setRequests] = useState(mockRequests);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  // Filter requests based on active tab and search term
+  const filteredRequests = requests.filter(request => {
+    // Filter by tab
+    if (activeTab !== "all" && request.status !== activeTab) {
+      return false;
+    }
+    
+    // Filter by search term
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      return (
+        request.customerName.toLowerCase().includes(term) ||
+        request.customerEmail.toLowerCase().includes(term) ||
+        request.customerPhone?.toLowerCase().includes(term) ||
+        request.locationName.toLowerCase().includes(term)
+      );
+    }
+    
+    return true;
+  });
+
+  // Set up form for creating a new request
+  const createForm = useForm({
+    resolver: zodResolver(createRequestSchema),
+    defaultValues: {
+      customerName: "",
+      customerEmail: "",
+      customerPhone: "",
+      requestMethod: "email",
+      templateId: "template-1",
+      message: mockTemplates[0].content,
+      locationId: "loc-1"
+    }
+  });
+
+  // Set up form for editing a request
+  const editForm = useForm({
+    resolver: zodResolver(editRequestSchema),
+    defaultValues: {
+      id: 0,
+      customerName: "",
+      customerEmail: "",
+      customerPhone: "",
+      requestMethod: "email",
+      templateId: "template-1",
+      message: "",
+      status: "scheduled",
+      locationId: "loc-1"
+    }
+  });
+
+  // Handle creating a new request
+  const handleCreateRequest = (data) => {
+    // In a real app, this would send the data to a backend API
+    console.log("Creating request:", data);
+    
+    // For demo purposes, add to local state
+    const newRequest = {
+      id: requests.length + 1,
+      ...data,
+      status: "scheduled",
+      scheduledDate: new Date().toISOString(),
+      locationName: mockLocations.find(loc => loc.id === data.locationId)?.name || "Unknown Location"
+    };
+    
+    setRequests([...requests, newRequest]);
+    setIsCreateDialogOpen(false);
+    createForm.reset();
+  };
+
+  // Handle editing a request
+  const handleEditRequest = (data) => {
+    // In a real app, this would send the data to a backend API
+    console.log("Editing request:", data);
+    
+    // For demo purposes, update local state
+    const updatedRequests = requests.map(request => 
+      request.id === data.id ? {
+        ...request,
+        ...data,
+        locationName: mockLocations.find(loc => loc.id === data.locationId)?.name || "Unknown Location"
+      } : request
+    );
+    
+    setRequests(updatedRequests);
+    setIsEditDialogOpen(false);
+    editForm.reset();
+  };
+
+  // Handle deleting a request
+  const handleDeleteRequest = () => {
+    if (!selectedRequest) return;
+    
+    // In a real app, this would send a delete request to a backend API
+    console.log("Deleting request:", selectedRequest);
+    
+    // For demo purposes, update local state
+    const updatedRequests = requests.filter(request => request.id !== selectedRequest.id);
+    setRequests(updatedRequests);
+    setIsDeleteDialogOpen(false);
+    setSelectedRequest(null);
+  };
+
+  // Handle opening the edit dialog and populating the form
+  const openEditDialog = (request) => {
+    setSelectedRequest(request);
+    editForm.reset({
+      id: request.id,
+      customerName: request.customerName,
+      customerEmail: request.customerEmail,
+      customerPhone: request.customerPhone || "",
+      requestMethod: request.requestMethod,
+      templateId: request.templateId,
+      message: request.message,
+      status: request.status,
+      locationId: request.locationId
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  // Handle opening the delete dialog
+  const openDeleteDialog = (request) => {
+    setSelectedRequest(request);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // Handle template selection in create form
+  const handleCreateTemplateChange = (value) => {
+    const template = mockTemplates.find(t => t.id === value);
+    if (template) {
+      createForm.setValue("templateId", value);
+      createForm.setValue("message", template.content);
+    }
+  };
+
+  // Handle template selection in edit form
+  const handleEditTemplateChange = (value) => {
+    const template = mockTemplates.find(t => t.id === value);
+    if (template) {
+      editForm.setValue("templateId", value);
+      editForm.setValue("message", template.content);
+    }
+  };
+
+  // Create form mutation state (simulated)
+  const createRequestMutation = { isPending: false };
+  
+  // Edit form mutation state (simulated)
+  const editRequestMutation = { isPending: false };
+  
+  // Delete request mutation state (simulated)
+  const deleteRequestMutation = { isPending: false };
+
+  return (
+    <div>
+      <Helmet>
+        <title>Review Requests | RepuRadar</title>
+        <meta name="description" content="Manage your review requests and track customer feedback initiatives." />
+      </Helmet>
+      
+      <div className="space-y-6">
+        {/* Header with search and actions */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="relative w-full sm:w-auto">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <Input
+              placeholder="Search requests..."
+              className="pl-9 w-full sm:w-[260px]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="w-full sm:w-auto">
+                <Plus className="mr-2 h-4 w-4" />
+                New Request
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[550px]">
+              <DialogHeader>
+                <DialogTitle>Create Review Request</DialogTitle>
+                <DialogDescription>
+                  Send a request to your customer asking for a review.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <Form {...createForm}>
+                <form onSubmit={createForm.handleSubmit(handleCreateRequest)} className="space-y-4">
+                  <FormField
+                    control={createForm.control}
+                    name="customerName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Name</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter customer name" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={createForm.control}
+                    name="customerEmail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Email</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter customer email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={createForm.control}
+                    name="customerPhone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Customer Phone (optional)</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Enter customer phone" {...field} />
+                        </FormControl>
+                        <FormDescription>
+                          Required for SMS requests
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={createForm.control}
+                    name="requestMethod"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Request Method</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a method" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="email">
+                              <div className="flex items-center">
+                                <Mail className="mr-2 h-4 w-4" />
+                                Email
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="sms">
+                              <div className="flex items-center">
+                                <Phone className="mr-2 h-4 w-4" />
+                                SMS
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="both">
+                              <div className="flex items-center">
+                                <MessagesSquare className="mr-2 h-4 w-4" />
+                                Both Email & SMS
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={createForm.control}
+                    name="locationId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a location" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {mockLocations.map(location => (
+                              <SelectItem key={location.id} value={location.id}>
+                                {location.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={createForm.control}
+                    name="templateId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email Template</FormLabel>
+                        <Select 
+                          onValueChange={(value) => handleCreateTemplateChange(value)} 
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a template" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {mockTemplates.map(template => (
+                              <SelectItem key={template.id} value={template.id}>
+                                {template.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={createForm.control}
+                    name="message"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Message</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Enter your message" 
+                            {...field} 
+                            rows={6}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          You can use placeholders like [CUSTOMER_NAME], [BUSINESS_NAME], and [REVIEW_LINK].
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <DialogFooter>
+                    <Button 
+                      type="submit" 
+                      disabled={createRequestMutation.isPending}
+                    >
+                      {createRequestMutation.isPending && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
+                      Create Review Request
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
+        
+        {/* Tabs for filtering requests */}
+        <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList>
+            <TabsTrigger value="all">All Requests</TabsTrigger>
+            <TabsTrigger value="scheduled">
+              Scheduled
+              <Badge variant="secondary" className="ml-2 bg-yellow-100 text-yellow-800">
+                {requests.filter(r => r.status === "scheduled").length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="sent">
+              Sent
+              <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800">
+                {requests.filter(r => r.status === "sent").length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="cancelled">
+              Cancelled
+              <Badge variant="secondary" className="ml-2 bg-gray-100 text-gray-800">
+                {requests.filter(r => r.status === "cancelled").length}
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value={activeTab} className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Review Requests</CardTitle>
+                <CardDescription>
+                  Manage and track your review requests to customers.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {filteredRequests.length > 0 ? (
+                  <div className="overflow-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Customer</TableHead>
+                          <TableHead>Method</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Location</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredRequests.map(request => (
+                          <TableRow key={request.id}>
+                            <TableCell>
+                              <div className="font-medium">{request.customerName}</div>
+                              <div className="text-sm text-slate-500">{request.customerEmail}</div>
+                              {request.customerPhone && (
+                                <div className="text-sm text-slate-500">{request.customerPhone}</div>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {request.requestMethod === "email" ? (
+                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                  <Mail className="mr-1 h-3 w-3" />
+                                  Email
+                                </Badge>
+                              ) : request.requestMethod === "sms" ? (
+                                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                  <Phone className="mr-1 h-3 w-3" />
+                                  SMS
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200">
+                                  <MessagesSquare className="mr-1 h-3 w-3" />
+                                  Both
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              {request.status === "scheduled" ? (
+                                <div>
+                                  <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                                    <Calendar className="mr-1 h-3 w-3" />
+                                    Scheduled
+                                  </Badge>
+                                  <div className="text-sm text-slate-500 mt-1">
+                                    {new Date(request.scheduledDate).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              ) : request.status === "sent" ? (
+                                <div>
+                                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                    <Send className="mr-1 h-3 w-3" />
+                                    Sent
+                                  </Badge>
+                                  <div className="text-sm text-slate-500 mt-1">
+                                    {new Date(request.sentDate).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div>
+                                  <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+                                    <StopCircle className="mr-1 h-3 w-3" />
+                                    Cancelled
+                                  </Badge>
+                                  <div className="text-sm text-slate-500 mt-1">
+                                    {new Date(request.cancelledDate).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="font-medium">{request.locationName}</div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <MoreVertical className="h-4 w-4" />
+                                    <span className="sr-only">Open menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem onClick={() => openEditDialog(request)}>
+                                    <Pencil className="mr-2 h-4 w-4" />
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => navigator.clipboard.writeText(request.message)}>
+                                    <Copy className="mr-2 h-4 w-4" />
+                                    Copy Message
+                                  </DropdownMenuItem>
+                                  {request.status === "scheduled" && (
+                                    <DropdownMenuItem>
+                                      <PlayCircle className="mr-2 h-4 w-4" />
+                                      Send Now
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => openDeleteDialog(request)} className="text-red-600">
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <MessageCircle className="mx-auto h-12 w-12 text-slate-300" />
+                    <h3 className="mt-4 text-lg font-medium">No requests found</h3>
+                    <p className="mt-2 text-sm text-slate-500">
+                      {searchTerm 
+                        ? "No requests match your search criteria. Try a different search term." 
+                        : activeTab !== "all" 
+                          ? `You don't have any ${activeTab} requests.` 
+                          : "Get started by creating your first review request."}
+                    </p>
+                    <Button 
+                      variant="outline" 
+                      className="mt-4"
+                      onClick={() => setIsCreateDialogOpen(true)}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Request
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+      
+      {/* Edit Request Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[550px]">
+          <DialogHeader>
+            <DialogTitle>Edit Review Request</DialogTitle>
+            <DialogDescription>
+              Update the details of this review request.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...editForm}>
+            <form onSubmit={editForm.handleSubmit(handleEditRequest)} className="space-y-4">
+              <FormField
+                control={editForm.control}
+                name="customerName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Customer Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter customer name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={editForm.control}
+                name="customerEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Customer Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter customer email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={editForm.control}
+                name="customerPhone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Customer Phone (optional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Enter customer phone" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Required for SMS requests
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={editForm.control}
+                name="requestMethod"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Request Method</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a method" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="email">
+                          <div className="flex items-center">
+                            <Mail className="mr-2 h-4 w-4" />
+                            Email
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="sms">
+                          <div className="flex items-center">
+                            <Phone className="mr-2 h-4 w-4" />
+                            SMS
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="both">
+                          <div className="flex items-center">
+                            <MessagesSquare className="mr-2 h-4 w-4" />
+                            Both Email & SMS
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={editForm.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="scheduled">
+                          <div className="flex items-center">
+                            <Calendar className="mr-2 h-4 w-4" />
+                            Scheduled
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="sent">
+                          <div className="flex items-center">
+                            <Send className="mr-2 h-4 w-4" />
+                            Sent
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="cancelled">
+                          <div className="flex items-center">
+                            <StopCircle className="mr-2 h-4 w-4" />
+                            Cancelled
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={editForm.control}
+                name="locationId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Location</FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a location" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {mockLocations.map(location => (
+                          <SelectItem key={location.id} value={location.id}>
+                            {location.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={editForm.control}
+                name="templateId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email Template</FormLabel>
+                    <Select 
+                      onValueChange={(value) => handleEditTemplateChange(value)} 
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a template" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {mockTemplates.map(template => (
+                          <SelectItem key={template.id} value={template.id}>
+                            {template.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={editForm.control}
+                name="message"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Message</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Enter your message" 
+                        {...field} 
+                        rows={6}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      You can use placeholders like [CUSTOMER_NAME], [BUSINESS_NAME], and [REVIEW_LINK].
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  disabled={editRequestMutation.isPending}
+                >
+                  {editRequestMutation.isPending && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
+                  Save Changes
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Request Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the review request for {selectedRequest?.customerName}. 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteRequest}
+              className="bg-red-500 hover:bg-red-600"
+            >
+              {deleteRequestMutation.isPending && (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              )}
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+}

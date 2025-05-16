@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/hooks/use-theme";
@@ -13,6 +13,7 @@ import {
   X,
   ChevronDown,
   ChevronRight,
+  ChevronLeft,
   Moon,
   Sun,
   Paintbrush
@@ -67,10 +68,26 @@ export function Sidebar({
   // Use either provided toggle function or internal one
   const toggleSidebar = onToggleSidebar || internalSidebarState.toggleSidebar;
   
-  // Dark mode is now handled by ThemeProvider context
+  // Keep track of unread counts for notification badges
+  const unreadReviewsCount = 5; // Replace with actual data in production
+  const unreadAlertsCount = 3; // Replace with actual data in production
   
   // Generate navigation structure based on current user permissions
   const roleBasedNavItems = generateSidebarNavigation(expandedGroups, permissions);
+  
+  // Handle keyboard navigation
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Toggle sidebar on Alt+S
+    if (e.altKey && e.key === 's') {
+      e.preventDefault();
+      toggleSidebar();
+    }
+    
+    // Close mobile menu on Escape
+    if (e.key === 'Escape' && mobileMenuOpen) {
+      setMobileMenuOpen(false);
+    }
+  }, [toggleSidebar, mobileMenuOpen]);
   
   // Handle sidebar click outside to close on mobile
   useEffect(() => {
@@ -90,6 +107,19 @@ export function Sidebar({
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isMobile, mobileMenuOpen]);
+  
+  // Announce sidebar state changes to screen readers
+  useEffect(() => {
+    const announcement = sidebarCollapsed 
+      ? "Sidebar collapsed. Press Alt+S to expand." 
+      : "Sidebar expanded. Press Alt+S to collapse.";
+    
+    // Create a visually hidden announcement for screen readers
+    const ariaLive = document.getElementById('sidebar-announcer');
+    if (ariaLive) {
+      ariaLive.textContent = announcement;
+    }
+  }, [sidebarCollapsed]);
     
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
   
@@ -104,33 +134,49 @@ export function Sidebar({
   
   return (
     <TooltipProvider>
+      {/* Visually hidden announcer for screen readers */}
+      <div 
+        id="sidebar-announcer" 
+        className="sr-only" 
+        aria-live="polite" 
+        aria-atomic="true"
+      ></div>
+      
       <aside 
         ref={sidebarRef}
         className={cn(
-          "bg-white border-r border-slate-200 z-20 transition-all duration-300 h-full overflow-visible",
-          sidebarCollapsed ? "lg:w-20" : "lg:w-64", 
-          isMobile ? "shadow-xl" : "relative",
+          "bg-white dark:bg-gray-900 border-r border-slate-200 dark:border-gray-800 z-30",
+          "transition-all duration-300 h-full overflow-visible fixed lg:sticky top-0",
+          sidebarCollapsed ? "lg:w-16" : "lg:w-64", 
+          isMobile ? "shadow-xl" : "",
           mobileMenuOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full lg:translate-x-0 lg:w-auto",
           className
         )}
         role="navigation"
         aria-label="Main navigation"
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-[100vh] overflow-hidden">
           {/* Mobile Header */}
-          <div className="flex items-center justify-between p-4 border-b border-slate-200 lg:hidden">
+          <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-gray-800 lg:hidden">
             <div className="text-primary text-xl font-bold flex items-center">
               <ChartLine className="h-5 w-5 mr-2" />
               RepuRadar
             </div>
-            <Button variant="ghost" size="icon" onClick={toggleMobileMenu} aria-label="Close menu">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleMobileMenu} 
+              aria-label="Close menu"
+            >
               <X className="h-5 w-5" />
             </Button>
           </div>
 
           {/* Desktop Header */}
           <div className={cn(
-            "hidden lg:flex items-center p-4 border-b border-slate-200",
+            "hidden lg:flex items-center p-4 border-b border-slate-200 dark:border-gray-800",
             sidebarCollapsed ? "justify-center" : "justify-between"
           )}>
             {!sidebarCollapsed && (
@@ -148,12 +194,13 @@ export function Sidebar({
               className={cn("h-8 w-8", sidebarCollapsed && "hidden")}
               onClick={toggleSidebar}
               aria-label="Collapse sidebar"
+              title="Collapse sidebar (Alt+S)"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5" />
             </Button>
           </div>
           
-          {/* Expand button when collapsed */}
+          {/* Toggle button - always visible when collapsed */}
           {sidebarCollapsed && (
             <Button
               variant="ghost"
@@ -161,8 +208,9 @@ export function Sidebar({
               className="hidden lg:flex h-8 w-8 mx-auto mt-2"
               onClick={toggleSidebar}
               aria-label="Expand sidebar"
+              title="Expand sidebar (Alt+S)"
             >
-              <ChevronRight className="h-5 w-5 rotate-180" />
+              <ChevronRight className="h-5 w-5" />
             </Button>
           )}
           
