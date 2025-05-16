@@ -42,10 +42,12 @@ export default function AuthPage() {
   useEffect(() => {
     if (user) {
       // Redirect admin users to the admin dashboard, regular users to the main dashboard
-      if (user.role === 'admin') {
+      if (user.role === 'admin' && user.username === 'admin') {
+        console.log("Redirecting system admin to admin dashboard");
         navigate("/admin");
       } else {
-        navigate("/");
+        console.log("Redirecting to main dashboard");
+        navigate("/dashboard");
       }
     }
   }, [user, navigate]);
@@ -55,6 +57,8 @@ export default function AuthPage() {
   const onLoginSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     console.log("Login attempt with:", loginEmail);
+    
+    // We need to handle the case when a user enters a username instead of email
     loginMutation.mutate({
       email: loginEmail,
       password: loginPassword
@@ -64,13 +68,14 @@ export default function AuthPage() {
         console.log("Login successful, user data:", user);
         console.log("User role:", user.role);
         
-        // Navigate after successful login
-        if (user.role === 'admin') {
-          console.log("Redirecting to admin dashboard");
+        // For system admin only (username 'admin'), go to admin dashboard
+        // For all other users including client admins, go to regular dashboard
+        if (user.role === 'admin' && user.username === 'admin') {
+          console.log("Redirecting system admin to admin dashboard");
           navigate('/admin');
         } else {
           console.log("Redirecting to regular dashboard");
-          navigate('/');
+          navigate('/dashboard');
         }
       }
     });

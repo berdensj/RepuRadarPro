@@ -31,8 +31,8 @@ type AuthContextType = {
 };
 
 const loginSchema = z.object({
-  email: z.string().min(3, "Please enter a valid email or username"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  email: z.string().min(1, "Please enter a username or email"),
+  password: z.string().min(1, "Password is required"),
 });
 
 const registerSchema = z.object({
