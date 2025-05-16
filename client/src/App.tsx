@@ -17,6 +17,7 @@ import NotFoundPage from "@/pages/not-found";
 import TestSidebarPage from "@/pages/test-sidebar-page";
 import TestEnhancedSidebarPage from "@/pages/test-enhanced-sidebar";
 import ModernSidebarDemo from "@/pages/modern-sidebar-demo";
+import EnhancedSidebarDemo from "@/pages/enhanced-sidebar-demo";
 
 // Lazy load components for better performance
 // Using dynamic imports with proper typing
@@ -187,6 +188,9 @@ function Router() {
       </Route>
       <Route path="/modern-sidebar">
         {() => <ModernSidebarDemo />}
+      </Route>
+      <Route path="/enhanced-sidebar-demo">
+        {() => <EnhancedSidebarDemo />}
       </Route>
       <Route>
         {() => <NotFoundPage />}
