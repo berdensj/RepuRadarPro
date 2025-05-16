@@ -18,6 +18,7 @@ import TestSidebarPage from "@/pages/test-sidebar-page";
 import TestEnhancedSidebarPage from "@/pages/test-enhanced-sidebar";
 import ModernSidebarDemo from "@/pages/modern-sidebar-demo";
 import EnhancedSidebarDemo from "@/pages/enhanced-sidebar-demo";
+import AccessibleSidebarDemo from "@/pages/accessible-sidebar-demo";
 
 // Lazy load components for better performance
 // Using dynamic imports with proper typing
