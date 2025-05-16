@@ -193,6 +193,9 @@ function Router() {
       <Route path="/enhanced-sidebar-demo">
         {() => <EnhancedSidebarDemo />}
       </Route>
+      <Route path="/accessible-sidebar">
+        {() => <AccessibleSidebarDemo />}
+      </Route>
       <Route>
         {() => <NotFoundPage />}
       </Route>
