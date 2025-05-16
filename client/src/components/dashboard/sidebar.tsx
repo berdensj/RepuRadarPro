@@ -196,7 +196,7 @@ export function Sidebar({
                       sidebarCollapsed && "hidden"
                     )}>
                       <div className="mx-2">
-                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        <p className="text-[9px] font-semibold text-slate-500 uppercase tracking-wider">
                           {item.label}
                         </p>
                         <div className="mt-0.5 border-t border-slate-200"></div>
@@ -229,7 +229,7 @@ export function Sidebar({
                             <div className="relative">
                               <Icon 
                                 className={cn("flex-shrink-0", 
-                                  sidebarCollapsed ? "w-5 h-5" : "w-4 h-4 mr-2"
+                                  sidebarCollapsed ? "w-4 h-4" : "w-3.5 h-3.5 mr-1.5"
                                 )} 
                                 aria-hidden="true"
                               />
@@ -248,7 +248,7 @@ export function Sidebar({
                               )}
                             </div>
                             {!sidebarCollapsed && (
-                              <span className="text-xs font-medium truncate">{item.label}</span>
+                              <span className="text-[10px] font-medium truncate">{item.label}</span>
                             )}
                             {isActive && !sidebarCollapsed && (
                               <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" />
@@ -292,7 +292,7 @@ export function Sidebar({
                               aria-label={`${item.label} menu${isGroupExpanded ? ' (expanded)' : ' (collapsed)'}`}
                             >
                               <div className="relative">
-                                <Icon className="w-5 h-5" aria-hidden="true" />
+                                <Icon className="w-4 h-4" aria-hidden="true" />
                                 {/* Group notification badge */}
                                 {item.label === "Reviews" && (
                                   <span 
@@ -341,7 +341,7 @@ export function Sidebar({
                                 >
                                   <div className="flex items-center">
                                     <child.icon className="w-3 h-3 mr-1.5" aria-hidden="true" />
-                                    <span className="text-xs">{child.label}</span>
+                                    <span className="text-[10px]">{child.label}</span>
                                   </div>
                                 </a>
                               ))}
@@ -358,7 +358,7 @@ export function Sidebar({
                       <button
                         id={`${item.label.toLowerCase()}-menu-button`}
                         className={cn(
-                          "w-full flex justify-between items-center rounded-md py-0.5 px-1.5 text-xs font-medium",
+                          "w-full flex justify-between items-center rounded-md py-0.5 px-1.5 text-[10px] font-medium",
                           hasActiveChild 
                             ? "bg-primary/10 text-primary" 
                             : "text-slate-700 hover:bg-slate-100"
@@ -419,7 +419,7 @@ export function Sidebar({
                                   aria-current={isChildActive ? "page" : undefined}
                                 >
                                   <ChildIcon className="w-3 h-3 mr-1.5" aria-hidden="true" />
-                                  <span className="text-xs">{child.label}</span>
+                                  <span className="text-[10px]">{child.label}</span>
                                   {isChildActive && (
                                     <div className="absolute left-0 w-1 h-6 bg-primary rounded-r-full" aria-hidden="true" />
                                   )}
