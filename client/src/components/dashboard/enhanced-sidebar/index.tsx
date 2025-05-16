@@ -368,7 +368,7 @@ export function EnhancedSidebar({
           {/* Navigation - scrollable section */}
           <nav 
             className="overflow-y-auto"
-            style={{ maxHeight: 'calc(100vh - 140px)' }} // Ensure proper scrolling area
+            style={{ maxHeight: 'calc(100vh - 180px)' }} // Increased height to prevent cutoff
           >
             <ul className="space-y-1 p-3" role="menu">
               {navItems.map((item) => {
