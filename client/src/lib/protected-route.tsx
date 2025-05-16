@@ -45,31 +45,15 @@ export function ProtectedRoute({
     );
   }
   
-  // For now, let's remove the special case redirection for client admins
-  // to fix access issues for testing the reporting system.
-  // We'll uncomment this later if needed.
+  // Commented out to enable client user access to dashboard
+  // This redirect was causing access issues for client users
   
-  /* 
-  // Special case: If this is a client admin (admin role but not system admin) 
-  // trying to access the root dashboard, redirect to the reviews page
-  if ((path === '/' || path === '/dashboard') && user.role === 'admin') {
-    // The isSystemAdmin flag is only set to true for admin users with username "admin"
-    // Let's simplify this logic to avoid access issues
-    
-    // We'll just check if this user is the main system admin
-    const isSystemAdmin = user.username === 'admin';
-    
-    if (!isSystemAdmin) {
-      console.log("Client admin detected, redirecting to reviews dashboard");
-      // For client admins at root, redirect to reviews page (main dashboard)
-      return (
-        <Route path={path}>
-          <Redirect to="/reviews" />
-        </Route>
-      );
-    }
-  }
-  */
+  // Debug user info to help with troubleshooting
+  console.log("User authentication info:", {
+    role: user.role,
+    username: user.username,
+    isSystemAdmin: user.username === 'admin'
+  });
 
   // Check for permission-based access
   if (requiredPermission && permissions) {
