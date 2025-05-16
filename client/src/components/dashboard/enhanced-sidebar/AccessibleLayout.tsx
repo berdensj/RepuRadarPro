@@ -104,7 +104,9 @@ export function AccessibleLayout({ children, pageTitle }: AccessibleLayoutProps)
           "flex-1 overflow-auto pt-16 lg:pt-0", 
           "lg:ml-[3.75rem] transition-all duration-300",
           "focus:outline-none",
-          "bg-gray-50 dark:bg-gray-900"
+          "bg-gray-50 dark:bg-gray-900",
+          // Ensure the main content scrolls independently
+          "h-screen"
         )}
         style={{ 
           // Dynamic margin based on sidebar collapsed state

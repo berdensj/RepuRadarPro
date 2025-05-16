@@ -366,10 +366,14 @@ export function AccessibleSidebar({
             </Button>
           )}
           
-          {/* Navigation - scrollable section with improved max-height calculation */}
+          {/* Navigation - independently scrollable section */}
           <nav 
             className="overflow-y-auto flex-grow"
-            style={{ maxHeight: 'calc(100vh - 11rem)' }} // Ensure enough space for all elements
+            style={{ 
+              maxHeight: 'calc(100vh - 11rem)', // Leave space for header and footer
+              scrollbarWidth: 'thin', // For Firefox
+              msOverflowStyle: 'none' // For IE/Edge
+            }}
           >
             <ul className="space-y-1 p-3" role="menu">
               {navItems.map((item) => {
