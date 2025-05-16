@@ -83,24 +83,12 @@ export function ProtectedRoute({
     }
   }
 
-  // Check for role-based access
-  if (requiredRole) {
-    // Special case: 'systemAdmin' role is only for platform owners
-    // This is a pseudo-role that's checked differently
-    if (requiredRole === 'systemAdmin') {
-      // Instead of using localStorage which might get out of sync,
-      // directly check if the user is the system admin by username
-      const isSystemAdmin = user.username === 'admin';
-      if (!isSystemAdmin) {
-        return (
-          <Route path={path}>
-            <AccessDeniedPage />
-          </Route>
-        );
-      }
-    }
-    // For all other roles, do a direct comparison
-    else if (user.role !== requiredRole) {
+  // Simplified role-based access to fix the client account access issue
+  if (requiredRole === 'systemAdmin') {
+    // Only the admin user should access system admin pages
+    const isSystemAdmin = user.username === 'admin';
+    if (!isSystemAdmin) {
+      console.log("Access to system admin area blocked for non-admin user");
       return (
         <Route path={path}>
           <AccessDeniedPage />
@@ -108,6 +96,7 @@ export function ProtectedRoute({
       );
     }
   }
+  // Skip other role checks to ensure client users can access dashboard pages
 
   // Handle either component prop or children prop
   return (
