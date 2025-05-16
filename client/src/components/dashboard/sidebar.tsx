@@ -107,7 +107,7 @@ export function Sidebar({
       <aside 
         ref={sidebarRef}
         className={cn(
-          "bg-white border-r border-slate-200 z-20 transition-all duration-300 h-full overflow-hidden",
+          "bg-white border-r border-slate-200 z-20 transition-all duration-300 h-full overflow-visible",
           sidebarCollapsed ? "lg:w-20" : "lg:w-64", 
           isMobile ? "shadow-xl" : "relative",
           mobileMenuOpen ? "w-64 translate-x-0" : "w-0 -translate-x-full lg:translate-x-0 lg:w-auto",
@@ -185,14 +185,14 @@ export function Sidebar({
           )}
           
           {/* Navigation */}
-          <nav className="flex-grow py-1 px-2 sidebar-nav overflow-auto">
-            <ul className="space-y-1">
+          <nav className="flex-grow py-1 px-2 sidebar-nav overflow-visible">
+            <ul className="space-y-0.5">
               {roleBasedNavItems.map((item, index) => {
                 // Display separator
                 if (item.type === 'separator') {
                   return (
                     <li key={`separator-${index}`} className={cn(
-                      "pt-2 pb-0.5",
+                      "pt-1 pb-0.5",
                       sidebarCollapsed && "hidden"
                     )}>
                       <div className="mx-2">
@@ -217,8 +217,8 @@ export function Sidebar({
                           <a 
                             href={item.href} 
                             className={cn(
-                              "flex items-center rounded-md transition-colors py-1",
-                              sidebarCollapsed ? "justify-center px-1.5" : "px-2",
+                              "flex items-center rounded-md transition-colors py-0.5",
+                              sidebarCollapsed ? "justify-center px-1" : "px-1.5",
                               isActive 
                                 ? "bg-primary/10 text-primary" 
                                 : "text-slate-700 hover:bg-slate-100"
@@ -354,11 +354,11 @@ export function Sidebar({
                   
                   // For expanded sidebar, show group with collapsible children
                   return (
-                    <li key={`group-${item.label}`} className="space-y-1">
+                    <li key={`group-${item.label}`} className="space-y-0.5">
                       <button
                         id={`${item.label.toLowerCase()}-menu-button`}
                         className={cn(
-                          "w-full flex justify-between items-center rounded-md py-1 px-2 text-xs font-medium",
+                          "w-full flex justify-between items-center rounded-md py-0.5 px-1.5 text-xs font-medium",
                           hasActiveChild 
                             ? "bg-primary/10 text-primary" 
                             : "text-slate-700 hover:bg-slate-100"
@@ -397,7 +397,7 @@ export function Sidebar({
                       {isGroupExpanded && (
                         <ul 
                           id={`${item.label.toLowerCase()}-submenu`}
-                          className="pl-8 mt-1 space-y-1"
+                          className="pl-7 mt-0.5 space-y-0.5"
                           role="menu"
                           aria-labelledby={`${item.label.toLowerCase()}-menu-button`}
                         >
