@@ -5,7 +5,9 @@ import {
   alerts, type Alert, type InsertAlert,
   locations, type Location, type InsertLocation,
   crmIntegrations, type CrmIntegration, type InsertCrmIntegration,
-  aiReplies, type AiReply, type InsertAiReply
+  aiReplies, type AiReply, type InsertAiReply,
+  reviewInvites, type ReviewInvite, type InsertReviewInvite,
+  healthcareSettings, type HealthcareSettings, type InsertHealthcareSettings
 } from "@shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -123,6 +125,8 @@ export class MemStorage implements IStorage {
     this.locations = new Map();
     this.crmIntegrations = new Map();
     this.aiReplies = new Map();
+    this.reviewInvites = new Map();
+    this.healthcareSettingsMap = new Map();
     
     this.userCurrentId = 1;
     this.reviewCurrentId = 1;
@@ -131,6 +135,8 @@ export class MemStorage implements IStorage {
     this.locationCurrentId = 1;
     this.crmIntegrationCurrentId = 1;
     this.aiReplyCurrentId = 1;
+    this.reviewInviteCurrentId = 1;
+    this.healthcareSettingsCurrentId = 1;
     
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
