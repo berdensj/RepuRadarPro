@@ -597,6 +597,83 @@ export class MemStorage implements IStorage {
       topReviews
     };
   }
+  
+  // Healthcare-specific methods - Review Invites
+  async createReviewInvite(invitation: InsertReviewInvite): Promise<ReviewInvite> {
+    const id = this.reviewInviteCurrentId++;
+    const newInvite: ReviewInvite = {
+      ...invitation,
+      id,
+      createdAt: new Date()
+    };
+    this.reviewInvites.set(id, newInvite);
+    return newInvite;
+  }
+
+  async getReviewInviteById(id: number): Promise<ReviewInvite | undefined> {
+    return this.reviewInvites.get(id);
+  }
+
+  async updateReviewInvite(id: number, invitation: Partial<ReviewInvite>): Promise<ReviewInvite> {
+    const existingInvite = this.reviewInvites.get(id);
+    if (!existingInvite) {
+      throw new Error("Review invite not found");
+    }
+    
+    const updatedInvite = { ...existingInvite, ...invitation };
+    this.reviewInvites.set(id, updatedInvite);
+    return updatedInvite;
+  }
+
+  async getReviewInvitesByLocationId(
+    locationId: number, 
+    startDate?: Date, 
+    endDate?: Date
+  ): Promise<ReviewInvite[]> {
+    let invites = Array.from(this.reviewInvites.values())
+      .filter(invite => invite.locationId === locationId);
+    
+    if (startDate && endDate) {
+      invites = invites.filter(invite => 
+        invite.sentAt >= startDate && invite.sentAt <= endDate
+      );
+    } else if (startDate) {
+      invites = invites.filter(invite => invite.sentAt >= startDate);
+    } else if (endDate) {
+      invites = invites.filter(invite => invite.sentAt <= endDate);
+    }
+    
+    // Sort by sentAt in descending order (newest first)
+    return invites.sort((a, b) => b.sentAt.getTime() - a.sentAt.getTime());
+  }
+  
+  // Healthcare settings methods
+  async getHealthcareSettingsByUserId(userId: number): Promise<HealthcareSettings | undefined> {
+    return Array.from(this.healthcareSettingsMap.values())
+      .find(settings => settings.userId === userId);
+  }
+  
+  async createHealthcareSettings(settings: InsertHealthcareSettings): Promise<HealthcareSettings> {
+    const id = this.healthcareSettingsCurrentId++;
+    const newSettings: HealthcareSettings = {
+      ...settings,
+      id,
+      createdAt: new Date()
+    };
+    this.healthcareSettingsMap.set(id, newSettings);
+    return newSettings;
+  }
+  
+  async updateHealthcareSettings(id: number, settings: Partial<HealthcareSettings>): Promise<HealthcareSettings> {
+    const existingSettings = this.healthcareSettingsMap.get(id);
+    if (!existingSettings) {
+      throw new Error("Healthcare settings not found");
+    }
+    
+    const updatedSettings = { ...existingSettings, ...settings, updatedAt: new Date() };
+    this.healthcareSettingsMap.set(id, updatedSettings);
+    return updatedSettings;
+  }
 }
 
 // Import the database storage implementation
