@@ -79,6 +79,17 @@ export interface IStorage {
   getLocationMetrics(locationId: number): Promise<any>;
   getWeeklySummary(userId: number): Promise<any>;
 
+  // Healthcare-specific methods
+  createReviewInvite(invitation: InsertReviewInvite): Promise<ReviewInvite>;
+  getReviewInviteById(id: number): Promise<ReviewInvite | undefined>;
+  updateReviewInvite(id: number, invitation: Partial<ReviewInvite>): Promise<ReviewInvite>;
+  getReviewInvitesByLocationId(locationId: number, startDate?: Date, endDate?: Date): Promise<ReviewInvite[]>;
+  
+  // Healthcare settings methods
+  getHealthcareSettingsByUserId(userId: number): Promise<HealthcareSettings | undefined>;
+  createHealthcareSettings(settings: InsertHealthcareSettings): Promise<HealthcareSettings>;
+  updateHealthcareSettings(id: number, settings: Partial<HealthcareSettings>): Promise<HealthcareSettings>;
+
   sessionStore: session.Store;
 }
 

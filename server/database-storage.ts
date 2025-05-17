@@ -32,11 +32,18 @@ import {
   aiReplies,
   type AiReply,
   type InsertAiReply,
-  locationManagers
+  locationManagers,
+  // Add new healthcare-specific imports
+  reviewInvites,
+  type ReviewInvite,
+  type InsertReviewInvite,
+  healthcareSettings,
+  type HealthcareSettings,
+  type InsertHealthcareSettings
 } from "@shared/schema";
 import { IStorage } from "./storage";
 import { db } from "./db";
-import { eq, and, desc, lte, between, sql, count } from "drizzle-orm";
+import { eq, and, desc, lte, gte, between, sql, count } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
