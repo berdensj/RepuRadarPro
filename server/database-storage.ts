@@ -812,4 +812,73 @@ export class DatabaseStorage implements IStorage {
       reviews: recentReviews.slice(0, 5), // Return the 5 most recent reviews
     };
   }
+
+  // Healthcare-specific methods - Review Invites
+  async createReviewInvite(invitation: InsertReviewInvite): Promise<ReviewInvite> {
+    const [invite] = await db.insert(reviewInvites).values(invitation).returning();
+    return invite;
+  }
+
+  async getReviewInviteById(id: number): Promise<ReviewInvite | undefined> {
+    const [invite] = await db.select().from(reviewInvites).where(eq(reviewInvites.id, id));
+    return invite;
+  }
+
+  async updateReviewInvite(id: number, invitation: Partial<ReviewInvite>): Promise<ReviewInvite> {
+    const [updated] = await db
+      .update(reviewInvites)
+      .set(invitation)
+      .where(eq(reviewInvites.id, id))
+      .returning();
+    return updated;
+  }
+
+  async getReviewInvitesByLocationId(
+    locationId: number, 
+    startDate?: Date, 
+    endDate?: Date
+  ): Promise<ReviewInvite[]> {
+    let query = db.select().from(reviewInvites).where(eq(reviewInvites.locationId, locationId));
+    
+    if (startDate && endDate) {
+      query = query.where(
+        and(
+          gte(reviewInvites.sentAt, startDate),
+          lte(reviewInvites.sentAt, endDate)
+        )
+      );
+    } else if (startDate) {
+      query = query.where(gte(reviewInvites.sentAt, startDate));
+    } else if (endDate) {
+      query = query.where(lte(reviewInvites.sentAt, endDate));
+    }
+    
+    return await query.orderBy(desc(reviewInvites.sentAt));
+  }
+
+  // Healthcare settings methods
+  async getHealthcareSettingsByUserId(userId: number): Promise<HealthcareSettings | undefined> {
+    const [settings] = await db
+      .select()
+      .from(healthcareSettings)
+      .where(eq(healthcareSettings.userId, userId));
+    return settings;
+  }
+
+  async createHealthcareSettings(settings: InsertHealthcareSettings): Promise<HealthcareSettings> {
+    const [newSettings] = await db
+      .insert(healthcareSettings)
+      .values(settings)
+      .returning();
+    return newSettings;
+  }
+
+  async updateHealthcareSettings(id: number, settings: Partial<HealthcareSettings>): Promise<HealthcareSettings> {
+    const [updated] = await db
+      .update(healthcareSettings)
+      .set(settings)
+      .where(eq(healthcareSettings.id, id))
+      .returning();
+    return updated;
+  }
 }

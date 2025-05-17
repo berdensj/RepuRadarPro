@@ -27,6 +27,9 @@ import {
   verifyFacebookWebhook,
   handleReviewWebhook 
 } from "./services/webhooks";
+
+// Import route modules
+import healthcareRoutes from "./routes/healthcare";
 import {
   initializeSubscriptionPlans,
   startTrial,

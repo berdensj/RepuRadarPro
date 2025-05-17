@@ -101,6 +101,8 @@ export class MemStorage implements IStorage {
   private locations: Map<number, Location>;
   private crmIntegrations: Map<number, CrmIntegration>;
   private aiReplies: Map<number, AiReply>;
+  private reviewInvites: Map<number, ReviewInvite>;
+  private healthcareSettingsMap: Map<number, HealthcareSettings>;
   sessionStore: session.Store;
   
   private userCurrentId: number;
@@ -110,6 +112,8 @@ export class MemStorage implements IStorage {
   private locationCurrentId: number;
   private crmIntegrationCurrentId: number;
   private aiReplyCurrentId: number;
+  private reviewInviteCurrentId: number;
+  private healthcareSettingsCurrentId: number;
 
   constructor() {
     this.users = new Map();
