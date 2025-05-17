@@ -1,0 +1,67 @@
+You are an expert full stack developer improving RepuRadarPro — an AI-powered, multi-location reputation management SaaS — to better serve healthcare clients including clinics, dental offices, urgent care centers, and medspas.
+
+Enhance the existing platform to support healthcare workflows while maintaining all current functionality for other business types. Do not break the client dashboard, admin dashboard, or AI reply pipeline.
+
+---
+
+🎯 ADD THE FOLLOWING HEALTHCARE-SPECIFIC ENHANCEMENTS:
+
+✅ 1. Healthcare Business Type Recognition  
+- In the client onboarding flow and settings, allow users to select their business type (e.g., Medical Clinic, Dental Practice, MedSpa, Mental Health, etc.)  
+- Store `business_type` in the users or organizations table  
+- Ensure this value is used to:
+  - Tailor AI review reply tone/templates
+  - Customize dashboard labels (e.g., "Patients" instead of "Customers")
+
+✅ 2. Appointment-Based Review Request Simulation  
+- Add optional setting for healthcare accounts to **simulate completed appointments**
+- Add a `Send Review Request` button in the dashboard that triggers a mock review request (email or SMS)
+- Save sent requests in a new table: `review_invites`
+  - Fields: `location_id`, `patient_name`, `method`, `status`, `sent_at`
+
+✅ 3. Review Request Settings Panel  
+- Add a panel under “Settings” where healthcare clients can:
+  - Enable/disable review automation
+  - Choose delay for request (Immediately / 1 hour / 24 hours after appointment)
+  - Customize message template
+  - Add Google Business Profile link (used in CTA)
+
+✅ 4. Enhanced Analytics for Clinics  
+- Update the dashboard to show:
+  - # of review invites sent this week
+  - Open/click rate (simulated for now)
+  - Review score trend over past 7 days
+- Add filters by location or provider name if available
+
+✅ 5. HIPAA-Aware UI & Data Fields  
+- Do not display patient names in analytics (use pseudonyms or initials)
+- Avoid using PHI in SMS/email previews
+- Add disclaimer in UI that RepuRadarPro is not storing or exposing PHI
+
+✅ 6. Provider-Focused Terminology  
+- If `business_type` is healthcare-related, use:
+  - “Patients” instead of “Customers”
+  - “Visit” instead of “Order” or “Transaction”
+  - “Provider” instead of “Manager” in UI where appropriate
+
+✅ 7. AI Reply Enhancement for Healthcare  
+- Update your OpenAI prompts to use healthcare-aware tones when `business_type` is medical (e.g., “empathetic, reassuring tone for medical offices”)
+- Tailor sample prompts to use terms like:
+  > "Thank you for trusting us with your care"  
+  > "We appreciate your feedback following your recent visit"
+
+---
+
+📦 Implementation Notes:
+- Maintain compatibility with current RepuRadarPro database structure
+- Use Supabase tables: `users`, `locations`, `review_invites`, `settings`
+- Backend: Use Node.js + Express routes where applicable
+- Frontend: Use existing React + Tailwind structure (no need to rebuild UI from scratch)
+
+---
+
+⚙️ Output Expectations:
+- Enhanced dashboard views for healthcare users
+- Optional appointment-based trigger logic
+- Review request system and template settings
+- Tailored language and analytics without disrupting other business types

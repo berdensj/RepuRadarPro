@@ -358,7 +358,7 @@ export type AgencyClient = typeof agencyClients.$inferSelect;
 // Define relationships between tables
 
 // User relations
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   reviews: many(reviews),
   locations: many(locations),
   alerts: many(alerts),
@@ -369,6 +369,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   ownedAgencies: many(agencies),
   crmIntegrations: many(crmIntegrations),
   managedLocations: many(locationManagers),
+  healthcareSettings: one(healthcareSettings),
 }));
 
 // Review relations
@@ -392,6 +393,7 @@ export const locationsRelations = relations(locations, ({ one, many }) => ({
   }),
   reviews: many(reviews),
   reviewRequests: many(reviewRequests),
+  reviewInvites: many(reviewInvites),
   managers: many(locationManagers),
 }));
 
@@ -471,6 +473,90 @@ export const agencyClientsRelations = relations(agencyClients, ({ one }) => ({
   client: one(users, {
     fields: [agencyClients.clientUserId],
     references: [users.id],
+  }),
+}));
+
+// Review invites table for healthcare appointment-based review request simulation
+export const reviewInvites = pgTable("review_invites", {
+  id: serial("id").primaryKey(),
+  locationId: integer("location_id").notNull(),
+  patientName: text("patient_name").notNull(),
+  method: text("method").notNull(), // email, sms
+  status: text("status").notNull().default("pending"), // pending, sent, opened, clicked
+  sentAt: timestamp("sent_at").notNull().defaultNow(),
+  deliveredAt: timestamp("delivered_at"),
+  openedAt: timestamp("opened_at"),
+  clickedAt: timestamp("clicked_at"),
+  reviewId: integer("review_id"), // if they left a review, link to it
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertReviewInviteSchema = createInsertSchema(reviewInvites).pick({
+  locationId: true,
+  patientName: true,
+  method: true,
+  status: true,
+  sentAt: true,
+  deliveredAt: true,
+  openedAt: true,
+  clickedAt: true,
+  reviewId: true,
+  notes: true,
+});
+
+export type InsertReviewInvite = z.infer<typeof insertReviewInviteSchema>;
+export type ReviewInvite = typeof reviewInvites.$inferSelect;
+
+// Review invites relations
+export const reviewInvitesRelations = relations(reviewInvites, ({ one }) => ({
+  location: one(locations, {
+    fields: [reviewInvites.locationId],
+    references: [locations.id],
+  }),
+  review: one(reviews, {
+    fields: [reviewInvites.reviewId],
+    references: [reviews.id],
+  }),
+}));
+
+// Healthcare-specific settings table
+export const healthcareSettings = pgTable("healthcare_settings", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  enableReviewAutomation: boolean("enable_review_automation").default(false),
+  requestDelay: text("request_delay").default("immediately"), // immediately, 1hour, 24hours
+  defaultTemplateId: integer("default_template_id"),
+  googleProfileLink: text("google_profile_link"),
+  usePatientTerminology: boolean("use_patient_terminology").default(true),
+  hipaaMode: boolean("hipaa_mode").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertHealthcareSettingsSchema = createInsertSchema(healthcareSettings).pick({
+  userId: true,
+  enableReviewAutomation: true,
+  requestDelay: true,
+  defaultTemplateId: true,
+  googleProfileLink: true,
+  usePatientTerminology: true,
+  hipaaMode: true,
+  updatedAt: true,
+});
+
+export type InsertHealthcareSettings = z.infer<typeof insertHealthcareSettingsSchema>;
+export type HealthcareSettings = typeof healthcareSettings.$inferSelect;
+
+// Healthcare settings relations
+export const healthcareSettingsRelations = relations(healthcareSettings, ({ one }) => ({
+  user: one(users, {
+    fields: [healthcareSettings.userId],
+    references: [users.id],
+  }),
+  defaultTemplate: one(reviewTemplates, {
+    fields: [healthcareSettings.defaultTemplateId],
+    references: [reviewTemplates.id],
   }),
 }));
 
