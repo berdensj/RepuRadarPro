@@ -27,7 +27,6 @@ import {
   verifyFacebookWebhook,
   handleReviewWebhook 
 } from "./services/webhooks";
-
 // Import route modules
 import healthcareRoutes from "./routes/healthcare";
 import {
@@ -3260,6 +3259,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       next(error);
     }
   });
+  
+  // Register healthcare-specific routes for medical practices
+  app.use("/api/healthcare", healthcareRoutes);
   
   // Create HTTP server
   const httpServer = createServer(app);
