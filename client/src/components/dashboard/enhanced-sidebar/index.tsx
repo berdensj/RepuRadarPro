@@ -137,8 +137,30 @@ export function EnhancedSidebar({
     },
     {
       icon: Settings,
-      label: "Settings",
-      href: "/settings",
+      label: "Configuration",
+      href: "#",
+      children: [
+        {
+          icon: Settings,
+          label: "API Access",
+          href: "/api-access",
+        },
+        {
+          icon: Settings,
+          label: "White Label",
+          href: "/white-label",
+        },
+        {
+          icon: Settings,
+          label: "Integrations",
+          href: "/integrations",
+        },
+        {
+          icon: Settings,
+          label: "Settings",
+          href: "/settings",
+        }
+      ]
     },
     {
       icon: User,
