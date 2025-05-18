@@ -489,9 +489,7 @@ const SettingsPage = () => {
         />
       </Helmet>
 
-      <div className="min-h-screen flex flex-col lg:flex-row">
-        <Sidebar />
-
+      <div className="min-h-screen flex flex-col">
         <main className="flex-1 p-4 lg:p-6 bg-slate-50 min-h-screen">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
