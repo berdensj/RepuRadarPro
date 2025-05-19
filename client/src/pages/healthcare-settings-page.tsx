@@ -1,5 +1,5 @@
 import React from 'react';
-import { SidebarLayout } from '@/components/dashboard/layout';
+import { SidebarLayout } from '@/components/layout/sidebar-layout';
 import { TabsContent, Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -83,7 +83,7 @@ const HealthcareSettingsForm = () => {
   const queryClient = useQueryClient();
   
   // Get locations for dropdown
-  const { data: locations = [] } = useQuery({
+  const { data: locations = [] } = useQuery<any[]>({
     queryKey: ['/api/locations'],
   });
   
@@ -631,7 +631,7 @@ const AppointmentsTab = () => {
                       {appointment.patient.email || 'No email'} | {appointment.patient.phone || 'No phone'}
                     </p>
                     <div className="mt-2">
-                      <Badge variant={appointment.status === 'Complete' ? 'success' : appointment.status === 'Confirmed' ? 'default' : 'secondary'}>
+                      <Badge variant={appointment.status === 'Complete' ? 'outline' : appointment.status === 'Confirmed' ? 'default' : 'secondary'}>
                         {appointment.status}
                       </Badge>
                       <Badge variant="outline" className="ml-2">
@@ -782,7 +782,7 @@ const ReviewStatsTab = () => {
                   <td className="p-2">{patient.reviewPlatform || 'N/A'}</td>
                   <td className="p-2">
                     {patient.reviewCompleted ? (
-                      <Badge variant="success">Completed</Badge>
+                      <Badge variant="default" className="bg-green-500">Completed</Badge>
                     ) : patient.reviewRequestSent ? (
                       <Badge>Sent</Badge>
                     ) : (

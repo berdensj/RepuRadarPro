@@ -44,6 +44,7 @@ const CommunicationsPage = lazy(() => import("@/pages/communications-page").then
 const ApiAccessPage = lazy(() => import("@/pages/api-access-page").then(module => ({ default: module.default })));
 const WhiteLabelPage = lazy(() => import("@/pages/white-label-page").then(module => ({ default: module.default })));
 const DashboardBuilderPage = lazy(() => import("@/pages/dashboard-builder-page").then(module => ({ default: module.default })));
+const HealthcareSettingsPage = lazy(() => import("@/pages/healthcare-settings-page").then(module => ({ default: module.default })));
 const AdminDashboardPage = lazy(() => import("@/pages/admin/dashboard-page").then(module => ({ default: module.default })));
 const AdminUsersPage = lazy(() => import("@/pages/admin/users-page").then(module => ({ default: module.default })));
 const AdminFinancialPage = lazy(() => import("@/pages/admin/financial-page").then(module => ({ default: module.default })));
@@ -105,6 +106,7 @@ function Router() {
       <ProtectedRoute path="/api-access" component={withSidebarLayout(ApiAccessPage, "API Access")} />
       <ProtectedRoute path="/white-label" component={withSidebarLayout(WhiteLabelPage, "White Label")} />
       <ProtectedRoute path="/settings" component={withSidebarLayout(SettingsPage, "Settings")} />
+      <ProtectedRoute path="/healthcare-settings" component={withSidebarLayout(HealthcareSettingsPage, "Healthcare Settings")} />
       <ProtectedRoute path="/profile" component={withSidebarLayout(ProfilePage, "Profile")} />
       <ProtectedRoute path="/subscription" component={withSidebarLayout(SubscriptionPage, "Subscription")} />
       <ProtectedRoute path="/help" component={withSidebarLayout(HelpPage, "Help & Support")} />
