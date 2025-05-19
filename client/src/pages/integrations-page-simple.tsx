@@ -64,7 +64,7 @@ const IntegrationsPage = () => {
           <TabsList>
             <TabsTrigger value="review-platforms">Review Platforms</TabsTrigger>
             <TabsTrigger value="crm">CRM Systems</TabsTrigger>
-            {isHealthcare && <TabsTrigger value="ehr">EHR Systems</TabsTrigger>}
+            <TabsTrigger value="ehr">EHR Systems</TabsTrigger>
             <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
@@ -183,8 +183,7 @@ const IntegrationsPage = () => {
             </div>
           </TabsContent>
           
-          {isHealthcare && (
-            <TabsContent value="ehr" className="space-y-4">
+          <TabsContent value="ehr" className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {/* Athenahealth */}
                 <Card>
@@ -411,7 +410,6 @@ const IntegrationsPage = () => {
                 </p>
               </div>
             </TabsContent>
-          )}
           
           <TabsContent value="webhooks" className="space-y-4">
             <Card>
