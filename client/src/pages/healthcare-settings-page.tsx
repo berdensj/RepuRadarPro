@@ -25,13 +25,81 @@ interface HealthcareSettings {
   googleProfileLink?: string;
   usePatientTerminology: boolean;
   hipaaMode: boolean;
+  
+  // DrChrono
   drchronoEnabled: boolean;
   drchronoClientId?: string;
   drchronoClientSecret?: string;
   drchronoRefreshToken?: string;
+  
+  // Jane App
   janeappEnabled: boolean;
   janeappApiKey?: string;
   janeappApiSecret?: string;
+  
+  // Symplast (Plastic Surgery, Aesthetics)
+  symplastEnabled: boolean;
+  symplastApiKey?: string;
+  symplastApiSecret?: string;
+  symplastInstance?: string;
+  
+  // Aesthetic Record (Med Spas, Cosmetic)
+  aestheticRecordEnabled: boolean;
+  aestheticRecordApiKey?: string;
+  aestheticRecordUsername?: string;
+  aestheticRecordPassword?: string;
+  
+  // Open Dental (Dental)
+  openDentalEnabled: boolean;
+  openDentalApiKey?: string;
+  openDentalServerUrl?: string;
+  openDentalUsername?: string;
+  openDentalPassword?: string;
+  
+  // Dentrix (Dental)
+  dentrixEnabled: boolean;
+  dentrixApiKey?: string;
+  dentrixCustomerId?: string;
+  dentrixInstanceKey?: string;
+  
+  // ChiroFusion (Chiropractic)
+  chirofusionEnabled: boolean;
+  chirofusionApiKey?: string;
+  chirofusionUsername?: string;
+  chirofusionPassword?: string;
+  
+  // Athenahealth
+  athenahealthEnabled: boolean;
+  athenahealthApiKey?: string;
+  athenahealthApiSecret?: string;
+  athenahealthPracticeId?: string;
+  
+  // Tebra (Kareo)
+  tebraEnabled: boolean;
+  tebraApiKey?: string;
+  tebraAccountId?: string;
+  tebraUsername?: string;
+  tebraPassword?: string;
+  
+  // Cerner
+  cernerEnabled: boolean;
+  cernerClientId?: string;
+  cernerClientSecret?: string;
+  cernerTenantId?: string;
+  
+  // Epic
+  epicEnabled: boolean;
+  epicClientId?: string;
+  epicClientSecret?: string;
+  epicFhirUrl?: string;
+  
+  // eClinicalWorks
+  eclinicalworksEnabled: boolean;
+  eclinicalworksApiKey?: string;
+  eclinicalworksUsername?: string;
+  eclinicalworksPassword?: string;
+  
+  // General settings
   primaryLocationId?: number;
   autoSendReviewRequests: boolean;
   defaultReviewPlatform: string;
@@ -101,8 +169,21 @@ const HealthcareSettingsForm = () => {
           requestDelay: 'immediately',
           usePatientTerminology: true,
           hipaaMode: true,
+          
+          // EHR Systems Integration defaults
           drchronoEnabled: false,
           janeappEnabled: false,
+          symplastEnabled: false,
+          aestheticRecordEnabled: false,
+          openDentalEnabled: false,
+          dentrixEnabled: false,
+          chirofusionEnabled: false,
+          athenahealthEnabled: false,
+          tebraEnabled: false,
+          cernerEnabled: false,
+          epicEnabled: false,
+          eclinicalworksEnabled: false,
+          
           autoSendReviewRequests: true,
           defaultReviewPlatform: 'google'
         };
@@ -518,6 +599,953 @@ const HealthcareSettingsForm = () => {
                   />
                   {errors.janeappApiSecret && (
                     <p className="text-sm text-destructive">API Secret is required</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
+          {/* Symplast Integration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Symplast Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect to Symplast for plastic surgery and aesthetic practice management
+                </p>
+              </div>
+              <Controller
+                name="symplastEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="symplast-enabled"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            
+            {watch('symplastEnabled') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="symplast-api-key">API Key</Label>
+                  <Controller
+                    name="symplastApiKey"
+                    control={control}
+                    rules={{ required: watch('symplastEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="symplast-api-key"
+                        placeholder="Enter your Symplast API Key"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.symplastApiKey && (
+                    <p className="text-sm text-destructive">API Key is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="symplast-api-secret">API Secret</Label>
+                  <Controller
+                    name="symplastApiSecret"
+                    control={control}
+                    rules={{ required: watch('symplastEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="symplast-api-secret"
+                        type="password"
+                        placeholder="Enter your Symplast API Secret"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.symplastApiSecret && (
+                    <p className="text-sm text-destructive">API Secret is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="symplast-instance">Instance Name</Label>
+                  <Controller
+                    name="symplastInstance"
+                    control={control}
+                    rules={{ required: watch('symplastEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="symplast-instance"
+                        placeholder="Enter your Symplast Instance Name"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.symplastInstance && (
+                    <p className="text-sm text-destructive">Instance Name is required</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
+          {/* Aesthetic Record Integration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Aesthetic Record Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect to Aesthetic Record for med spa and cosmetic practice management
+                </p>
+              </div>
+              <Controller
+                name="aestheticRecordEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="aesthetic-record-enabled"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            
+            {watch('aestheticRecordEnabled') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="aesthetic-record-api-key">API Key</Label>
+                  <Controller
+                    name="aestheticRecordApiKey"
+                    control={control}
+                    rules={{ required: watch('aestheticRecordEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="aesthetic-record-api-key"
+                        placeholder="Enter your Aesthetic Record API Key"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.aestheticRecordApiKey && (
+                    <p className="text-sm text-destructive">API Key is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="aesthetic-record-username">Username</Label>
+                  <Controller
+                    name="aestheticRecordUsername"
+                    control={control}
+                    rules={{ required: watch('aestheticRecordEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="aesthetic-record-username"
+                        placeholder="Enter your Aesthetic Record Username"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.aestheticRecordUsername && (
+                    <p className="text-sm text-destructive">Username is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="aesthetic-record-password">Password</Label>
+                  <Controller
+                    name="aestheticRecordPassword"
+                    control={control}
+                    rules={{ required: watch('aestheticRecordEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="aesthetic-record-password"
+                        type="password"
+                        placeholder="Enter your Aesthetic Record Password"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.aestheticRecordPassword && (
+                    <p className="text-sm text-destructive">Password is required</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
+          {/* Open Dental Integration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Open Dental Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect to Open Dental for dental practice management
+                </p>
+              </div>
+              <Controller
+                name="openDentalEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="open-dental-enabled"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            
+            {watch('openDentalEnabled') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="open-dental-api-key">API Key</Label>
+                  <Controller
+                    name="openDentalApiKey"
+                    control={control}
+                    rules={{ required: watch('openDentalEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="open-dental-api-key"
+                        placeholder="Enter your Open Dental API Key"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.openDentalApiKey && (
+                    <p className="text-sm text-destructive">API Key is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="open-dental-server-url">Server URL</Label>
+                  <Controller
+                    name="openDentalServerUrl"
+                    control={control}
+                    rules={{ required: watch('openDentalEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="open-dental-server-url"
+                        placeholder="Enter your Open Dental Server URL"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.openDentalServerUrl && (
+                    <p className="text-sm text-destructive">Server URL is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="open-dental-username">Username</Label>
+                  <Controller
+                    name="openDentalUsername"
+                    control={control}
+                    rules={{ required: watch('openDentalEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="open-dental-username"
+                        placeholder="Enter your Open Dental Username"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.openDentalUsername && (
+                    <p className="text-sm text-destructive">Username is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="open-dental-password">Password</Label>
+                  <Controller
+                    name="openDentalPassword"
+                    control={control}
+                    rules={{ required: watch('openDentalEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="open-dental-password"
+                        type="password"
+                        placeholder="Enter your Open Dental Password"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.openDentalPassword && (
+                    <p className="text-sm text-destructive">Password is required</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
+          {/* Dentrix Integration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Dentrix Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect to Dentrix for comprehensive dental practice management
+                </p>
+              </div>
+              <Controller
+                name="dentrixEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="dentrix-enabled"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            
+            {watch('dentrixEnabled') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="dentrix-api-key">API Key</Label>
+                  <Controller
+                    name="dentrixApiKey"
+                    control={control}
+                    rules={{ required: watch('dentrixEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="dentrix-api-key"
+                        placeholder="Enter your Dentrix API Key"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.dentrixApiKey && (
+                    <p className="text-sm text-destructive">API Key is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="dentrix-customer-id">Customer ID</Label>
+                  <Controller
+                    name="dentrixCustomerId"
+                    control={control}
+                    rules={{ required: watch('dentrixEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="dentrix-customer-id"
+                        placeholder="Enter your Dentrix Customer ID"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.dentrixCustomerId && (
+                    <p className="text-sm text-destructive">Customer ID is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="dentrix-instance-key">Instance Key</Label>
+                  <Controller
+                    name="dentrixInstanceKey"
+                    control={control}
+                    rules={{ required: watch('dentrixEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="dentrix-instance-key"
+                        placeholder="Enter your Dentrix Instance Key"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.dentrixInstanceKey && (
+                    <p className="text-sm text-destructive">Instance Key is required</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
+          {/* ChiroFusion Integration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">ChiroFusion Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect to ChiroFusion for chiropractic practice management
+                </p>
+              </div>
+              <Controller
+                name="chirofusionEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="chirofusion-enabled"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            
+            {watch('chirofusionEnabled') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="chirofusion-api-key">API Key</Label>
+                  <Controller
+                    name="chirofusionApiKey"
+                    control={control}
+                    rules={{ required: watch('chirofusionEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="chirofusion-api-key"
+                        placeholder="Enter your ChiroFusion API Key"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.chirofusionApiKey && (
+                    <p className="text-sm text-destructive">API Key is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="chirofusion-username">Username</Label>
+                  <Controller
+                    name="chirofusionUsername"
+                    control={control}
+                    rules={{ required: watch('chirofusionEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="chirofusion-username"
+                        placeholder="Enter your ChiroFusion Username"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.chirofusionUsername && (
+                    <p className="text-sm text-destructive">Username is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="chirofusion-password">Password</Label>
+                  <Controller
+                    name="chirofusionPassword"
+                    control={control}
+                    rules={{ required: watch('chirofusionEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="chirofusion-password"
+                        type="password"
+                        placeholder="Enter your ChiroFusion Password"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.chirofusionPassword && (
+                    <p className="text-sm text-destructive">Password is required</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Enterprise EHR Integrations</CardTitle>
+          <CardDescription>
+            Connect to major enterprise healthcare systems
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Athenahealth Integration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Athenahealth Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect to Athenahealth for streamlined medical practice management
+                </p>
+              </div>
+              <Controller
+                name="athenahealthEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="athenahealth-enabled"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            
+            {watch('athenahealthEnabled') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="athenahealth-api-key">API Key</Label>
+                  <Controller
+                    name="athenahealthApiKey"
+                    control={control}
+                    rules={{ required: watch('athenahealthEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="athenahealth-api-key"
+                        placeholder="Enter your Athenahealth API Key"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.athenahealthApiKey && (
+                    <p className="text-sm text-destructive">API Key is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="athenahealth-api-secret">API Secret</Label>
+                  <Controller
+                    name="athenahealthApiSecret"
+                    control={control}
+                    rules={{ required: watch('athenahealthEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="athenahealth-api-secret"
+                        type="password"
+                        placeholder="Enter your Athenahealth API Secret"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.athenahealthApiSecret && (
+                    <p className="text-sm text-destructive">API Secret is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="athenahealth-practice-id">Practice ID</Label>
+                  <Controller
+                    name="athenahealthPracticeId"
+                    control={control}
+                    rules={{ required: watch('athenahealthEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="athenahealth-practice-id"
+                        placeholder="Enter your Athenahealth Practice ID"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.athenahealthPracticeId && (
+                    <p className="text-sm text-destructive">Practice ID is required</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
+          {/* Tebra (Kareo) Integration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Tebra (Kareo) Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect to Tebra/Kareo for practice management
+                </p>
+              </div>
+              <Controller
+                name="tebraEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="tebra-enabled"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            
+            {watch('tebraEnabled') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="tebra-api-key">API Key</Label>
+                  <Controller
+                    name="tebraApiKey"
+                    control={control}
+                    rules={{ required: watch('tebraEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="tebra-api-key"
+                        placeholder="Enter your Tebra API Key"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.tebraApiKey && (
+                    <p className="text-sm text-destructive">API Key is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="tebra-account-id">Account ID</Label>
+                  <Controller
+                    name="tebraAccountId"
+                    control={control}
+                    rules={{ required: watch('tebraEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="tebra-account-id"
+                        placeholder="Enter your Tebra Account ID"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.tebraAccountId && (
+                    <p className="text-sm text-destructive">Account ID is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="tebra-username">Username</Label>
+                  <Controller
+                    name="tebraUsername"
+                    control={control}
+                    rules={{ required: watch('tebraEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="tebra-username"
+                        placeholder="Enter your Tebra Username"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.tebraUsername && (
+                    <p className="text-sm text-destructive">Username is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="tebra-password">Password</Label>
+                  <Controller
+                    name="tebraPassword"
+                    control={control}
+                    rules={{ required: watch('tebraEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="tebra-password"
+                        type="password"
+                        placeholder="Enter your Tebra Password"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.tebraPassword && (
+                    <p className="text-sm text-destructive">Password is required</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
+          {/* Cerner Integration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Cerner Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect to Cerner for enterprise healthcare management
+                </p>
+              </div>
+              <Controller
+                name="cernerEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="cerner-enabled"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            
+            {watch('cernerEnabled') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="cerner-client-id">Client ID</Label>
+                  <Controller
+                    name="cernerClientId"
+                    control={control}
+                    rules={{ required: watch('cernerEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="cerner-client-id"
+                        placeholder="Enter your Cerner Client ID"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.cernerClientId && (
+                    <p className="text-sm text-destructive">Client ID is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cerner-client-secret">Client Secret</Label>
+                  <Controller
+                    name="cernerClientSecret"
+                    control={control}
+                    rules={{ required: watch('cernerEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="cerner-client-secret"
+                        type="password"
+                        placeholder="Enter your Cerner Client Secret"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.cernerClientSecret && (
+                    <p className="text-sm text-destructive">Client Secret is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cerner-tenant-id">Tenant ID</Label>
+                  <Controller
+                    name="cernerTenantId"
+                    control={control}
+                    rules={{ required: watch('cernerEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="cerner-tenant-id"
+                        placeholder="Enter your Cerner Tenant ID"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.cernerTenantId && (
+                    <p className="text-sm text-destructive">Tenant ID is required</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
+          {/* Epic Integration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Epic Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect to Epic for enterprise healthcare management
+                </p>
+              </div>
+              <Controller
+                name="epicEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="epic-enabled"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            
+            {watch('epicEnabled') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="epic-client-id">Client ID</Label>
+                  <Controller
+                    name="epicClientId"
+                    control={control}
+                    rules={{ required: watch('epicEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="epic-client-id"
+                        placeholder="Enter your Epic Client ID"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.epicClientId && (
+                    <p className="text-sm text-destructive">Client ID is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="epic-client-secret">Client Secret</Label>
+                  <Controller
+                    name="epicClientSecret"
+                    control={control}
+                    rules={{ required: watch('epicEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="epic-client-secret"
+                        type="password"
+                        placeholder="Enter your Epic Client Secret"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.epicClientSecret && (
+                    <p className="text-sm text-destructive">Client Secret is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="epic-fhir-url">FHIR URL</Label>
+                  <Controller
+                    name="epicFhirUrl"
+                    control={control}
+                    rules={{ required: watch('epicEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="epic-fhir-url"
+                        placeholder="Enter your Epic FHIR URL"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.epicFhirUrl && (
+                    <p className="text-sm text-destructive">FHIR URL is required</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
+          {/* eClinicalWorks Integration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">eClinicalWorks Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect to eClinicalWorks for practice management
+                </p>
+              </div>
+              <Controller
+                name="eclinicalworksEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="eclinicalworks-enabled"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            
+            {watch('eclinicalworksEnabled') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="eclinicalworks-api-key">API Key</Label>
+                  <Controller
+                    name="eclinicalworksApiKey"
+                    control={control}
+                    rules={{ required: watch('eclinicalworksEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="eclinicalworks-api-key"
+                        placeholder="Enter your eClinicalWorks API Key"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.eclinicalworksApiKey && (
+                    <p className="text-sm text-destructive">API Key is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="eclinicalworks-username">Username</Label>
+                  <Controller
+                    name="eclinicalworksUsername"
+                    control={control}
+                    rules={{ required: watch('eclinicalworksEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="eclinicalworks-username"
+                        placeholder="Enter your eClinicalWorks Username"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.eclinicalworksUsername && (
+                    <p className="text-sm text-destructive">Username is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="eclinicalworks-password">Password</Label>
+                  <Controller
+                    name="eclinicalworksPassword"
+                    control={control}
+                    rules={{ required: watch('eclinicalworksEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="eclinicalworks-password"
+                        type="password"
+                        placeholder="Enter your eClinicalWorks Password"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.eclinicalworksPassword && (
+                    <p className="text-sm text-destructive">Password is required</p>
                   )}
                 </div>
               </div>
