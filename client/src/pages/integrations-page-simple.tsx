@@ -293,6 +293,114 @@ const IntegrationsPage = () => {
                     <Button onClick={() => handleConnect('eClinicalWorks')}>Connect</Button>
                   </CardFooter>
                 </Card>
+                
+                {/* Symplast */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Symplast</CardTitle>
+                    <CardDescription>
+                      Connect patient data with Symplast
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Integrate with Symplast EHR for med spas and aesthetic practices to streamline review collection.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleConnect('Symplast')}>Connect</Button>
+                  </CardFooter>
+                </Card>
+                
+                {/* Aesthetic Record */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Aesthetic Record</CardTitle>
+                    <CardDescription>
+                      Connect patient data with Aesthetic Record
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Sync appointment data from Aesthetic Record to automate review requests for cosmetic procedures.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleConnect('Aesthetic Record')}>Connect</Button>
+                  </CardFooter>
+                </Card>
+                
+                {/* Open Dental */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Open Dental</CardTitle>
+                    <CardDescription>
+                      Connect patient data with Open Dental
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Integrate with Open Dental to automate review requests after dental appointments.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleConnect('Open Dental')}>Connect</Button>
+                  </CardFooter>
+                </Card>
+                
+                {/* Dentrix */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Dentrix</CardTitle>
+                    <CardDescription>
+                      Connect patient data with Dentrix
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Synchronize dental patient appointments with Dentrix to streamline review collection.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleConnect('Dentrix')}>Connect</Button>
+                  </CardFooter>
+                </Card>
+                
+                {/* ChiroFusion */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>ChiroFusion</CardTitle>
+                    <CardDescription>
+                      Connect patient data with ChiroFusion
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Integrate with ChiroFusion to automatically request reviews after chiropractic treatments.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleConnect('ChiroFusion')}>Connect</Button>
+                  </CardFooter>
+                </Card>
+                
+                {/* Jane App */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Jane App</CardTitle>
+                    <CardDescription>
+                      Connect patient data with Jane App
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Sync appointment data from Jane App for allied health professionals to automate review collection.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleConnect('Jane App')}>Connect</Button>
+                  </CardFooter>
+                </Card>
               </div>
               
               <div className="mt-6 bg-muted p-4 rounded-lg border border-border">
