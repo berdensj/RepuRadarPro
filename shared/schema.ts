@@ -531,13 +531,78 @@ export const healthcareSettings = pgTable("healthcare_settings", {
   usePatientTerminology: boolean("use_patient_terminology").default(true),
   hipaaMode: boolean("hipaa_mode").default(true),
   // EHR integration fields
+  // DrChrono
   drchronoEnabled: boolean("drchrono_enabled").default(false),
   drchronoClientId: text("drchrono_client_id"),
   drchronoClientSecret: text("drchrono_client_secret"),
   drchronoRefreshToken: text("drchrono_refresh_token"),
+  
+  // Jane App
   janeappEnabled: boolean("janeapp_enabled").default(false),
   janeappApiKey: text("janeapp_api_key"),
   janeappApiSecret: text("janeapp_api_secret"),
+  
+  // Symplast (Plastic Surgery, Aesthetics)
+  symplastEnabled: boolean("symplast_enabled").default(false),
+  symplastApiKey: text("symplast_api_key"),
+  symplastApiSecret: text("symplast_api_secret"),
+  symplastInstance: text("symplast_instance"),
+  
+  // Aesthetic Record (Med Spas, Cosmetic)
+  aestheticRecordEnabled: boolean("aesthetic_record_enabled").default(false),
+  aestheticRecordApiKey: text("aesthetic_record_api_key"),
+  aestheticRecordUsername: text("aesthetic_record_username"),
+  aestheticRecordPassword: text("aesthetic_record_password"),
+  
+  // Open Dental (Dental)
+  openDentalEnabled: boolean("open_dental_enabled").default(false),
+  openDentalApiKey: text("open_dental_api_key"),
+  openDentalServerUrl: text("open_dental_server_url"),
+  openDentalUsername: text("open_dental_username"),
+  openDentalPassword: text("open_dental_password"),
+  
+  // Dentrix (Dental)
+  dentrixEnabled: boolean("dentrix_enabled").default(false),
+  dentrixApiKey: text("dentrix_api_key"),
+  dentrixCustomerId: text("dentrix_customer_id"),
+  dentrixInstanceKey: text("dentrix_instance_key"),
+  
+  // ChiroFusion (Chiropractic)
+  chirofusionEnabled: boolean("chirofusion_enabled").default(false),
+  chirofusionApiKey: text("chirofusion_api_key"),
+  chirofusionUsername: text("chirofusion_username"),
+  chirofusionPassword: text("chirofusion_password"),
+  
+  // Athenahealth
+  athenahealthEnabled: boolean("athenahealth_enabled").default(false),
+  athenahealthApiKey: text("athenahealth_api_key"),
+  athenahealthApiSecret: text("athenahealth_api_secret"),
+  athenahealthPracticeId: text("athenahealth_practice_id"),
+  
+  // Tebra (Kareo)
+  tebraEnabled: boolean("tebra_enabled").default(false),
+  tebraApiKey: text("tebra_api_key"),
+  tebraAccountId: text("tebra_account_id"),
+  tebraUsername: text("tebra_username"),
+  tebraPassword: text("tebra_password"),
+  
+  // Cerner
+  cernerEnabled: boolean("cerner_enabled").default(false),
+  cernerClientId: text("cerner_client_id"),
+  cernerClientSecret: text("cerner_client_secret"),
+  cernerTenantId: text("cerner_tenant_id"),
+  
+  // Epic
+  epicEnabled: boolean("epic_enabled").default(false),
+  epicClientId: text("epic_client_id"),
+  epicClientSecret: text("epic_client_secret"),
+  epicFhirUrl: text("epic_fhir_url"),
+  
+  // eClinicalWorks
+  eclinicalworksEnabled: boolean("eclinicalworks_enabled").default(false),
+  eclinicalworksApiKey: text("eclinicalworks_api_key"),
+  eclinicalworksUsername: text("eclinicalworks_username"),
+  eclinicalworksPassword: text("eclinicalworks_password"),
   primaryLocationId: integer("primary_location_id"),
   autoSendReviewRequests: boolean("auto_send_review_requests").default(true),
   defaultReviewPlatform: text("default_review_platform").default("google"),
@@ -555,13 +620,78 @@ export const insertHealthcareSettingsSchema = createInsertSchema(healthcareSetti
   usePatientTerminology: true,
   hipaaMode: true,
   // EHR integration fields
+  // DrChrono
   drchronoEnabled: true,
   drchronoClientId: true,
   drchronoClientSecret: true,
   drchronoRefreshToken: true,
+  
+  // Jane App
   janeappEnabled: true,
   janeappApiKey: true,
   janeappApiSecret: true,
+  
+  // Symplast
+  symplastEnabled: true,
+  symplastApiKey: true,
+  symplastApiSecret: true,
+  symplastInstance: true,
+  
+  // Aesthetic Record
+  aestheticRecordEnabled: true,
+  aestheticRecordApiKey: true,
+  aestheticRecordUsername: true,
+  aestheticRecordPassword: true,
+  
+  // Open Dental
+  openDentalEnabled: true,
+  openDentalApiKey: true,
+  openDentalServerUrl: true,
+  openDentalUsername: true,
+  openDentalPassword: true,
+  
+  // Dentrix
+  dentrixEnabled: true,
+  dentrixApiKey: true,
+  dentrixCustomerId: true,
+  dentrixInstanceKey: true,
+  
+  // ChiroFusion
+  chirofusionEnabled: true,
+  chirofusionApiKey: true,
+  chirofusionUsername: true,
+  chirofusionPassword: true,
+  
+  // Athenahealth
+  athenahealthEnabled: true,
+  athenahealthApiKey: true,
+  athenahealthApiSecret: true,
+  athenahealthPracticeId: true,
+  
+  // Tebra
+  tebraEnabled: true,
+  tebraApiKey: true,
+  tebraAccountId: true,
+  tebraUsername: true,
+  tebraPassword: true,
+  
+  // Cerner
+  cernerEnabled: true,
+  cernerClientId: true,
+  cernerClientSecret: true,
+  cernerTenantId: true,
+  
+  // Epic
+  epicEnabled: true,
+  epicClientId: true,
+  epicClientSecret: true,
+  epicFhirUrl: true,
+  
+  // eClinicalWorks
+  eclinicalworksEnabled: true,
+  eclinicalworksApiKey: true,
+  eclinicalworksUsername: true,
+  eclinicalworksPassword: true,
   primaryLocationId: true,
   autoSendReviewRequests: true,
   defaultReviewPlatform: true,

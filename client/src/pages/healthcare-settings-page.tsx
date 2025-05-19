@@ -198,8 +198,21 @@ const HealthcareSettingsForm = () => {
       requestDelay: 'immediately',
       usePatientTerminology: true,
       hipaaMode: true,
+      
+      // EHR Systems
       drchronoEnabled: false,
       janeappEnabled: false,
+      symplastEnabled: false,
+      aestheticRecordEnabled: false,
+      openDentalEnabled: false,
+      dentrixEnabled: false,
+      chirofusionEnabled: false,
+      athenahealthEnabled: false,
+      tebraEnabled: false,
+      cernerEnabled: false,
+      epicEnabled: false,
+      eclinicalworksEnabled: false,
+      
       autoSendReviewRequests: true,
       defaultReviewPlatform: 'google'
     }
