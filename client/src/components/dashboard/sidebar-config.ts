@@ -22,7 +22,8 @@ import {
   Code,
   Users,
   BadgeDollarSign,
-  Package
+  Package,
+  HeartPulse
 } from "lucide-react";
 
 // Base navigation item
@@ -240,6 +241,13 @@ export function createNavStructure(expandedGroups: Record<string, boolean>) {
         label: "Settings",
         href: "/settings",
         tooltip: "Platform settings"
+      },
+      {
+        type: 'item',
+        icon: HeartPulse,
+        label: "Healthcare Settings",
+        href: "/healthcare-settings",
+        tooltip: "Healthcare specific settings and EHR integrations"
       }
     ]
   };
@@ -387,6 +395,26 @@ export function generateSidebarNavigation(
     separators
   } = createNavStructure(expandedGroups);
   
+  // Get user's business type or client type from localStorage
+  const clientType = localStorage.getItem('clientType') || '';
+  const isHealthcare = clientType.toLowerCase() === 'healthcare' || 
+                        clientType.toLowerCase() === 'medical' ||
+                        clientType.toLowerCase() === 'doctor' ||
+                        clientType.toLowerCase().includes('health');
+  
+  // Check if system admin (platform owner)
+  const isSystemAdmin = localStorage.getItem('isSystemAdmin') === 'true';
+  
+  // Filter the configNavItems based on business type
+  // Only show the healthcare settings for healthcare businesses or system admins
+  const filteredConfigItems = {...configNavItems};
+  if (!isHealthcare && !isSystemAdmin) {
+    // Remove the healthcare settings item if not a healthcare business or system admin
+    filteredConfigItems.children = configNavItems.children.filter(item => 
+      !(item.type === 'item' && item.label === 'Healthcare Settings')
+    );
+  }
+  
   // Base navigation items available to all users
   const baseNavItems: NavItem[] = [
     ...mainNavItems,
@@ -399,14 +427,12 @@ export function generateSidebarNavigation(
     separators.managementSeparator,
     managementNavItems,
     separators.configSeparator,
-    configNavItems,
+    filteredConfigItems,
     separators.accountSeparator,
     accountNavItems,
   ];
   
   // Special handling for system admins vs client admins
-  // Check if user is a system admin (platform owner)
-  const isSystemAdmin = localStorage.getItem('isSystemAdmin') === 'true';
   
   // System admins (platform owners) can see system admin pages
   if (isSystemAdmin && permissions?.canManageUsers && permissions?.canManageStaff) {
