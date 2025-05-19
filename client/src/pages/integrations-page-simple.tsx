@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet';
 import { Button } from "@/components/ui/button";
 import { 
@@ -16,10 +16,27 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { useQuery } from '@tanstack/react-query';
 
 const IntegrationsPage = () => {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("review-platforms");
+  const [isHealthcare, setIsHealthcare] = useState(false);
+  
+  // Fetch user's business type to determine if they're a healthcare client
+  const { data: onboardingStatus } = useQuery({
+    queryKey: ['/api/user/onboarding/status']
+  });
+  
+  // Set isHealthcare based on business type data
+  useEffect(() => {
+    if (onboardingStatus && 
+        typeof onboardingStatus === 'object' && 
+        'businessType' in onboardingStatus && 
+        onboardingStatus.businessType === 'healthcare') {
+      setIsHealthcare(true);
+    }
+  }, [onboardingStatus]);
   
   const handleConnect = (platform: string) => {
     toast({
@@ -47,6 +64,7 @@ const IntegrationsPage = () => {
           <TabsList>
             <TabsTrigger value="review-platforms">Review Platforms</TabsTrigger>
             <TabsTrigger value="crm">CRM Systems</TabsTrigger>
+            {isHealthcare && <TabsTrigger value="ehr">EHR Systems</TabsTrigger>}
             <TabsTrigger value="webhooks">Webhooks</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
@@ -164,6 +182,128 @@ const IntegrationsPage = () => {
               </Card>
             </div>
           </TabsContent>
+          
+          {isHealthcare && (
+            <TabsContent value="ehr" className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {/* Athenahealth */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Athenahealth</CardTitle>
+                    <CardDescription>
+                      Connect patient data with Athenahealth EHR
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Send review requests to patients automatically after appointments and sync contact information.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleConnect('Athenahealth')}>Connect</Button>
+                  </CardFooter>
+                </Card>
+                
+                {/* DrChrono */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>DrChrono</CardTitle>
+                    <CardDescription>
+                      Connect patient data with DrChrono EHR
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Integrate appointment data and automate review collection from patients after visits.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleConnect('DrChrono')}>Connect</Button>
+                  </CardFooter>
+                </Card>
+                
+                {/* Tebra (Kareo) */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Tebra (Kareo)</CardTitle>
+                    <CardDescription>
+                      Connect patient data with Tebra/Kareo
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Automate patient communications and review requests based on appointment data.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleConnect('Tebra')}>Connect</Button>
+                  </CardFooter>
+                </Card>
+                
+                {/* Cerner */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Cerner</CardTitle>
+                    <CardDescription>
+                      Connect patient data with Cerner EHR
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Integrate with Cerner to automate patient outreach and review collection workflows.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleConnect('Cerner')}>Connect</Button>
+                  </CardFooter>
+                </Card>
+                
+                {/* Epic */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Epic</CardTitle>
+                    <CardDescription>
+                      Connect patient data with Epic EHR
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Synchronize with Epic's patient portal to streamline review collection after appointments.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleConnect('Epic')}>Connect</Button>
+                  </CardFooter>
+                </Card>
+                
+                {/* eClinicalWorks */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>eClinicalWorks</CardTitle>
+                    <CardDescription>
+                      Connect patient data with eClinicalWorks
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Integrate appointment data to automate patient review requests and reputation management.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button onClick={() => handleConnect('eClinicalWorks')}>Connect</Button>
+                  </CardFooter>
+                </Card>
+              </div>
+              
+              <div className="mt-6 bg-muted p-4 rounded-lg border border-border">
+                <h3 className="text-sm font-medium mb-2">Healthcare Integration Notes</h3>
+                <p className="text-sm text-muted-foreground">
+                  All EHR integrations are HIPAA-compliant and only sync appointment data and contact information. 
+                  No protected health information (PHI) is accessed or stored in RepuRadar.
+                </p>
+              </div>
+            </TabsContent>
+          )}
           
           <TabsContent value="webhooks" className="space-y-4">
             <Card>
