@@ -530,6 +530,18 @@ export const healthcareSettings = pgTable("healthcare_settings", {
   googleProfileLink: text("google_profile_link"),
   usePatientTerminology: boolean("use_patient_terminology").default(true),
   hipaaMode: boolean("hipaa_mode").default(true),
+  // EHR integration fields
+  drchronoEnabled: boolean("drchrono_enabled").default(false),
+  drchronoClientId: text("drchrono_client_id"),
+  drchronoClientSecret: text("drchrono_client_secret"),
+  drchronoRefreshToken: text("drchrono_refresh_token"),
+  janeappEnabled: boolean("janeapp_enabled").default(false),
+  janeappApiKey: text("janeapp_api_key"),
+  janeappApiSecret: text("janeapp_api_secret"),
+  primaryLocationId: integer("primary_location_id"),
+  autoSendReviewRequests: boolean("auto_send_review_requests").default(true),
+  defaultReviewPlatform: text("default_review_platform").default("google"),
+  lastPolledAt: timestamp("last_polled_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -542,6 +554,17 @@ export const insertHealthcareSettingsSchema = createInsertSchema(healthcareSetti
   googleProfileLink: true,
   usePatientTerminology: true,
   hipaaMode: true,
+  // EHR integration fields
+  drchronoEnabled: true,
+  drchronoClientId: true,
+  drchronoClientSecret: true,
+  drchronoRefreshToken: true,
+  janeappEnabled: true,
+  janeappApiKey: true,
+  janeappApiSecret: true,
+  primaryLocationId: true,
+  autoSendReviewRequests: true,
+  defaultReviewPlatform: true,
   updatedAt: true,
 });
 
@@ -687,17 +710,15 @@ export const patients = pgTable("patients", {
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }),
   phone: varchar("phone", { length: 50 }),
+  ehrId: varchar("ehr_id", { length: 255 }), // ID in the EHR system
   ehrSource: varchar("ehr_source", { length: 50 }).notNull(), // 'drchrono' or 'janeapp'
-  appointmentTime: timestamp("appointment_time").notNull(),
-  appointmentCompleted: boolean("appointment_completed").default(false),
-  reviewSent: boolean("review_sent").default(false),
-  reviewSentAt: timestamp("review_sent_at"),
+  lastAppointment: timestamp("last_appointment"), // Most recent appointment date
+  reviewRequestSent: timestamp("review_request_sent"), // When review request was sent
   reviewCompleted: boolean("review_completed").default(false),
   reviewCompletedAt: timestamp("review_completed_at"),
   reviewPlatform: varchar("review_platform", { length: 50 }), // 'google', 'yelp', 'healthgrades', etc.
   rating: integer("rating"), // 1-5
   reviewId: integer("review_id").references(() => reviews.id), // Link to actual review if completed
-  externalId: varchar("external_id", { length: 255 }), // ID from EHR system
   metadata: jsonb("metadata"), // Additional data from EHR
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
