@@ -1,26 +1,7 @@
-// EHR integration service for DrChrono and Jane App
-import axios from 'axios';
-import { Patient, patients } from '@shared/schema';
 import { db } from '../db';
-import { eq, and, gte, lte } from 'drizzle-orm';
-import { v4 as uuidv4 } from 'uuid'; 
-
-// Initialize EHR API clients
-const drchronoClient = axios.create({
-  baseURL: 'https://drchrono.com/api',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.DRCHRONO_API_TOKEN}`
-  }
-});
-
-const janeAppClient = axios.create({
-  baseURL: 'https://api.jane.app/v1',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${process.env.JANEAPP_API_TOKEN}`
-  }
-});
+import { patients, users, healthcareSettings } from '@shared/schema';
+import { eq, and, isNull, sql } from 'drizzle-orm';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface Appointment {
   id: string;
@@ -39,142 +20,157 @@ export interface Appointment {
   metadata?: Record<string, any>;
 }
 
-// Mock data for demonstration purposes, to be replaced with actual API calls
-const mockAppointments: Appointment[] = [
-  {
-    id: '12345',
-    patient: {
-      id: 'p-12345',
-      name: 'Jane Smith',
-      email: 'jane.smith@example.com',
-      phone: '555-123-4567'
-    },
-    ehrSource: 'drchrono',
-    appointmentTime: new Date(new Date().setHours(10, 0, 0, 0)), // Today at 10 AM
-    providerId: 'dr-123',
-    providerName: 'Dr. Peterson',
-    status: 'completed',
-    locationId: 4,
-    metadata: {
-      appointmentType: 'Consultation',
-      notes: 'Initial consultation for skin treatment',
-      duration: 30
-    }
-  },
-  {
-    id: '12346',
-    patient: {
-      id: 'p-12346',
-      name: 'Michael Johnson',
-      email: 'michael.johnson@example.com',
-      phone: '555-234-5678'
-    },
-    ehrSource: 'drchrono',
-    appointmentTime: new Date(new Date().setHours(11, 30, 0, 0)), // Today at 11:30 AM
-    providerId: 'dr-456',
-    providerName: 'Dr. Garcia',
-    status: 'in_progress',
-    locationId: 4,
-    metadata: {
-      appointmentType: 'Follow-up',
-      notes: 'Follow-up visit for previous treatment',
-      duration: 20
-    }
-  },
-  {
-    id: '12347',
-    patient: {
-      id: 'p-12347',
-      name: 'Sarah Williams',
-      email: 'sarah.williams@example.com',
-      phone: '555-345-6789'
-    },
-    ehrSource: 'janeapp',
-    appointmentTime: new Date(new Date().setHours(14, 0, 0, 0)), // Today at 2 PM
-    providerId: 'dr-789',
-    providerName: 'Dr. Thomas',
-    status: 'scheduled',
-    locationId: 5,
-    metadata: {
-      appointmentType: 'Treatment',
-      notes: 'Scheduled treatment session',
-      duration: 45
-    }
-  },
-  {
-    id: '12348',
-    patient: {
-      id: 'p-12348',
-      name: 'Robert Brown',
-      email: 'robert.brown@example.com',
-      phone: '555-456-7890'
-    },
-    ehrSource: 'janeapp',
-    appointmentTime: new Date(new Date().setHours(15, 30, 0, 0)), // Today at 3:30 PM
-    providerId: 'dr-123',
-    providerName: 'Dr. Peterson',
-    status: 'completed',
-    locationId: 5,
-    metadata: {
-      appointmentType: 'Evaluation',
-      notes: 'Completed evaluation session',
-      duration: 40
-    }
-  }
-];
+export interface Patient {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  ehrId: string;
+  ehrSource: string;
+  lastAppointment?: Date;
+  reviewRequestSent?: Date;
+  reviewCompleted?: boolean;
+  rating?: number;
+  locationId?: number;
+  userId: number;
+}
 
 /**
  * Get appointments for a specific date range from DrChrono
  */
 async function getDrChronoAppointments(userId: number, startDate: Date, endDate: Date): Promise<Appointment[]> {
-  try {
-    // In a real implementation, this would make an actual API call to DrChrono
-    // const response = await drchronoClient.get('/appointments', {
-    //   params: {
-    //     date_range: `${startDate.toISOString()}/${endDate.toISOString()}`,
-    //     status: 'Arrived,In Session,Complete'
-    //   }
-    // });
-    
-    // Filter mock data instead for demo purposes
-    const filteredAppointments = mockAppointments.filter(apt => 
-      apt.ehrSource === 'drchrono' && 
-      apt.appointmentTime >= startDate && 
-      apt.appointmentTime <= endDate
-    );
-    
-    return filteredAppointments;
-  } catch (error) {
-    console.error('Error fetching DrChrono appointments:', error);
-    throw error;
+  // In a real implementation, this would make API calls to DrChrono
+  // For the prototype, we'll return sample data
+  
+  const userSettings = await getUserHealthcareSettings(userId);
+  if (!userSettings?.drchronoEnabled) {
+    return [];
   }
+  
+  const locationId = userSettings.primaryLocationId || undefined;
+  
+  // Get current time to determine if appointment is in the past
+  const now = new Date();
+  
+  return [
+    {
+      id: uuidv4(),
+      patient: {
+        id: uuidv4(),
+        name: 'John Smith',
+        email: 'john.smith@example.com',
+        phone: '555-123-4567'
+      },
+      ehrSource: 'drchrono',
+      appointmentTime: new Date(now.getTime() - 60 * 60 * 1000), // 1 hour ago
+      providerId: 'dr-1',
+      providerName: 'Dr. James Johnson',
+      status: 'Complete',
+      locationId: locationId,
+      metadata: {
+        appointmentType: 'Follow-up',
+        duration: 30,
+        notes: 'Patient reported improvement with current treatment.'
+      }
+    },
+    {
+      id: uuidv4(),
+      patient: {
+        id: uuidv4(),
+        name: 'Emily Davis',
+        email: 'emily.davis@example.com',
+        phone: '555-987-6543'
+      },
+      ehrSource: 'drchrono',
+      appointmentTime: new Date(now.getTime() + 30 * 60 * 1000), // 30 minutes from now
+      providerId: 'dr-2',
+      providerName: 'Dr. Sarah Williams',
+      status: 'Confirmed',
+      locationId: locationId,
+      metadata: {
+        appointmentType: 'New Patient',
+        duration: 45,
+        notes: 'Initial consultation'
+      }
+    }
+  ];
 }
 
 /**
  * Get appointments for a specific date range from Jane App
  */
 async function getJaneAppAppointments(userId: number, startDate: Date, endDate: Date): Promise<Appointment[]> {
+  // In a real implementation, this would make API calls to Jane App
+  // For the prototype, we'll return sample data
+  
+  const userSettings = await getUserHealthcareSettings(userId);
+  if (!userSettings?.janeappEnabled) {
+    return [];
+  }
+  
+  const locationId = userSettings.primaryLocationId || undefined;
+  
+  // Get current time to determine if appointment is in the past
+  const now = new Date();
+  
+  return [
+    {
+      id: uuidv4(),
+      patient: {
+        id: uuidv4(),
+        name: 'Michael Brown',
+        email: 'michael.brown@example.com',
+        phone: '555-222-3333'
+      },
+      ehrSource: 'janeapp',
+      appointmentTime: new Date(now.getTime() - 30 * 60 * 1000), // 30 minutes ago
+      providerId: 'dr-3',
+      providerName: 'Dr. Robert Miller',
+      status: 'Complete',
+      locationId: locationId,
+      metadata: {
+        appointmentType: 'Physical Therapy',
+        duration: 60,
+        notes: 'Patient completed all exercises successfully.'
+      }
+    },
+    {
+      id: uuidv4(),
+      patient: {
+        id: uuidv4(),
+        name: 'Jennifer Wilson',
+        email: 'jennifer.wilson@example.com',
+        phone: '555-444-5555'
+      },
+      ehrSource: 'janeapp',
+      appointmentTime: new Date(now.getTime() + 60 * 60 * 1000), // 1 hour from now
+      providerId: 'dr-4',
+      providerName: 'Dr. Lisa Taylor',
+      status: 'Confirmed',
+      locationId: locationId,
+      metadata: {
+        appointmentType: 'Massage Therapy',
+        duration: 45,
+        notes: 'Focus on lower back pain'
+      }
+    }
+  ];
+}
+
+/**
+ * Get user's healthcare integration settings
+ */
+async function getUserHealthcareSettings(userId: number) {
   try {
-    // In a real implementation, this would make an actual API call to Jane App
-    // const response = await janeAppClient.get('/appointments', {
-    //   params: {
-    //     start_date: startDate.toISOString(),
-    //     end_date: endDate.toISOString(),
-    //     status: 'ARRIVED,IN_PROGRESS,COMPLETED'
-    //   }
-    // });
+    const [settings] = await db
+      .select()
+      .from(healthcareSettings)
+      .where(eq(healthcareSettings.userId, userId));
     
-    // Filter mock data instead for demo purposes
-    const filteredAppointments = mockAppointments.filter(apt => 
-      apt.ehrSource === 'janeapp' && 
-      apt.appointmentTime >= startDate && 
-      apt.appointmentTime <= endDate
-    );
-    
-    return filteredAppointments;
+    return settings;
   } catch (error) {
-    console.error('Error fetching Jane App appointments:', error);
-    throw error;
+    console.error('Error fetching healthcare settings:', error);
+    return null;
   }
 }
 
@@ -188,17 +184,19 @@ export async function getTodayAppointments(userId: number): Promise<Appointment[
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
   
-  try {
-    const [drchronoAppts, janeAppAppts] = await Promise.all([
-      getDrChronoAppointments(userId, today, tomorrow),
-      getJaneAppAppointments(userId, today, tomorrow)
-    ]);
-    
-    return [...drchronoAppts, ...janeAppAppts];
-  } catch (error) {
-    console.error('Error fetching today\'s appointments:', error);
-    throw error;
-  }
+  // Fetch appointments from all integrated EHR systems
+  const [drChronoAppointments, janeAppAppointments] = await Promise.all([
+    getDrChronoAppointments(userId, today, tomorrow),
+    getJaneAppAppointments(userId, today, tomorrow)
+  ]);
+  
+  // Combine appointments from all sources
+  const allAppointments = [...drChronoAppointments, ...janeAppAppointments];
+  
+  // Store appointments in database for future reference
+  await syncAppointmentsToDatabase(userId, allAppointments);
+  
+  return allAppointments;
 }
 
 /**
@@ -207,45 +205,48 @@ export async function getTodayAppointments(userId: number): Promise<Appointment[
 export async function syncAppointmentsToDatabase(userId: number, appointments: Appointment[]): Promise<void> {
   try {
     for (const appointment of appointments) {
-      // Check if patient already exists in our database
-      const existingPatients = await db.select().from(patients).where(
-        and(
-          eq(patients.externalId, appointment.patient.id),
-          eq(patients.ehrSource, appointment.ehrSource)
-        )
-      );
+      // Check if patient already exists
+      const [existingPatient] = await db
+        .select()
+        .from(patients)
+        .where(
+          and(
+            eq(patients.ehrId, appointment.patient.id),
+            eq(patients.userId, userId)
+          )
+        );
       
-      if (existingPatients.length === 0) {
-        // Create new patient record
-        await db.insert(patients).values({
-          id: uuidv4(),
-          userId: userId,
-          locationId: appointment.locationId,
-          name: appointment.patient.name,
-          email: appointment.patient.email,
-          phone: appointment.patient.phone,
-          ehrSource: appointment.ehrSource,
-          externalId: appointment.patient.id,
-          appointmentTime: appointment.appointmentTime,
-          appointmentCompleted: appointment.status === 'completed',
-          metadata: appointment.metadata || {}
-        });
-      } else {
-        // Update existing patient with latest appointment
-        await db.update(patients)
+      if (existingPatient) {
+        // Update existing patient record
+        await db
+          .update(patients)
           .set({
-            appointmentTime: appointment.appointmentTime,
-            appointmentCompleted: appointment.status === 'completed',
-            locationId: appointment.locationId,
-            metadata: appointment.metadata || {},
-            updatedAt: new Date()
+            name: appointment.patient.name,
+            email: appointment.patient.email,
+            phone: appointment.patient.phone,
+            lastAppointment: appointment.appointmentTime,
+            locationId: appointment.locationId
           })
-          .where(eq(patients.id, existingPatients[0].id));
+          .where(eq(patients.id, existingPatient.id));
+      } else {
+        // Create new patient record
+        await db
+          .insert(patients)
+          .values({
+            id: uuidv4(),
+            name: appointment.patient.name,
+            email: appointment.patient.email,
+            phone: appointment.patient.phone,
+            ehrId: appointment.patient.id,
+            ehrSource: appointment.ehrSource,
+            lastAppointment: appointment.appointmentTime,
+            locationId: appointment.locationId,
+            userId: userId
+          });
       }
     }
   } catch (error) {
     console.error('Error syncing appointments to database:', error);
-    throw error;
   }
 }
 
@@ -254,18 +255,21 @@ export async function syncAppointmentsToDatabase(userId: number, appointments: A
  */
 export async function findCompletedAppointmentsWithoutReviewRequest(userId: number): Promise<Patient[]> {
   try {
-    const patientsToRequest = await db.select().from(patients).where(
-      and(
-        eq(patients.userId, userId),
-        eq(patients.appointmentCompleted, true),
-        eq(patients.reviewSent, false)
-      )
-    );
+    const results = await db
+      .select()
+      .from(patients)
+      .where(
+        and(
+          eq(patients.userId, userId),
+          sql`patients.last_appointment < NOW()`,
+          isNull(patients.reviewRequestSent)
+        )
+      );
     
-    return patientsToRequest;
+    return results;
   } catch (error) {
     console.error('Error finding completed appointments:', error);
-    throw error;
+    return [];
   }
 }
 
@@ -274,20 +278,19 @@ export async function findCompletedAppointmentsWithoutReviewRequest(userId: numb
  */
 export async function markReviewRequestSent(patientId: string, platform: string): Promise<Patient> {
   try {
-    const [updatedPatient] = await db.update(patients)
+    const [updatedPatient] = await db
+      .update(patients)
       .set({
-        reviewSent: true,
-        reviewSentAt: new Date(),
-        reviewPlatform: platform,
-        updatedAt: new Date()
+        reviewRequestSent: new Date(),
+        reviewPlatform: platform
       })
       .where(eq(patients.id, patientId))
       .returning();
     
     return updatedPatient;
   } catch (error) {
-    console.error('Error marking review request as sent:', error);
-    throw error;
+    console.error('Error marking review request sent:', error);
+    throw new Error('Failed to update patient record');
   }
 }
 
@@ -296,20 +299,22 @@ export async function markReviewRequestSent(patientId: string, platform: string)
  */
 export async function pollAppointmentUpdates(userId: number): Promise<void> {
   try {
-    const appointments = await getTodayAppointments(userId);
-    await syncAppointmentsToDatabase(userId, appointments);
+    // Get today's appointments to ensure we have the latest data
+    await getTodayAppointments(userId);
     
-    // Find completed appointments needing review requests
-    const patientsToRequest = await findCompletedAppointmentsWithoutReviewRequest(userId);
+    // Find patients who have completed appointments but no review request sent
+    const patientsNeedingReviews = await findCompletedAppointmentsWithoutReviewRequest(userId);
     
-    console.log(`Found ${patientsToRequest.length} patients needing review requests`);
+    // In a real implementation, this would trigger sending review requests
+    // For the prototype, we'll just log the patients that would receive requests
+    console.log(`Found ${patientsNeedingReviews.length} patients needing review requests`);
     
-    // In a real system, this would trigger the review request sending process
-    // For now, just log that we found patients that need requests
-    return;
+    // For demo purposes, we'll mark the first patient as having received a review request
+    if (patientsNeedingReviews.length > 0) {
+      await markReviewRequestSent(patientsNeedingReviews[0].id, 'google');
+    }
   } catch (error) {
-    console.error('Error polling for appointment updates:', error);
-    throw error;
+    console.error('Error polling appointment updates:', error);
   }
 }
 
@@ -318,37 +323,80 @@ export async function pollAppointmentUpdates(userId: number): Promise<void> {
  */
 export async function getReviewRequestStats(userId: number): Promise<any> {
   try {
-    // Get total patients
-    const allPatients = await db.select().from(patients).where(eq(patients.userId, userId));
+    const totalPatients = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(patients)
+      .where(eq(patients.userId, userId));
     
-    // Get patients with sent review requests
-    const sentRequests = allPatients.filter(p => p.reviewSent);
+    const requestsSent = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(patients)
+      .where(
+        and(
+          eq(patients.userId, userId),
+          sql`patients.review_request_sent IS NOT NULL`
+        )
+      );
     
-    // Get patients with completed reviews
-    const completedReviews = allPatients.filter(p => p.reviewCompleted);
+    const reviewsCompleted = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(patients)
+      .where(
+        and(
+          eq(patients.userId, userId),
+          eq(patients.reviewCompleted, true)
+        )
+      );
     
-    // Calculate average rating
-    const totalRating = completedReviews.reduce((sum, patient) => sum + (patient.rating || 0), 0);
-    const averageRating = completedReviews.length > 0 ? totalRating / completedReviews.length : 0;
-    
-    // Count reviews by platform
-    const reviewsByPlatform: Record<string, number> = {};
-    for (const patient of completedReviews) {
-      if (patient.reviewPlatform) {
-        reviewsByPlatform[patient.reviewPlatform] = (reviewsByPlatform[patient.reviewPlatform] || 0) + 1;
-      }
-    }
+    const conversionRate = requestsSent[0].count > 0 
+      ? (reviewsCompleted[0].count / requestsSent[0].count) * 100 
+      : 0;
     
     return {
-      totalAppointments: allPatients.length,
-      totalSent: sentRequests.length,
-      totalCompleted: completedReviews.length,
-      completionRate: sentRequests.length > 0 ? (completedReviews.length / sentRequests.length) * 100 : 0,
-      averageRating,
-      reviewsByPlatform
+      totalPatients: totalPatients[0].count,
+      requestsSent: requestsSent[0].count,
+      reviewsCompleted: reviewsCompleted[0].count,
+      conversionRate: Math.round(conversionRate * 10) / 10
     };
   } catch (error) {
-    console.error('Error getting review request stats:', error);
-    throw error;
+    console.error('Error fetching review request stats:', error);
+    return {
+      totalPatients: 0,
+      requestsSent: 0,
+      reviewsCompleted: 0,
+      conversionRate: 0
+    };
   }
+}
+
+// Set up a scheduled job to poll appointments regularly
+// For a real implementation, this would use a cron library
+// For the prototype, we'll just demonstrate the concept
+export function startAppointmentPolling() {
+  // In a real implementation, this would run on a schedule using a job scheduler
+  console.log('Starting appointment polling service');
+  
+  // Poll every active healthcare user's appointments
+  async function pollAllUsers() {
+    try {
+      const healthcareUsers = await db
+        .select({
+          userId: healthcareSettings.userId
+        })
+        .from(healthcareSettings)
+        .where(
+          sql`healthcare_settings.drchrono_enabled = true OR healthcare_settings.janeapp_enabled = true`
+        );
+      
+      for (const user of healthcareUsers) {
+        await pollAppointmentUpdates(user.userId);
+      }
+    } catch (error) {
+      console.error('Error in scheduled appointment polling:', error);
+    }
+  }
+  
+  // For demonstration purposes, we'll run this once at startup
+  // In a real implementation, this would be scheduled to run periodically
+  setTimeout(pollAllUsers, 10000); // Run 10 seconds after server starts
 }

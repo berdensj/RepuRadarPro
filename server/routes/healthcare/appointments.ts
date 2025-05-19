@@ -13,7 +13,7 @@ router.get('/today', async (req, res) => {
     const appointments = await getTodayAppointments(userId);
     
     res.json(appointments);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching today\'s appointments:', error);
     res.status(500).json({ message: 'Failed to fetch appointments', error: error.message });
   }
@@ -41,7 +41,7 @@ router.post('/send', async (req, res) => {
       message: `Review request sent to ${updatedPatient.name} for platform: ${platform}`,
       patient: updatedPatient
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error sending review request:', error);
     res.status(500).json({ message: 'Failed to send review request', error: error.message });
   }
@@ -57,7 +57,7 @@ router.get('/stats', async (req, res) => {
     const stats = await getReviewRequestStats(userId);
     
     res.json(stats);
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching review stats:', error);
     res.status(500).json({ message: 'Failed to fetch review statistics', error: error.message });
   }
@@ -73,7 +73,7 @@ router.post('/poll', async (req, res) => {
     await pollAppointmentUpdates(userId);
     
     res.json({ success: true, message: 'Appointment polling completed' });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error polling appointments:', error);
     res.status(500).json({ message: 'Failed to poll appointments', error: error.message });
   }

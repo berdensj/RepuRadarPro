@@ -28,6 +28,7 @@ import {
   handleReviewWebhook 
 } from "./services/webhooks";
 // Import route modules
+import healthcareAppointmentsRouter from './routes/healthcare/appointments';
 import healthcareRoutes from "./routes/healthcare";
 import {
   initializeSubscriptionPlans,
