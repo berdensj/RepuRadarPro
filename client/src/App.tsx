@@ -29,7 +29,7 @@ const AlertsPage = lazy(() => import("@/pages/alerts-page").then(module => ({ de
 const ResponsesPage = lazy(() => import("@/pages/responses-page").then(module => ({ default: module.default })));
 const AnalyticsPage = lazy(() => import("@/pages/analytics-page").then(module => ({ default: module.default })));
 const SettingsPage = lazy(() => import("@/pages/settings-page").then(module => ({ default: module.default })));
-const IntegrationsPage = lazy(() => import("@/pages/integrations-page").then(module => ({ default: module.default })));
+const IntegrationsPage = lazy(() => import("@/pages/integrations-page-simple").then(module => ({ default: module.default })));
 const CompetitorsPage = lazy(() => import("@/pages/competitors-page").then(module => ({ default: module.default })));
 const ReviewRequestsPage = lazy(() => import("@/pages/review-requests-page").then(module => ({ default: module.default })));
 const ProfilePage = lazy(() => import("@/pages/profile-page").then(module => ({ default: module.default })));
