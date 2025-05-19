@@ -1191,6 +1191,96 @@ const HealthcareSettingsForm = ({ displaySection = 'all' }: { displaySection?: '
           
           <Separator />
           
+          {/* Cerner Integration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Cerner Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect to Cerner for enterprise healthcare management
+                </p>
+              </div>
+              <Controller
+                name="cernerEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="cerner-enabled"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            
+            {watch('cernerEnabled') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="cerner-client-id">Client ID</Label>
+                  <Controller
+                    name="cernerClientId"
+                    control={control}
+                    rules={{ required: watch('cernerEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="cerner-client-id"
+                        placeholder="Enter your Cerner Client ID"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.cernerClientId && (
+                    <p className="text-sm text-destructive">Client ID is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cerner-client-secret">Client Secret</Label>
+                  <Controller
+                    name="cernerClientSecret"
+                    control={control}
+                    rules={{ required: watch('cernerEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="cerner-client-secret"
+                        type="password"
+                        placeholder="Enter your Cerner Client Secret"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.cernerClientSecret && (
+                    <p className="text-sm text-destructive">Client Secret is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cerner-tenant-id">Tenant ID</Label>
+                  <Controller
+                    name="cernerTenantId"
+                    control={control}
+                    rules={{ required: watch('cernerEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="cerner-tenant-id"
+                        placeholder="Enter your Cerner Tenant ID"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.cernerTenantId && (
+                    <p className="text-sm text-destructive">Tenant ID is required</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
           {/* Tebra (Kareo) Integration */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -1293,6 +1383,96 @@ const HealthcareSettingsForm = ({ displaySection = 'all' }: { displaySection?: '
                   />
                   {errors.tebraPassword && (
                     <p className="text-sm text-destructive">Password is required</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          <Separator />
+          
+          {/* Epic Integration */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">Epic Integration</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect to Epic for enterprise healthcare management
+                </p>
+              </div>
+              <Controller
+                name="epicEnabled"
+                control={control}
+                render={({ field }) => (
+                  <Switch
+                    id="epic-enabled"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
+            
+            {watch('epicEnabled') && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-6 border-l-2 border-primary/20">
+                <div className="space-y-2">
+                  <Label htmlFor="epic-client-id">Client ID</Label>
+                  <Controller
+                    name="epicClientId"
+                    control={control}
+                    rules={{ required: watch('epicEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="epic-client-id"
+                        placeholder="Enter your Epic Client ID"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.epicClientId && (
+                    <p className="text-sm text-destructive">Client ID is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="epic-client-secret">Client Secret</Label>
+                  <Controller
+                    name="epicClientSecret"
+                    control={control}
+                    rules={{ required: watch('epicEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="epic-client-secret"
+                        type="password"
+                        placeholder="Enter your Epic Client Secret"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.epicClientSecret && (
+                    <p className="text-sm text-destructive">Client Secret is required</p>
+                  )}
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="epic-fhir-url">FHIR URL</Label>
+                  <Controller
+                    name="epicFhirUrl"
+                    control={control}
+                    rules={{ required: watch('epicEnabled') }}
+                    render={({ field }) => (
+                      <Input
+                        id="epic-fhir-url"
+                        placeholder="Enter your Epic FHIR URL"
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    )}
+                  />
+                  {errors.epicFhirUrl && (
+                    <p className="text-sm text-destructive">FHIR URL is required</p>
                   )}
                 </div>
               </div>
