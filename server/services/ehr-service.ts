@@ -23,16 +23,19 @@ export interface Appointment {
 export interface Patient {
   id: string;
   name: string;
-  email: string;
-  phone: string;
-  ehrId: string;
+  email: string | null;
+  phone: string | null;
+  ehrId: string | null;
   ehrSource: string;
-  lastAppointment?: Date;
-  reviewRequestSent?: Date;
-  reviewCompleted?: boolean;
-  rating?: number;
-  locationId?: number;
+  lastAppointment: Date | null;
+  reviewRequestSent: Date | null;
+  reviewCompleted: boolean | null;
+  reviewCompletedAt: Date | null;
+  reviewPlatform: string | null;
+  rating: number | null;
+  locationId: number | null;
   userId: number;
+  metadata?: any;
 }
 
 /**

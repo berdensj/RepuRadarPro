@@ -27,6 +27,8 @@ import {
   verifyFacebookWebhook,
   handleReviewWebhook 
 } from "./services/webhooks";
+import { startAppointmentPolling } from './services/ehr-service';
+
 // Import route modules
 import healthcareAppointmentsRouter from './routes/healthcare/appointments';
 import healthcareRoutes from "./routes/healthcare";
@@ -3263,6 +3265,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Register healthcare-specific routes for medical practices
   app.use("/api/healthcare", healthcareRoutes);
+  
+  // Register appointment and review request endpoints
+  app.use("/api/healthcare/appointments", requireAuthentication, healthcareAppointmentsRouter);
+  
+  // Initialize appointment polling service for healthcare clients
+  startAppointmentPolling();
   
   // Create HTTP server
   const httpServer = createServer(app);
