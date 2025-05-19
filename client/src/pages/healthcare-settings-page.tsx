@@ -261,7 +261,14 @@ const HealthcareSettingsForm = ({ displaySection = 'all' }: { displaySection?: '
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       {/* General Settings Section */}
       {(displaySection === 'general' || displaySection === 'all') && (
-        <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>General Healthcare Settings</CardTitle>
+            <CardDescription>
+              Configure HIPAA compliance and review request settings for your healthcare practice
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
           <div className="flex items-center justify-between space-x-2">
             <div>
               <Label htmlFor="hipaa-mode" className="text-base font-medium">HIPAA Compliance Mode</Label>
@@ -436,14 +443,16 @@ const HealthcareSettingsForm = ({ displaySection = 'all' }: { displaySection?: '
         </CardContent>
       </Card>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>EHR Integrations</CardTitle>
-          <CardDescription>
-            Connect your Electronic Health Record system to automate review requests
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+      {/* Practice EHR Systems */}
+      {(displaySection === 'practice' || displaySection === 'all') && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Practice Management EHR Systems</CardTitle>
+            <CardDescription>
+              Connect your practice management system to automate review requests
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
           {/* DrChrono Integration */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
