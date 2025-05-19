@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/use-auth';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import React from 'react';
+import { Helmet } from 'react-helmet';
+import { Button } from "@/components/ui/button";
 import { 
   Tabs, 
   TabsContent, 
@@ -81,6 +80,19 @@ const IntegrationsPage = () => {
   
   // Add state for selected location
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
+  
+  // Add state for locations
+  const [locations, setLocations] = useState<any[]>([]);
+  
+  // Fetch locations
+  const { data: locationsData } = useQuery({
+    queryKey: ['/api/locations'],
+    onSuccess: (data) => {
+      if (Array.isArray(data)) {
+        setLocations(data);
+      }
+    }
+  });
   
   // Integration status states
   const [googleStatus, setGoogleStatus] = useState<IntegrationStatus>('idle');
@@ -305,11 +317,14 @@ const IntegrationsPage = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Locations</SelectItem>
-                {locations.map((location: Location) => (
+                {Array.isArray(locations) && locations.map((location: Location) => (
                   <SelectItem key={location.id} value={String(location.id)}>
                     {location.name}
                   </SelectItem>
                 ))}
+                {!Array.isArray(locations) && (
+                  <SelectItem value="main">Main Location</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>

@@ -1,4 +1,5 @@
 // No need to import DashboardLayout as the page is already wrapped with SidebarLayout in App.tsx
+// This is a simplified version of the API Access page to ensure it loads properly
 import React, { useState } from "react";
 import { Helmet } from "react-helmet";
 import { useQuery } from "@tanstack/react-query";
