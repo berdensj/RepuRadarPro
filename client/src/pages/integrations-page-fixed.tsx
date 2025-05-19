@@ -33,6 +33,22 @@ const IntegrationsPage = () => {
       title: 'Connection Requested',
       description: `Setting up connection to ${platform}...`,
     });
+    
+    // Redirect to healthcare settings page for EHR integrations
+    if (['DrChrono', 'Jane App', 'Symplast', 'Aesthetic Record', 'Open Dental', 
+         'Dentrix', 'ChiroFusion', 'Athenahealth', 'Tebra', 'Cerner', 'Epic', 
+         'eClinicalWorks'].includes(platform)) {
+      // Show connecting message
+      toast({
+        title: 'Redirecting to Settings',
+        description: 'Opening healthcare settings to configure your integration...',
+      });
+      
+      // Use setTimeout to give the toast time to display before navigation
+      setTimeout(() => {
+        window.location.href = '/healthcare-settings';
+      }, 1500);
+    }
   };
   
   return (
