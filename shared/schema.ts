@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, real, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, real, timestamp, jsonb, varchar } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -676,5 +676,58 @@ export const locationManagersRelations = relations(locationManagers, ({ one }) =
   location: one(locations, {
     fields: [locationManagers.locationId],
     references: [locations.id],
+  }),
+}));
+
+// Patient table for appointment-based review requests
+export const patients = pgTable("patients", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  locationId: integer("location_id").references(() => locations.id),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }),
+  phone: varchar("phone", { length: 50 }),
+  ehrSource: varchar("ehr_source", { length: 50 }).notNull(), // 'drchrono' or 'janeapp'
+  appointmentTime: timestamp("appointment_time").notNull(),
+  appointmentCompleted: boolean("appointment_completed").default(false),
+  reviewSent: boolean("review_sent").default(false),
+  reviewSentAt: timestamp("review_sent_at"),
+  reviewCompleted: boolean("review_completed").default(false),
+  reviewCompletedAt: timestamp("review_completed_at"),
+  reviewPlatform: varchar("review_platform", { length: 50 }), // 'google', 'yelp', 'healthgrades', etc.
+  rating: integer("rating"), // 1-5
+  reviewId: integer("review_id").references(() => reviews.id), // Link to actual review if completed
+  externalId: varchar("external_id", { length: 255 }), // ID from EHR system
+  metadata: jsonb("metadata"), // Additional data from EHR
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Patient Zod schema
+export const insertPatientSchema = createInsertSchema(patients).omit({
+  id: true,
+  reviewId: true,
+  reviewCompletedAt: true,
+  reviewSentAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPatient = z.infer<typeof insertPatientSchema>;
+export type Patient = typeof patients.$inferSelect;
+
+// Patient relations
+export const patientRelations = relations(patients, ({ one }) => ({
+  user: one(users, {
+    fields: [patients.userId],
+    references: [users.id],
+  }),
+  location: one(locations, {
+    fields: [patients.locationId],
+    references: [locations.id],
+  }),
+  review: one(reviews, {
+    fields: [patients.reviewId],
+    references: [reviews.id],
   }),
 }));
