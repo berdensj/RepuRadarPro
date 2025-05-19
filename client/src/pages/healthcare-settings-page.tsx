@@ -146,7 +146,7 @@ interface ReviewStats {
 }
 
 // Component for displaying the Healthcare Settings
-const HealthcareSettingsForm = () => {
+const HealthcareSettingsForm = ({ displaySection = 'all' }: { displaySection?: 'general' | 'practice' | 'enterprise' | 'all' }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -259,14 +259,9 @@ const HealthcareSettingsForm = () => {
   
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>General Healthcare Settings</CardTitle>
-          <CardDescription>
-            Configure HIPAA compliance and review request settings for your healthcare practice
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      {/* General Settings Section */}
+      {(displaySection === 'general' || displaySection === 'all') && (
+        <div className="space-y-4">
           <div className="flex items-center justify-between space-x-2">
             <div>
               <Label htmlFor="hipaa-mode" className="text-base font-medium">HIPAA Compliance Mode</Label>
@@ -1848,14 +1843,54 @@ export default function HealthcareSettingsPage() {
         <h1 className="text-3xl font-bold mb-6">Healthcare Settings</h1>
         
         <Tabs defaultValue="settings" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="settings">General Settings</TabsTrigger>
+            <TabsTrigger value="practice-ehrs">Practice EHRs</TabsTrigger>
+            <TabsTrigger value="enterprise-ehrs">Enterprise EHRs</TabsTrigger>
             <TabsTrigger value="appointments">Today's Appointments</TabsTrigger>
             <TabsTrigger value="stats">Review Requests</TabsTrigger>
           </TabsList>
           
           <TabsContent value="settings" className="space-y-6">
-            <HealthcareSettingsForm />
+            <Card>
+              <CardHeader>
+                <CardTitle>Healthcare Settings</CardTitle>
+                <CardDescription>
+                  Configure general healthcare settings for your practice
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <HealthcareSettingsForm displaySection="general" />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="practice-ehrs" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Practice Management Systems</CardTitle>
+                <CardDescription>
+                  Connect your practice EHR systems for appointment-based review requests
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <HealthcareSettingsForm displaySection="practice" />
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="enterprise-ehrs" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Enterprise Healthcare Systems</CardTitle>
+                <CardDescription>
+                  Connect to major enterprise-grade EHR platforms
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <HealthcareSettingsForm displaySection="enterprise" />
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="appointments">
