@@ -66,11 +66,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     enabled: !!user,
   });
   
-  // Set user role in localStorage when user data is available
+  // Set user role and client type in localStorage when user data is available
   useEffect(() => {
     if (user?.role) {
       // Store the basic role
       localStorage.setItem('userRole', user.role);
+      
+      // Store client type for conditional menu rendering
+      if (user.clientType) {
+        localStorage.setItem('clientType', user.clientType);
+      }
       
       // Determine if the user is a system admin or client admin
       // System admins are those with admin role AND username "admin"
@@ -80,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.log("User authentication info:", {
         role: user.role,
         username: user.username,
+        clientType: user.clientType,
         isSystemAdmin
       });
     }
@@ -160,6 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Clear all stored user data
       localStorage.removeItem('userRole');
       localStorage.removeItem('isSystemAdmin');
+      localStorage.removeItem('clientType');
       
       toast({
         title: "Logged out",
