@@ -312,7 +312,7 @@ export function AccessibleSidebar({
           <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-gray-800 lg:hidden">
             <div className="text-primary text-base font-semibold flex items-center">
               <ChartLine className="h-5 w-5 mr-2" />
-              RepuRadar
+              Reputation Sentinel
             </div>
             <Button 
               variant="ghost" 
@@ -332,7 +332,7 @@ export function AccessibleSidebar({
             {!collapsed && (
               <div className="text-primary text-base font-semibold flex items-center">
                 <ChartLine className="h-5 w-5 mr-2" />
-                RepuRadar
+                Reputation Sentinel
               </div>
             )}
             {collapsed && (
