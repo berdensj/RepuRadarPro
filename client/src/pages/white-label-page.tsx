@@ -65,7 +65,7 @@ const WhiteLabelPage = () => {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">White Label</h1>
           <p className="text-muted-foreground">
-            Customize your RepuRadar dashboard with your own branding
+            Customize your Reputation Sentinel dashboard with your own branding
           </p>
         </div>
 

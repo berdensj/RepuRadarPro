@@ -53,8 +53,8 @@ const SettingsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Settings | RepuRadar</title>
-        <meta name="description" content="Manage your RepuRadar account settings" />
+        <title>Settings | Reputation Sentinel</title>
+        <meta name="description" content="Manage your Reputation Sentinel account settings" />
       </Helmet>
       
       <div className="space-y-6">
