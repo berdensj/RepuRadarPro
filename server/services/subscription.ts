@@ -95,7 +95,7 @@ export async function initializeSubscriptionPlans() {
         'Manual reply approval only',
         'No analytics, SMS, or integrations',
         'Review history limited to 7 days',
-        '"Powered by RepuRadarPro" branding',
+        '"Powered by Reputation Sentinel" branding',
         'Email support'
       ],
       maxLocations: 1,

@@ -1,6 +1,6 @@
-# RepuRadarPro - Reputation Management Platform
+# Reputation Sentinel - Reputation Management Platform
 
-RepuRadarPro is a professional SaaS dashboard for businesses (doctors, lawyers, accountants, etc.) to monitor and manage their online reviews with advanced AI-powered insights and comprehensive reputation management capabilities.
+Reputation Sentinel is a professional SaaS dashboard for businesses (doctors, lawyers, accountants, etc.) to monitor and manage their online reviews with advanced AI-powered insights and comprehensive reputation management capabilities.
 
 ## 🚀 Features
 
@@ -114,7 +114,7 @@ repuradar-pro/
 
 ## ♿ Accessibility Features
 
-RepuRadarPro is designed to be accessible to all users, including those with disabilities. The application is compliant with WCAG 2.1 AA standards and includes:
+Reputation Sentinel is designed to be accessible to all users, including those with disabilities. The application is compliant with WCAG 2.1 AA standards and includes:
 
 - **Semantic HTML Structure**: Proper use of headings, landmarks, and HTML5 semantic elements
 - **Keyboard Navigation**: Full keyboard support with visible focus indicators
@@ -164,7 +164,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## 💰 Subscription Plans
 
-RepuRadarPro offers a tiered subscription model to accommodate businesses of all sizes:
+Reputation Sentinel offers a tiered subscription model to accommodate businesses of all sizes:
 
 ### Free Tier
 - Monitor up to 2 locations
@@ -238,7 +238,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 🔒 Security Considerations
 
-RepuRadarPro is built with security in mind:
+Reputation Sentinel is built with security in mind:
 
 - **Authentication**: Secure password hashing using scrypt
 - **Authorization**: Role-based access control with fine-grained permissions
