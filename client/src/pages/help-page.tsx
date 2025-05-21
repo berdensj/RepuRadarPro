@@ -131,24 +131,24 @@ const faqCategories = [
 const kbArticles = [
   {
     id: 1,
-    title: "Getting Started with RepuRadar",
+    title: "Getting Started with Reputation Sentinel",
     category: "Onboarding",
-    summary: "Learn how to set up your account and get started with RepuRadar's key features.",
-    content: "This comprehensive guide walks you through everything you need to know to get started with RepuRadar. From completing your profile to connecting review platforms, setting up notifications, and inviting team members, you'll learn how to configure your account for optimal performance.\n\nWe recommend starting with connecting your most important review platforms, then setting up alert preferences for negative reviews. This ensures you can immediately respond to customer concerns while you continue setting up the rest of your account features."
+    summary: "Learn how to set up your account and get started with Reputation Sentinel's key features.",
+    content: "This comprehensive guide walks you through everything you need to know to get started with Reputation Sentinel. From completing your profile to connecting review platforms, setting up notifications, and inviting team members, you'll learn how to configure your account for optimal performance.\n\nWe recommend starting with connecting your most important review platforms, then setting up alert preferences for negative reviews. This ensures you can immediately respond to customer concerns while you continue setting up the rest of your account features."
   },
   {
     id: 2,
     title: "Managing Multiple Business Locations",
     category: "Configuration",
-    summary: "Learn how to effectively organize and manage multiple business locations within RepuRadar.",
-    content: "This article explains how to add, organize, and manage multiple business locations in RepuRadar. You'll learn how to create location groups, assign managers to specific locations, configure location-specific settings, and view aggregated data across all locations.\n\nBy properly organizing your locations, you'll be able to track performance metrics individually or as groups, allowing both granular and high-level views of your online reputation. Each location can have its own set of connected platforms, notification settings, and response templates."
+    summary: "Learn how to effectively organize and manage multiple business locations within Reputation Sentinel.",
+    content: "This article explains how to add, organize, and manage multiple business locations in Reputation Sentinel. You'll learn how to create location groups, assign managers to specific locations, configure location-specific settings, and view aggregated data across all locations.\n\nBy properly organizing your locations, you'll be able to track performance metrics individually or as groups, allowing both granular and high-level views of your online reputation. Each location can have its own set of connected platforms, notification settings, and response templates."
   },
   {
     id: 3,
     title: "Understanding Sentiment Analysis",
     category: "Analytics",
-    summary: "Deep dive into how RepuRadar's sentiment analysis works and how to interpret the results.",
-    content: "This article explains the technology behind RepuRadar's advanced sentiment analysis system. Our AI doesn't just count stars—it reads and understands the actual content of reviews, identifying key themes, emotional indicators, and contextual nuances.\n\nYou'll learn how to interpret the sentiment score (0-100), how to track sentiment trends over time, and how to identify specific aspects of your business that are affecting sentiment. We also explain how our theme detection works to categorize feedback into actionable insights about your products, services, staff, and customer experience."
+    summary: "Deep dive into how Reputation Sentinel's sentiment analysis works and how to interpret the results.",
+    content: "This article explains the technology behind Reputation Sentinel's advanced sentiment analysis system. Our AI doesn't just count stars—it reads and understands the actual content of reviews, identifying key themes, emotional indicators, and contextual nuances.\n\nYou'll learn how to interpret the sentiment score (0-100), how to track sentiment trends over time, and how to identify specific aspects of your business that are affecting sentiment. We also explain how our theme detection works to categorize feedback into actionable insights about your products, services, staff, and customer experience."
   },
   {
     id: 4,
