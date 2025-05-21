@@ -413,7 +413,7 @@ const ImportExportPage = () => {
   return (
     <div className="w-full">
       <Helmet>
-        <title>Import & Export | RepuRadar</title>
+        <title>Import & Export | Reputation Sentinel</title>
         <meta
           name="description"
           content="Import and export review data across multiple platforms."

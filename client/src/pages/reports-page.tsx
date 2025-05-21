@@ -251,7 +251,7 @@ const ReportsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Reports | RepuRadar</title>
+        <title>Reports | Reputation Sentinel</title>
         <meta
           name="description"
           content="Schedule and manage automated reports for your business insights."

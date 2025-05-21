@@ -60,7 +60,7 @@ export default function ResponsesPage() {
   return (
     <SidebarLayout>
       <Helmet>
-        <title>AI Responses | RepuRadar</title>
+        <title>AI Responses | Reputation Sentinel</title>
         <meta name="description" content="Access pre-written response templates and generate custom AI responses for your reviews." />
       </Helmet>
       

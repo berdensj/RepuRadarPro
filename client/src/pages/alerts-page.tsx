@@ -5,7 +5,7 @@ export default function AlertsPage() {
   return (
     <>
       <Helmet>
-        <title>Alerts | RepuRadar</title>
+        <title>Alerts | Reputation Sentinel</title>
         <meta name="description" content="View important alerts about negative reviews and trending issues with your reputation." />
       </Helmet>
       

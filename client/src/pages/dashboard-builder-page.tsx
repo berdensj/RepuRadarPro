@@ -669,7 +669,7 @@ const DashboardBuilderPage = () => {
   return (
     <>
       <Helmet>
-        <title>Dashboard Builder | RepuRadar</title>
+        <title>Dashboard Builder | Reputation Sentinel</title>
         <meta
           name="description"
           content="Create and customize your own dashboards with the metrics that matter most to you."

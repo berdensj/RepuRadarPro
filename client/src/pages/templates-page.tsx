@@ -442,7 +442,7 @@ const TemplatesPage = () => {
   return (
     <>
       <Helmet>
-        <title>Review Templates | RepuRadar</title>
+        <title>Review Templates | Reputation Sentinel</title>
         <meta
           name="description"
           content="Create and manage templates for responding to customer reviews."

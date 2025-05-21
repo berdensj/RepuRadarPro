@@ -483,7 +483,7 @@ const CommunicationsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Communications | RepuRadar</title>
+        <title>Communications | Reputation Sentinel</title>
         <meta
           name="description"
           content="Manage all your customer communications in one place."

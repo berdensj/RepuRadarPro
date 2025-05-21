@@ -57,7 +57,7 @@ export default function ReviewsPage() {
   return (
     <>
       <Helmet>
-        <title>Reviews | RepuRadar</title>
+        <title>Reviews | Reputation Sentinel</title>
         <meta name="description" content="View and manage all your customer reviews in one place. Filter by platform, rating, and more." />
       </Helmet>
       

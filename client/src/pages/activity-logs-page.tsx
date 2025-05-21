@@ -457,7 +457,7 @@ const ActivityLogsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Activity Logs | RepuRadar</title>
+        <title>Activity Logs | Reputation Sentinel</title>
         <meta
           name="description"
           content="View and manage your account activity logs and security alerts."

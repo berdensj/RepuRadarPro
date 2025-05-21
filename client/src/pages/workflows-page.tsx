@@ -516,7 +516,7 @@ const WorkflowsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Workflow Automation | RepuRadar</title>
+        <title>Workflow Automation | Reputation Sentinel</title>
         <meta
           name="description"
           content="Create and manage automated workflows for your review management."
