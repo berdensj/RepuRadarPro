@@ -57,8 +57,8 @@ const WhiteLabelPage = () => {
   return (
     <>
       <Helmet>
-        <title>White Label | RepuRadar</title>
-        <meta name="description" content="Customize your RepuRadar dashboard with your own branding" />
+        <title>White Label | Reputation Sentinel</title>
+        <meta name="description" content="Customize your Reputation Sentinel dashboard with your own branding" />
       </Helmet>
 
       <div className="space-y-6">

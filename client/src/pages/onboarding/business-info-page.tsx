@@ -82,7 +82,7 @@ export default function BusinessInfoPage({
         </div>
         <h1 className="text-2xl font-bold text-slate-800">Business Information</h1>
         <p className="text-slate-600 max-w-lg mx-auto">
-          Tell us about your business to help us customize your RepuRadar experience
+          Tell us about your business to help us customize your Reputation Sentinel experience
         </p>
       </div>
       

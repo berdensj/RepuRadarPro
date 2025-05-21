@@ -185,7 +185,7 @@ const SubscriptionPage = () => {
             <div className="flex items-center">
               <AlertCircle className="h-5 w-5 text-yellow-600 mr-2" />
               <p className="text-sm text-yellow-700">
-                Your trial ends on {getTrialEndDate()}. Select a plan to continue using RepuRadar.
+                Your trial ends on {getTrialEndDate()}. Select a plan to continue using Reputation Sentinel.
               </p>
             </div>
           </div>

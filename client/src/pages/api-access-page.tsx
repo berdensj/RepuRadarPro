@@ -138,7 +138,7 @@ const ApiAccessPage = () => {
   return (
     <>
       <Helmet>
-        <title>API Access | RepuRadar</title>
+        <title>API Access | Reputation Sentinel</title>
         <meta name="description" content="Manage API keys, webhooks, and review API documentation" />
       </Helmet>
       
@@ -318,7 +318,7 @@ const ApiAccessPage = () => {
               <CardHeader>
                 <CardTitle>API Documentation</CardTitle>
                 <CardDescription>
-                  Learn how to integrate with the RepuRadar API
+                  Learn how to integrate with the Reputation Sentinel API
                 </CardDescription>
               </CardHeader>
               <CardContent>
