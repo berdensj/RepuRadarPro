@@ -41,7 +41,7 @@ export function useSidebarGroups() {
     if (typeof window === 'undefined') return {};
     
     try {
-      const saved = localStorage.getItem('repuradar_sidebar_groups');
+      const saved = localStorage.getItem('reputation_sentinel_sidebar_groups');
       return saved ? JSON.parse(saved) : {
         reviews: false,
         analytics: false,
@@ -69,7 +69,7 @@ export function useSidebarGroups() {
   // Persist changes to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('repuradar_sidebar_groups', JSON.stringify(expandedGroups));
+      localStorage.setItem('reputation_sentinel_sidebar_groups', JSON.stringify(expandedGroups));
     } catch (e) {
       // Ignore storage errors
     }
@@ -98,7 +98,7 @@ export function useSidebarCollapsed() {
     if (typeof window === 'undefined') return false;
     
     try {
-      const saved = localStorage.getItem('repuradar_sidebar_collapsed');
+      const saved = localStorage.getItem('reputation_sentinel_sidebar_collapsed');
       return saved ? JSON.parse(saved) : false;
     } catch (e) {
       return false;
@@ -110,7 +110,7 @@ export function useSidebarCollapsed() {
   // Persist changes to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('repuradar_sidebar_collapsed', JSON.stringify(sidebarCollapsed));
+      localStorage.setItem('reputation_sentinel_sidebar_collapsed', JSON.stringify(sidebarCollapsed));
     } catch (e) {
       // Ignore storage errors
     }

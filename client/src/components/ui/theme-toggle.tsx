@@ -7,7 +7,7 @@ export function ThemeToggle() {
   
   useEffect(() => {
     // On mount, read theme from localStorage or system preference
-    const storedTheme = localStorage.getItem('repuradar_theme') as 'light' | 'dark' | null;
+    const storedTheme = localStorage.getItem('reputation_sentinel_theme') as 'light' | 'dark' | null;
     
     if (storedTheme) {
       setTheme(storedTheme);
@@ -28,7 +28,7 @@ export function ThemeToggle() {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     applyTheme(newTheme);
-    localStorage.setItem('repuradar_theme', newTheme);
+    localStorage.setItem('reputation_sentinel_theme', newTheme);
   };
   
   // Helper function to get or create status element for screen reader announcements

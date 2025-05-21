@@ -49,14 +49,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
     
     // Save color theme to localStorage
-    localStorage.setItem('repuradar_primary_color', primaryColor);
+    localStorage.setItem('reputation_sentinel_primary_color', primaryColor);
   };
 
   // Load theme preferences on mount
   useEffect(() => {
     // Read the preferred theme from localStorage or system preference
-    const storedTheme = localStorage.getItem('repuradar_theme') as Theme | null;
-    const storedColor = localStorage.getItem('repuradar_primary_color') || DEFAULT_PRIMARY_COLOR;
+    const storedTheme = localStorage.getItem('reputation_sentinel_theme') as Theme | null;
+    const storedColor = localStorage.getItem('reputation_sentinel_primary_color') || DEFAULT_PRIMARY_COLOR;
     
     // Set the primary color
     setPrimaryColor(storedColor);
