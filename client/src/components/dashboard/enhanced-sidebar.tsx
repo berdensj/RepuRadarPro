@@ -286,7 +286,7 @@ export function EnhancedSidebar({ className }: SidebarProps) {
             {!collapsed && (
               <div className="text-primary text-xl font-bold flex items-center">
                 <ChartLine className="h-5 w-5 mr-2" />
-                RepuRadar
+                Reputation Sentinel
               </div>
             )}
             {collapsed && (

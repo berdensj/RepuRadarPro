@@ -108,7 +108,7 @@ export default function ClientAdminLayout({ children }: AdminLayoutProps) {
         >
           <div className="flex items-center gap-2 font-bold text-xl cursor-pointer">
             <LayoutDashboard className="h-6 w-6 text-primary" />
-            <span>RepuRadar</span>
+            <span>Reputation Sentinel</span>
             <span className="text-xs font-normal bg-primary/10 text-primary px-2 py-0.5 rounded">Client Admin</span>
           </div>
         </Button>

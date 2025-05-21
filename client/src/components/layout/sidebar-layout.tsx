@@ -117,7 +117,7 @@ export function SidebarLayout({
                   {mobileMenuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
                 </Button>
                 {pageTitle && <h1 className="text-lg font-semibold truncate">{pageTitle}</h1>}
-                {!pageTitle && <span className="text-primary text-lg font-semibold">RepuRadar</span>}
+                {!pageTitle && <span className="text-primary text-lg font-semibold">Reputation Sentinel</span>}
               </div>
             </header>
           )}
