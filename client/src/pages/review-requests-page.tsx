@@ -13,7 +13,7 @@ export default function ReviewRequestsPage() {
   return (
     <div>
       <Helmet>
-        <title>Review Requests | RepuRadar</title>
+        <title>Review Requests | Reputation Sentinel</title>
         <meta name="description" content="Manage your review requests and track customer feedback initiatives." />
       </Helmet>
       

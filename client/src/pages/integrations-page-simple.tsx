@@ -48,15 +48,15 @@ const IntegrationsPage = () => {
   return (
     <>
       <Helmet>
-        <title>Integrations | RepuRadar</title>
-        <meta name="description" content="Connect your RepuRadar to third-party services and platforms." />
+        <title>Integrations | Reputation Sentinel</title>
+        <meta name="description" content="Connect your Reputation Sentinel to third-party services and platforms." />
       </Helmet>
       
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Integrations</h1>
           <p className="text-muted-foreground">
-            Connect your RepuRadar to third-party services and platforms.
+            Connect your Reputation Sentinel to third-party services and platforms.
           </p>
         </div>
         
@@ -406,7 +406,7 @@ const IntegrationsPage = () => {
                 <h3 className="text-sm font-medium mb-2">Healthcare Integration Notes</h3>
                 <p className="text-sm text-muted-foreground">
                   All EHR integrations are HIPAA-compliant and only sync appointment data and contact information. 
-                  No protected health information (PHI) is accessed or stored in RepuRadar.
+                  No protected health information (PHI) is accessed or stored in Reputation Sentinel.
                 </p>
               </div>
             </TabsContent>

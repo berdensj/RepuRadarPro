@@ -211,8 +211,8 @@ const HelpPage = () => {
   return (
     <div>
       <Helmet>
-        <title>Help & Support | RepuRadar</title>
-        <meta name="description" content="Get support, search the knowledge base, and find answers to your questions about RepuRadar." />
+        <title>Help & Support | Reputation Sentinel</title>
+        <meta name="description" content="Get support, search the knowledge base, and find answers to your questions about Reputation Sentinel." />
       </Helmet>
       
       <div className="space-y-8">
