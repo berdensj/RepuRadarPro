@@ -531,7 +531,7 @@ const ProfilePage = () => {
               <div className="flex flex-col space-y-2">
                 <h3 className="text-sm font-medium">Data Export</h3>
                 <p className="text-sm text-muted-foreground">
-                  Download a copy of your data from RepuRadar.
+                  Download a copy of your data from Reputation Sentinel.
                 </p>
                 <div className="flex space-x-2 mt-2">
                   <Button variant="outline">
@@ -932,7 +932,7 @@ const ProfilePage = () => {
             <CardHeader>
               <CardTitle>Notification Preferences</CardTitle>
               <CardDescription>
-                Manage how and when you receive notifications from RepuRadar.
+                Manage how and when you receive notifications from Reputation Sentinel.
               </CardDescription>
             </CardHeader>
             <CardContent>

@@ -101,7 +101,7 @@ export default function AuthPage() {
             <div className="flex justify-center mb-6">
               <div className="text-primary text-3xl font-bold flex items-center">
                 <ChartLine className="h-6 w-6 mr-2" />
-                RepuRadar
+                Reputation Sentinel
               </div>
             </div>
             
@@ -250,7 +250,7 @@ export default function AuthPage() {
         <div className="hidden md:flex flex-col items-start">
           <h1 className="text-4xl font-bold text-slate-800 mb-4">Manage Your Professional Reputation with Ease</h1>
           <p className="text-lg text-slate-600 mb-6">
-            RepuRadar helps professionals monitor, analyze, and respond to online reviews across multiple platforms.
+            Reputation Sentinel helps professionals monitor, analyze, and respond to online reviews across multiple platforms.
           </p>
           
           <div className="space-y-4 w-full">
@@ -261,7 +261,7 @@ export default function AuthPage() {
               <div>
                 <h3 className="font-medium">For Professionals</h3>
                 <p className="text-sm text-slate-600">
-                  Doctors, lawyers, accountants, and more use RepuRadar to protect and enhance their online reputation.
+                  Doctors, lawyers, accountants, and more use Reputation Sentinel to protect and enhance their online reputation.
                 </p>
               </div>
             </div>

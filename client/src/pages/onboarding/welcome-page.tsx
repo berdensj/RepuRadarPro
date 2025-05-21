@@ -14,7 +14,7 @@ export default function WelcomePage({ goNext, trialDays = 14 }: WelcomePageProps
         <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-4">
           <ChartLine className="h-8 w-8" />
         </div>
-        <h1 className="text-3xl font-bold text-slate-800">Welcome to RepuRadar Pro</h1>
+        <h1 className="text-3xl font-bold text-slate-800">Welcome to Reputation Sentinel</h1>
         <p className="text-lg text-slate-600 mt-2">
           Your {trialDays}-day trial has started!
         </p>
