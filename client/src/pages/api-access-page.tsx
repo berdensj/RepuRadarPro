@@ -51,7 +51,7 @@ const ApiAccessPage = () => {
   // Sample webhook for display
   const sampleWebhook = {
     id: "whk_01H9ZXY123456",
-    url: "https://example.com/webhooks/repuradar",
+    url: "https://example.com/webhooks/reputation-sentinel",
     events: ["review.created", "review.updated"],
     createdAt: "2025-05-05T14:30:00Z",
     lastTriggered: "2025-05-14T09:15:22Z",
@@ -250,7 +250,7 @@ const ApiAccessPage = () => {
                   <div className="grid gap-4 py-4">
                     <div className="grid gap-2">
                       <Label htmlFor="webhook-url">URL</Label>
-                      <Input id="webhook-url" placeholder="https://example.com/webhooks/repuradar" />
+                      <Input id="webhook-url" placeholder="https://example.com/webhooks/reputation-sentinel" />
                     </div>
                     <div className="grid gap-2">
                       <Label>Events</Label>

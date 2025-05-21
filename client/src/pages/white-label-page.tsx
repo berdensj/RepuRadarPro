@@ -194,7 +194,7 @@ const WhiteLabelPage = () => {
                     <code className="text-xs">
                       Type: CNAME<br />
                       Host: dashboard (or subdomain of your choice)<br />
-                      Value: custom.repuradar.com<br />
+                      Value: custom.reputationsentinel.com<br />
                       TTL: 3600
                     </code>
                   </div>

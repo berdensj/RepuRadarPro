@@ -530,10 +530,10 @@ const HelpPage = () => {
                       Response time: Within 24 hours
                     </p>
                     <a 
-                      href="mailto:support@repuradar.com" 
+                      href="mailto:support@reputationsentinel.com" 
                       className="text-primary text-sm font-medium mt-1 inline-block hover:underline"
                     >
-                      support@repuradar.com
+                      support@reputationsentinel.com
                     </a>
                   </div>
                 </div>

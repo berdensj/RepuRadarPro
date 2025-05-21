@@ -153,7 +153,7 @@ export class MemStorage implements IStorage {
       id: this.userCurrentId++,
       username: 'admin',
       password: '$2b$10$5QnkCEJKBTrfZS27qkZcU.tnULAjO4tmEt2s2XBuZIr6CYnigr96S', // hashed "admin123"
-      email: 'admin@repuradar.com',
+      email: 'admin@reputationsentinel.com',
       fullName: 'System Administrator',
       role: 'admin',
       isActive: true,

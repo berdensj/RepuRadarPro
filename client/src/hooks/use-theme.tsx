@@ -92,7 +92,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
     
     // Save theme preference to localStorage
-    localStorage.setItem('repuradar_theme', theme);
+    localStorage.setItem('reputation_sentinel_theme', theme);
   }, [theme, primaryColor]);
 
   // Toggle between light and dark themes

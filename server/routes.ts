@@ -217,7 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         userId,
         alertType: "onboarding",
         content: JSON.stringify({
-          title: "Welcome to RepuRadar!",
+          title: "Welcome to Reputation Sentinel!",
           message: "Your 14-day trial has started. Explore all the premium features to manage your online reputation."
         }),
         date: new Date(),
