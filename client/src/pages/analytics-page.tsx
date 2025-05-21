@@ -270,7 +270,7 @@ export default function AnalyticsPage() {
   return (
     <>
       <Helmet>
-        <title>Analytics | RepuRadar</title>
+        <title>Analytics | Reputation Sentinel</title>
         <meta name="description" content="Detailed analytics of your online reviews and reputation metrics" />
       </Helmet>
       

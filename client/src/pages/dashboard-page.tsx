@@ -64,8 +64,8 @@ export default function DashboardPage() {
   return (
     <>
       <Helmet>
-        <title>Dashboard | RepuRadar</title>
-        <meta name="description" content="Monitor and manage your professional reviews with RepuRadar's comprehensive dashboard. Track metrics, respond to reviews, and analyze trends." />
+        <title>Dashboard | Reputation Sentinel</title>
+        <meta name="description" content="Monitor and manage your professional reviews with Reputation Sentinel's comprehensive dashboard. Track metrics, respond to reviews, and analyze trends." />
       </Helmet>
       
       <div className="p-4 lg:p-6">
