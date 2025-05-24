@@ -53,6 +53,7 @@ function Router() {
       <ProtectedRoute path="/admin/customers" component={AdminCustomersPage} requiredRole="admin" />
       <ProtectedRoute path="/admin/onboarding" component={OnboardingPage} requiredRole="admin" />
       <ProtectedRoute path="/admin/analytics" component={AdminAnalyticsPage} requiredRole="admin" />
+      <ProtectedRoute path="/admin/reports" component={AdminReportsPage} requiredRole="admin" />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
