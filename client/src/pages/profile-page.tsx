@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { useAuth } from '@/hooks/use-auth';
+import React, { useState } from 'react';
+import { useAuth } from '../hooks/use-auth';
 import { useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '../lib/queryClient';
+import { useToast } from '../hooks/use-toast';
 import {
   Card,
   CardContent,
@@ -10,18 +10,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+} from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import {
   Form,
   FormControl,
@@ -30,7 +21,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from '../components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -39,20 +30,20 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '@/components/ui/tabs';
+} from '../components/ui/tabs';
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from '@/components/ui/avatar';
+} from '../components/ui/avatar';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+} from '../components/ui/select';
+import { Switch } from '../components/ui/switch';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -63,9 +54,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+} from '../components/ui/alert-dialog';
+import { Badge } from '../components/ui/badge';
+import { Separator } from '../components/ui/separator';
+import { Textarea } from '../components/ui/textarea';
 import { 
   User, 
   Lock, 
@@ -78,8 +70,19 @@ import {
   Trash2,
   ExternalLink
 } from 'lucide-react';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption
+} from '../components/ui/table';
 
 // Profile update schema
+// TODO: Bug report mentions a 'bio' field that crashes if over 2000 chars. This field is not currently in the schema or UI.
+// If a bio field is added, include: bio: z.string().max(2000, 'Bio must be 2000 characters or less').optional(),
 const profileFormSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email'),
@@ -88,6 +91,7 @@ const profileFormSchema = z.object({
   companyName: z.string().optional(),
   jobTitle: z.string().optional(),
   phone: z.string().optional(),
+  // bio: z.string().max(2000, 'Bio must be 2000 characters or less').optional(), // Example if bio were added
 });
 
 // Password update schema
@@ -471,76 +475,143 @@ const ProfilePage = () => {
             </Card>
           </div>
           
-          {/* General Settings */}
+          {/* General Preferences Card */}
           <Card>
             <CardHeader>
-              <CardTitle>General Settings</CardTitle>
-              <CardDescription>Manage your account settings and preferences.</CardDescription>
+              <CardTitle>General Preferences</CardTitle>
+              <CardDescription>
+                Customize your account settings and preferences.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              <div className="flex flex-col space-y-3">
+                <h3 className="text-sm font-medium leading-none">Time Zone</h3>
+                <p className="text-sm text-muted-foreground">
+                  Choose your local time zone to ensure that your reports and notifications are delivered at appropriate times.
+                </p>
+                <Select
+                  value={timeZone}
+                  onValueChange={setTimeZone}
+                >
+                  <SelectTrigger className="w-full sm:w-[300px]">
+                    <SelectValue placeholder="Select time zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="America/New_York">Eastern Time (US & Canada)</SelectItem>
+                    <SelectItem value="America/Chicago">Central Time (US & Canada)</SelectItem>
+                    <SelectItem value="America/Denver">Mountain Time (US & Canada)</SelectItem>
+                    <SelectItem value="America/Los_Angeles">Pacific Time (US & Canada)</SelectItem>
+                    <SelectItem value="America/Anchorage">Alaska</SelectItem>
+                    <SelectItem value="America/Honolulu">Hawaii</SelectItem>
+                    <SelectItem value="Europe/London">London</SelectItem>
+                    <SelectItem value="Europe/Paris">Paris</SelectItem>
+                    <SelectItem value="Asia/Tokyo">Tokyo</SelectItem>
+                    <SelectItem value="Australia/Sydney">Sydney</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Separator />
+              
               <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-sm font-medium">Language</h3>
+                <div className="space-y-0.5">
+                  <h3 className="text-sm font-medium leading-none">Language</h3>
                   <p className="text-sm text-muted-foreground">
-                    Set your preferred language for the interface.
+                    Set your preferred language for the platform interface.
                   </p>
                 </div>
                 <Select defaultValue="en-US">
-                  <SelectTrigger className="w-40">
+                  <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select language" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="en-US">English (US)</SelectItem>
                     <SelectItem value="en-GB">English (UK)</SelectItem>
-                    <SelectItem value="fr">Français</SelectItem>
-                    <SelectItem value="de">Deutsch</SelectItem>
-                    <SelectItem value="es">Español</SelectItem>
+                    <SelectItem value="es">Spanish</SelectItem>
+                    <SelectItem value="fr">French</SelectItem>
+                    <SelectItem value="de">German</SelectItem>
+                    <SelectItem value="pt">Portuguese</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <Separator />
               
-              <div className="flex items-center justify-between">
+              <div className="flex flex-row items-center justify-between rounded-lg">
+                <div className="space-y-0.5">
+                  <h3 className="text-sm font-medium leading-none">Email Digests</h3>
+                  <p className="text-sm text-muted-foreground">Receive a digest of your activity.</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              
+              <Separator />
+              
+              <div className="flex flex-row items-center justify-between rounded-lg">
+                <div className="space-y-0.5">
+                  <h3 className="text-sm font-medium leading-none">Auto-Refresh Dashboard</h3>
+                  <p className="text-sm text-muted-foreground">Automatically refresh dashboard data.</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Account Management Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-red-600">Account Management</CardTitle>
+              <CardDescription>
+                Manage your account status and subscription.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between items-center py-2">
                 <div>
-                  <h3 className="text-sm font-medium">Time Zone</h3>
+                  <h3 className="text-sm font-medium">Delete Account</h3>
                   <p className="text-sm text-muted-foreground">
-                    Set your time zone to see the correct local times.
+                    Permanently delete your account and all your data.
                   </p>
                 </div>
-                <Select 
-                  defaultValue={timeZone} 
-                  onValueChange={setTimeZone}
-                >
-                  <SelectTrigger className="w-60">
-                    <SelectValue placeholder="Select time zone" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
-                    <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
-                    <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
-                    <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
-                    <SelectItem value="Europe/London">Greenwich Mean Time (GMT)</SelectItem>
-                    <SelectItem value="Europe/Paris">Central European Time (CET)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">Delete Account</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete your account
+                        and remove all your data from our servers.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => deleteAccountMutation.mutate()}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {deleteAccountMutation.isPending && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
+                        Delete Account
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
               
-              <Separator />
-              
-              <div className="flex flex-col space-y-2">
-                <h3 className="text-sm font-medium">Data Export</h3>
-                <p className="text-sm text-muted-foreground">
-                  Download a copy of your data from Reputation Sentinel.
-                </p>
-                <div className="flex space-x-2 mt-2">
-                  <Button variant="outline">
-                    Export All Data
-                  </Button>
-                  <Button variant="outline">
-                    Download Reviews
-                  </Button>
+              <div className="flex justify-between items-center py-2">
+                <div>
+                  <h3 className="text-sm font-medium">Log Out</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Sign out of your account on this device.
+                  </p>
                 </div>
+                <Button variant="outline" onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log Out
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -550,14 +621,14 @@ const ProfilePage = () => {
         <TabsContent value="security" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Password</CardTitle>
+              <CardTitle>Change Password</CardTitle>
               <CardDescription>
-                Change your password to keep your account secure.
+                Update your password to keep your account secure.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...passwordForm}>
-                <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-4">
+                <form onSubmit={passwordForm.handleSubmit(onPasswordSubmit)} className="space-y-6">
                   <FormField
                     control={passwordForm.control}
                     name="currentPassword"
@@ -605,6 +676,7 @@ const ProfilePage = () => {
                   
                   <Button 
                     type="submit" 
+                    className="mt-4"
                     disabled={changePasswordMutation.isPending}
                   >
                     {changePasswordMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -617,135 +689,88 @@ const ProfilePage = () => {
           
           <Card>
             <CardHeader>
-              <CardTitle>Session History</CardTitle>
-              <CardDescription>
-                See where you're currently logged in and manage your sessions.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[180px]">Device</TableHead>
-                    <TableHead>Location</TableHead>
-                    <TableHead>IP Address</TableHead>
-                    <TableHead>Last Active</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-2">
-                        <span>Chrome on Windows</span>
-                        <Badge variant="outline" className="ml-2">Current</Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell>New York, USA</TableCell>
-                    <TableCell>102.45.67.89</TableCell>
-                    <TableCell>Now</TableCell>
-                    <TableCell className="text-right">
-                      -
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Safari on iPhone</TableCell>
-                    <TableCell>New York, USA</TableCell>
-                    <TableCell>102.45.67.90</TableCell>
-                    <TableCell>Yesterday at 2:30 PM</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        Sign out
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Firefox on Mac</TableCell>
-                    <TableCell>Boston, USA</TableCell>
-                    <TableCell>98.35.67.123</TableCell>
-                    <TableCell>May 5, 2025</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        Sign out
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
-              
-              <div className="mt-4">
-                <Button variant="outline" className="w-full">
-                  Sign out of all other sessions
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
               <CardTitle>Two-Factor Authentication</CardTitle>
               <CardDescription>
-                Add an extra layer of security to your account by enabling two-factor authentication.
+                Add an extra layer of security to your account.
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col gap-4">
-              <div className="flex items-center gap-4">
-                <Lock className="h-8 w-8 text-primary" />
-                <div className="flex-1">
-                  <h3 className="text-lg font-medium">Two-Factor Authentication</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Protect your account with an additional authentication step.
-                  </p>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <h3 className="text-sm font-medium">Email Authentication</h3>
+                  <p className="text-sm text-muted-foreground">Receive a code via email when signing in.</p>
                 </div>
-                <Button>Enable</Button>
+                <Switch defaultChecked />
+              </div>
+              
+              <Separator />
+              
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <h3 className="text-sm font-medium">Authenticator App</h3>
+                  <p className="text-sm text-muted-foreground">Use an authenticator app to generate codes.</p>
+                </div>
+                <Button variant="outline">Set Up</Button>
+              </div>
+              
+              <Separator />
+              
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <h3 className="text-sm font-medium">SMS Authentication</h3>
+                  <p className="text-sm text-muted-foreground">Receive a code via SMS when signing in.</p>
+                </div>
+                <Button variant="outline">Set Up</Button>
               </div>
             </CardContent>
           </Card>
           
           <Card>
             <CardHeader>
-              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+              <CardTitle>Login Sessions</CardTitle>
               <CardDescription>
-                Permanently delete your account and all of your data.
+                Manage your active login sessions.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-muted-foreground mb-4">
-                This action is irreversible and will permanently delete your account, 
-                all your reviews, and all associated data. This cannot be undone.
-              </p>
-              
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive">Delete Account</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your account
-                      and remove all your data from our servers.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => deleteAccountMutation.mutate()}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      {deleteAccountMutation.isPending ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Deleting...
-                        </>
-                      ) : (
-                        "Delete Account"
-                      )}
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between bg-muted/40 p-3 rounded-lg">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center">
+                      <h3 className="text-sm font-medium">Current Session</h3>
+                      <Badge className="ml-2 bg-green-100 text-green-800">Active</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Chrome on Windows • IP: 192.168.1.1 • Last active: Just now
+                    </p>
+                  </div>
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                </div>
+                
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div className="space-y-0.5">
+                    <h3 className="text-sm font-medium">Safari on MacOS</h3>
+                    <p className="text-xs text-muted-foreground">
+                      IP: 192.168.1.2 • Last active: 2 days ago
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="sm">Sign Out</Button>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 rounded-lg border">
+                  <div className="space-y-0.5">
+                    <h3 className="text-sm font-medium">Firefox on Android</h3>
+                    <p className="text-xs text-muted-foreground">
+                      IP: 192.168.1.3 • Last active: 5 days ago
+                    </p>
+                  </div>
+                  <Button variant="ghost" size="sm">Sign Out</Button>
+                </div>
+              </div>
             </CardContent>
+            <CardFooter>
+              <Button variant="outline" className="w-full">Sign Out of All Sessions</Button>
+            </CardFooter>
           </Card>
         </TabsContent>
         
@@ -753,67 +778,128 @@ const ProfilePage = () => {
         <TabsContent value="billing" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Subscription</CardTitle>
-              <CardDescription>
-                Manage your subscription and billing information.
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Subscription Plan</CardTitle>
+                  <CardDescription>
+                    Manage your subscription and billing details.
+                  </CardDescription>
+                </div>
+                {getSubscriptionBadge(user?.plan)}
+              </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="flex flex-col space-y-2">
-                <h3 className="text-lg font-medium">Current Plan</h3>
-                <div className="flex justify-between items-center">
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">Pro Plan</span>
-                      <Badge className="bg-blue-100 text-blue-800">Active</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Renews on June 1, 2025
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xl font-bold">$29.99/month</div>
-                    <div className="text-sm text-muted-foreground">
-                      Billed monthly
-                    </div>
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="border border-primary/20">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Free</CardTitle>
+                    <CardDescription>$0/month</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <ul className="list-disc pl-5 space-y-1 text-sm">
+                      <li>1 Location</li>
+                      <li>Basic analytics</li>
+                      <li>Google & Yelp integrations</li>
+                      <li>100 review requests/month</li>
+                      <li>Email support</li>
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      variant={user?.plan === 'free' ? 'secondary' : 'outline'} 
+                      className="w-full"
+                      disabled={user?.plan === 'free'}
+                    >
+                      {user?.plan === 'free' ? 'Current Plan' : 'Downgrade'}
+                    </Button>
+                  </CardFooter>
+                </Card>
+                
+                <Card className="border-2 border-primary">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Pro</CardTitle>
+                    <CardDescription>$49/month</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <ul className="list-disc pl-5 space-y-1 text-sm">
+                      <li>5 Locations</li>
+                      <li>Advanced analytics</li>
+                      <li>All platform integrations</li>
+                      <li>500 review requests/month</li>
+                      <li>AI response suggestions</li>
+                      <li>Priority support</li>
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      variant={user?.plan === 'pro' ? 'secondary' : 'default'} 
+                      className="w-full"
+                      disabled={user?.plan === 'pro'}
+                    >
+                      {user?.plan === 'pro' ? 'Current Plan' : 'Upgrade'}
+                    </Button>
+                  </CardFooter>
+                </Card>
+                
+                <Card className="border border-muted">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Business</CardTitle>
+                    <CardDescription>$149/month</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pb-2">
+                    <ul className="list-disc pl-5 space-y-1 text-sm">
+                      <li>Unlimited locations</li>
+                      <li>Custom analytics</li>
+                      <li>White-label reports</li>
+                      <li>Unlimited review requests</li>
+                      <li>API access</li>
+                      <li>Dedicated support</li>
+                    </ul>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      variant={user?.plan === 'business' ? 'secondary' : 'outline'} 
+                      className="w-full"
+                      disabled={user?.plan === 'business'}
+                    >
+                      {user?.plan === 'business' ? 'Current Plan' : 'Upgrade'}
+                    </Button>
+                  </CardFooter>
+                </Card>
               </div>
               
-              <Separator />
-              
-              <div className="space-y-2">
-                <h3 className="text-lg font-medium">Plan Features</h3>
-                <ul className="space-y-2">
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    <span>Track up to 50 reviews</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    <span>10 review response templates</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    <span>Weekly reports and analytics</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    <span>Email notifications</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                    <span>Priority support</span>
-                  </li>
-                </ul>
+              <div className="bg-muted/40 p-4 rounded-lg">
+                <h3 className="font-medium mb-2">Need more?</h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Contact our team for custom enterprise solutions with advanced features, dedicated support, and custom integrations.
+                </p>
+                <Button variant="outline">Contact Sales</Button>
               </div>
               
-              <div className="flex flex-col space-y-2">
-                <div className="flex gap-2">
-                  <Button>Change Plan</Button>
-                  <Button variant="outline">Cancel Subscription</Button>
-                </div>
-              </div>
+              {user?.plan !== 'free' && (
+                <AlertDialog open={cancelDialogOpen} onOpenChange={setCancelDialogOpen}>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="outline" className="text-red-600">Cancel Subscription</Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Your subscription will be canceled, and you'll lose access to premium features at the end of your current billing period.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Keep My Subscription</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => setCancelDialogOpen(false)}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Cancel Subscription
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
             </CardContent>
           </Card>
           
@@ -821,35 +907,28 @@ const ProfilePage = () => {
             <CardHeader>
               <CardTitle>Payment Method</CardTitle>
               <CardDescription>
-                Manage your payment methods and billing information.
+                Update your payment details and billing address.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <CreditCard className="h-8 w-8 text-primary" />
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex items-center">
+                  <div className="w-12 h-8 mr-4 bg-gray-800 rounded-md flex items-center justify-center text-white font-semibold">
+                    VISA
+                  </div>
                   <div>
                     <h3 className="text-sm font-medium">Visa ending in 4242</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Expires 12/2025
-                    </p>
+                    <p className="text-xs text-muted-foreground">Expires 12/2025</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="sm">
-                    Edit
-                  </Button>
-                  <Button variant="ghost" size="sm">
-                    Remove
-                  </Button>
+                  <Button variant="ghost" size="sm">Edit</Button>
+                  <Button variant="ghost" size="sm">Remove</Button>
                 </div>
               </div>
               
-              <Separator />
-              
               <Button variant="outline">
-                <CreditCard className="mr-2 h-4 w-4" />
-                Add Payment Method
+                <CreditCard className="mr-2 h-4 w-4" /> Add Payment Method
               </Button>
             </CardContent>
           </Card>
@@ -858,71 +937,65 @@ const ProfilePage = () => {
             <CardHeader>
               <CardTitle>Billing History</CardTitle>
               <CardDescription>
-                View your previous invoices and payment history.
+                View your past invoices and billing details.
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Invoice</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">#INV-1234</TableCell>
-                    <TableCell>May 1, 2025</TableCell>
-                    <TableCell>$29.99</TableCell>
-                    <TableCell>
-                      <Badge className="bg-green-100 text-green-800">Paid</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#INV-1233</TableCell>
-                    <TableCell>Apr 1, 2025</TableCell>
-                    <TableCell>$29.99</TableCell>
-                    <TableCell>
-                      <Badge className="bg-green-100 text-green-800">Paid</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">#INV-1232</TableCell>
-                    <TableCell>Mar 1, 2025</TableCell>
-                    <TableCell>$29.99</TableCell>
-                    <TableCell>
-                      <Badge className="bg-green-100 text-green-800">Paid</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        <ExternalLink className="h-4 w-4 mr-2" />
-                        View
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                </TableBody>
-              </Table>
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Invoice</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>May 1, 2023</TableCell>
+                      <TableCell>Pro Plan - Monthly</TableCell>
+                      <TableCell>$49.00</TableCell>
+                      <TableCell>
+                        <Badge className="bg-green-100 text-green-800">Paid</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="link" size="sm" className="h-auto p-0">
+                          <ExternalLink className="h-4 w-4 mr-1" /> View
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Apr 1, 2023</TableCell>
+                      <TableCell>Pro Plan - Monthly</TableCell>
+                      <TableCell>$49.00</TableCell>
+                      <TableCell>
+                        <Badge className="bg-green-100 text-green-800">Paid</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="link" size="sm" className="h-auto p-0">
+                          <ExternalLink className="h-4 w-4 mr-1" /> View
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>Mar 1, 2023</TableCell>
+                      <TableCell>Pro Plan - Monthly</TableCell>
+                      <TableCell>$49.00</TableCell>
+                      <TableCell>
+                        <Badge className="bg-green-100 text-green-800">Paid</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="link" size="sm" className="h-auto p-0">
+                          <ExternalLink className="h-4 w-4 mr-1" /> View
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
             </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">
-                View All Invoices
-              </Button>
-            </CardFooter>
           </Card>
         </TabsContent>
         
@@ -932,135 +1005,117 @@ const ProfilePage = () => {
             <CardHeader>
               <CardTitle>Notification Preferences</CardTitle>
               <CardDescription>
-                Manage how and when you receive notifications from Reputation Sentinel.
+                Manage how and when you receive notifications.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...notificationForm}>
                 <form onSubmit={notificationForm.handleSubmit(onNotificationSubmit)} className="space-y-6">
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-2 items-start">
-                        <Bell className="h-5 w-5 text-primary mt-0.5" />
-                        <div>
-                          <h3 className="text-sm font-medium">Email Notifications</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Receive notifications via email.
-                          </p>
-                        </div>
-                      </div>
-                      <FormField
-                        control={notificationForm.control}
-                        name="emailNotifications"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center space-y-0 space-x-2">
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    <FormField
+                      control={notificationForm.control}
+                      name="emailNotifications"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4 border">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Email Notifications</FormLabel>
+                            <FormDescription>
+                              Receive notifications via email.
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
                     
-                    <Separator />
+                    <FormField
+                      control={notificationForm.control}
+                      name="smsNotifications"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4 border">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>SMS Notifications</FormLabel>
+                            <FormDescription>
+                              Receive notifications via text messages.
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
                     
-                    <div className="flex items-center justify-between">
-                      <div className="flex gap-2 items-start">
-                        <Bell className="h-5 w-5 text-primary mt-0.5" />
-                        <div>
-                          <h3 className="text-sm font-medium">SMS Notifications</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Receive notifications via text message.
-                          </p>
-                        </div>
-                      </div>
-                      <FormField
-                        control={notificationForm.control}
-                        name="smsNotifications"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center space-y-0 space-x-2">
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    <FormField
+                      control={notificationForm.control}
+                      name="reviewAlerts"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4 border">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>New Review Alerts</FormLabel>
+                            <FormDescription>
+                              Get notified immediately when you receive new reviews.
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
                     
-                    <Separator />
+                    <FormField
+                      control={notificationForm.control}
+                      name="weeklyReports"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4 border">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Weekly Summary Reports</FormLabel>
+                            <FormDescription>
+                              Receive a weekly summary of your review performance.
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
                     
-                    <h3 className="text-sm font-medium">Notification Types</h3>
-                    
-                    <div className="pl-6 space-y-2">
-                      <FormField
-                        control={notificationForm.control}
-                        name="reviewAlerts"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center justify-between space-y-0">
-                            <div>
-                              <FormLabel className="font-normal">New Review Alerts</FormLabel>
-                              <FormDescription>
-                                Receive notifications for new reviews.
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={notificationForm.control}
-                        name="weeklyReports"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center justify-between space-y-0">
-                            <div>
-                              <FormLabel className="font-normal">Weekly Reports</FormLabel>
-                              <FormDescription>
-                                Receive weekly summary reports of your reviews.
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={notificationForm.control}
-                        name="marketingEmails"
-                        render={({ field }) => (
-                          <FormItem className="flex items-center justify-between space-y-0">
-                            <div>
-                              <FormLabel className="font-normal">Marketing Emails</FormLabel>
-                              <FormDescription>
-                                Receive product updates and promotional emails.
-                              </FormDescription>
-                            </div>
-                            <FormControl>
-                              <Switch
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+                    <FormField
+                      control={notificationForm.control}
+                      name="marketingEmails"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md p-4 border">
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Marketing Emails</FormLabel>
+                            <FormDescription>
+                              Receive updates about new features, tips, and promotional offers.
+                            </FormDescription>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
                   </div>
                   
                   <Button 
@@ -1068,10 +1123,84 @@ const ProfilePage = () => {
                     disabled={updateNotificationsMutation.isPending}
                   >
                     {updateNotificationsMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Save Notification Settings
+                    Save Preferences
                   </Button>
                 </form>
               </Form>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Alert Thresholds</CardTitle>
+              <CardDescription>
+                Set thresholds for when you want to be alerted.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium">Negative Review Threshold</h3>
+                <p className="text-sm text-muted-foreground">
+                  Alert me when a review rating is below:
+                </p>
+                <Select defaultValue="3">
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Select a rating" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1 Star</SelectItem>
+                    <SelectItem value="2">2 Stars</SelectItem>
+                    <SelectItem value="3">3 Stars</SelectItem>
+                    <SelectItem value="4">4 Stars</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Separator />
+              
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium">Rating Drop Alert</h3>
+                <p className="text-sm text-muted-foreground">
+                  Alert me when average rating drops by:
+                </p>
+                <Select defaultValue="0.2">
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Select threshold" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0.1">0.1 Stars</SelectItem>
+                    <SelectItem value="0.2">0.2 Stars</SelectItem>
+                    <SelectItem value="0.3">0.3 Stars</SelectItem>
+                    <SelectItem value="0.5">0.5 Stars</SelectItem>
+                    <SelectItem value="1.0">1.0 Stars</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Separator />
+              
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium">Competitor Alert</h3>
+                <p className="text-sm text-muted-foreground">
+                  Alert me when a competitor's rating exceeds mine by:
+                </p>
+                <Select defaultValue="0.3">
+                  <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectValue placeholder="Select threshold" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="0.1">0.1 Stars</SelectItem>
+                    <SelectItem value="0.2">0.2 Stars</SelectItem>
+                    <SelectItem value="0.3">0.3 Stars</SelectItem>
+                    <SelectItem value="0.5">0.5 Stars</SelectItem>
+                    <SelectItem value="1.0">1.0 Stars</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <Button className="mt-4">
+                Save Thresholds
+              </Button>
             </CardContent>
           </Card>
         </TabsContent>

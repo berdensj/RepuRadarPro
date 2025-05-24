@@ -1,33 +1,19 @@
-import { useAuth } from "@/hooks/use-auth";
-import { useQuery } from "@tanstack/react-query";
+import React from 'react';
+import { useAuth } from "../hooks/use-auth";
 import { Loader2, ShieldAlert } from "lucide-react";
 import { Redirect, Route } from "wouter";
-import { Suspense, ReactNode } from "react";
+import { Layout } from '../components/Layout';
 
-interface ProtectedRouteProps {
+export interface ProtectedRouteProps {
   path: string;
-  component?: React.ComponentType<any>;
-  children?: ReactNode;
+  component: React.ComponentType<any>;
   requiredRole?: string;
-  requiredPermission?: string;
 }
 
-export function ProtectedRoute({
-  path,
-  component: Component,
-  children,
-  requiredRole,
-  requiredPermission,
-}: ProtectedRouteProps) {
+export function ProtectedRoute({ path, component: Component, requiredRole }: ProtectedRouteProps) {
   const { user, isLoading } = useAuth();
-  
-  // Fetch user permissions
-  const { data: permissions, isLoading: permissionsLoading } = useQuery({
-    queryKey: ["/api/permissions"],
-    enabled: !!user, // Only fetch permissions if user is logged in
-  });
 
-  if (isLoading || (requiredPermission && permissionsLoading)) {
+  if (isLoading) {
     return (
       <Route path={path}>
         <div className="flex items-center justify-center min-h-screen">
@@ -44,85 +30,34 @@ export function ProtectedRoute({
       </Route>
     );
   }
-  
-  // Commented out to enable client user access to dashboard
-  // This redirect was causing access issues for client users
-  
-  // Debug user info to help with troubleshooting
-  console.log("User authentication info:", {
-    role: user.role,
-    username: user.username,
-    isSystemAdmin: user.username === 'admin'
-  });
 
-  // Check for permission-based access
-  if (requiredPermission && permissions) {
-    // Special case for client-admin routes
-    if (path.startsWith('/client-admin')) {
-      // Client admins (role = admin) always have access to client-admin routes
-      if (user.role === 'admin') {
-        // Allow access
-        console.log("Client admin accessing admin section - permitted");
-      }
-      // For others, check specific permissions
-      else if (permissions.hasOwnProperty(requiredPermission) && !permissions[requiredPermission as keyof typeof permissions]) {
-        return (
-          <Route path={path}>
-            <AccessDeniedPage />
-          </Route>
-        );
-      }
-    }
-    // For non-client-admin routes with permission requirements
-    else if (permissions.hasOwnProperty(requiredPermission) && !permissions[requiredPermission as keyof typeof permissions]) {
-      return (
-        <Route path={path}>
-          <AccessDeniedPage />
-        </Route>
-      );
-    }
+  if (requiredRole === 'admin' && user.role !== 'admin') {
+    return (
+      <Route path={path}>
+        <Layout>
+          <div className="flex flex-col items-center justify-center h-full">
+            <ShieldAlert className="h-16 w-16 text-red-500 mb-4" />
+            <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
+            <p className="text-muted-foreground mb-4">
+              You don't have permission to access this page.
+            </p>
+            <button 
+              onClick={() => window.history.back()} 
+              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
+            >
+              Go Back
+            </button>
+          </div>
+        </Layout>
+      </Route>
+    );
   }
 
-  // Simplified role-based access to fix the client account access issue
-  if (requiredRole === 'systemAdmin') {
-    // Only the admin user should access system admin pages
-    const isSystemAdmin = user.username === 'admin';
-    if (!isSystemAdmin) {
-      console.log("Access to system admin area blocked for non-admin user");
-      return (
-        <Route path={path}>
-          <AccessDeniedPage />
-        </Route>
-      );
-    }
-  }
-  // Skip other role checks to ensure client users can access dashboard pages
-
-  // Handle either component prop or children prop
   return (
     <Route path={path}>
-      {Component ? (
-        typeof Component === 'function' ? <Component /> : Component
-      ) : children}
+      <Layout>
+        <Component />
+      </Layout>
     </Route>
-  );
-}
-
-// Separate component for access denied page to avoid duplication
-function AccessDeniedPage() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <ShieldAlert className="h-16 w-16 text-red-500 mb-4" />
-      <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
-      <p className="text-muted-foreground mb-4">
-        You don't have permission to access this page.
-      </p>
-      <button 
-        onClick={() => window.history.back()} 
-        className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90"
-      >
-        Go Back
-      </button>
-    </div>
   );
 }

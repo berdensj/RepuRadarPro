@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
-import { Helmet } from 'react-helmet';
-import { useToast } from '@/hooks/use-toast';
+import React from 'react';
+import { useEffect, useState } from 'react';
+import { useAuth } from '../hooks/use-auth';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { apiRequest, queryClient } from '../lib/queryClient';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import {
   Card,
   CardContent,
@@ -8,452 +11,842 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Textarea } from '@/components/ui/textarea';
+} from '../components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../components/ui/table';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/ui/dialog';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '../components/ui/form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { useToast } from '../hooks/use-toast';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
+import { Switch } from '../components/ui/switch';
+import { Badge } from '../components/ui/badge';
+import { Loader2, PlusCircle, Trash2, UserCog } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../components/ui/alert-dialog';
+
+// Define zod schema for location form
+const locationFormSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  address: z.string().optional(),
+  phone: z.string().optional(),
+  googlePlaceId: z.string().optional(),
+  yelpBusinessId: z.string().optional(),
+  facebookPageId: z.string().optional(),
+  applePlaceId: z.string().optional(),
+});
+
+// Define zod schema for user form 
+const userFormSchema = z.object({
+  username: z.string().min(3, 'Username must be at least 3 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+  fullName: z.string().min(1, 'Full name is required'),
+  role: z.enum(['admin', 'staff', 'user']),
+});
+
+type Location = {
+  id: number;
+  name: string;
+  address: string | null;
+  phone: string | null;
+  googlePlaceId: string | null;
+  yelpBusinessId: string | null;
+  facebookPageId?: string | null;
+  applePlaceId?: string | null;
+};
+
+type User = {
+  id: number;
+  username: string;
+  email: string;
+  fullName: string;
+  role: string;
+  isActive: boolean;
+};
 
 const SettingsPage = () => {
+  const { user, permissions } = useAuth();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('general');
-  
-  // General settings
-  const [language, setLanguage] = useState('en');
-  const [timezone, setTimezone] = useState('America/New_York');
-  const [dateFormat, setDateFormat] = useState('MM/DD/YYYY');
-  
-  // Notification settings
-  const [emailNotifications, setEmailNotifications] = useState(true);
-  const [browserNotifications, setBrowserNotifications] = useState(true);
-  const [slackNotifications, setSlackNotifications] = useState(false);
-  const [notificationFrequency, setNotificationFrequency] = useState('immediate');
-  
-  // Security settings
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [sessionTimeout, setSessionTimeout] = useState('60');
-  const [loginAttempts, setLoginAttempts] = useState('5');
-  
-  // Accessibility settings
-  const [highContrast, setHighContrast] = useState(false);
-  const [largeText, setLargeText] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
-  
-  const handleSaveChanges = () => {
-    toast({
-      title: 'Settings Saved',
-      description: 'Your settings have been updated successfully.',
-    });
-  };
-  
-  return (
-    <>
-      <Helmet>
-        <title>Settings | Reputation Sentinel</title>
-        <meta name="description" content="Manage your Reputation Sentinel account settings" />
-      </Helmet>
+  const [addLocationOpen, setAddLocationOpen] = useState(false);
+  const [addUserOpen, setAddUserOpen] = useState(false);
+  const [deletingLocation, setDeletingLocation] = useState<number | null>(null);
+  const [roleDialogOpen, setRoleDialogOpen] = useState<number | null>(null);
+  const [statusDialogOpen, setStatusDialogOpen] = useState<number | null>(null);
+
+  // Fetch all locations, either for specific user or all (for admin/staff)
+  const { data: locations, isLoading: locationsLoading } = useQuery({
+    queryKey: ['/api/locations'],
+    queryFn: async () => {
+      const endpoint = permissions?.canViewAllLocations 
+        ? '/api/staff/locations' 
+        : '/api/locations';
       
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-          <p className="text-muted-foreground">
-            Manage your account and application preferences
-          </p>
-        </div>
-        
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="general">General</TabsTrigger>
-            <TabsTrigger value="notifications">Notifications</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
-            <TabsTrigger value="accessibility">Accessibility</TabsTrigger>
-            <TabsTrigger value="data">Data Management</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="general" className="space-y-4">
+      const res = await apiRequest('GET', endpoint);
+      return res.json();
+    },
+  });
+
+  // Fetch all users (admin only)
+  const { data: users, isLoading: usersLoading } = useQuery({
+    queryKey: ['/api/admin/users'],
+    queryFn: async () => {
+      const res = await apiRequest('GET', '/api/admin/users');
+      return res.json();
+    },
+    enabled: !!permissions?.canManageUsers,
+  });
+
+  // Add Location Form
+  const locationForm = useForm<z.infer<typeof locationFormSchema>>({
+    resolver: zodResolver(locationFormSchema),
+    defaultValues: {
+      name: '',
+      address: '',
+      phone: '',
+      googlePlaceId: '',
+      yelpBusinessId: '',
+      facebookPageId: '',
+      applePlaceId: '',
+    },
+  });
+
+  // Add User Form
+  const userForm = useForm<z.infer<typeof userFormSchema>>({
+    resolver: zodResolver(userFormSchema),
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+      fullName: '',
+      role: 'user',
+    },
+  });
+
+  // Add Location Mutation
+  const addLocationMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof locationFormSchema>) => {
+      const res = await apiRequest('POST', '/api/locations', values);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Location Added',
+        description: 'The location has been added successfully.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
+      locationForm.reset();
+      setAddLocationOpen(false);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: `Failed to add location: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Delete Location Mutation
+  const deleteLocationMutation = useMutation({
+    mutationFn: async (locationId: number) => {
+      await apiRequest('DELETE', `/api/locations/${locationId}`);
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Location Deleted',
+        description: 'The location has been deleted successfully.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
+      setDeletingLocation(null);
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Error',
+        description: `Failed to delete location: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Add User Mutation
+  const addUserMutation = useMutation({
+    mutationFn: async (values: z.infer<typeof userFormSchema>) => {
+      // TODO: Verify API endpoint and payload for adding a user
+      const res = await apiRequest('POST', '/api/register', values);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'User Added',
+        description: 'The user has been added successfully.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      userForm.reset();
+      setAddUserOpen(false);
+    },
+    onError: (error: Error) => {
+      // TODO: Consider extracting more specific error messages from API responses if available.
+      toast({
+        title: 'Error',
+        description: `Failed to add user: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Update User Role Mutation
+  const updateUserRoleMutation = useMutation({
+    mutationFn: async ({ userId, role }: { userId: number, role: string }) => {
+      // TODO: Verify API endpoint and payload for updating user role
+      const res = await apiRequest('PATCH', `/api/admin/users/${userId}/role`, { role });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Role Updated',
+        description: 'The user role has been updated successfully.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      setRoleDialogOpen(null);
+    },
+    onError: (error: Error) => {
+      // TODO: Consider extracting more specific error messages from API responses if available.
+      toast({
+        title: 'Error',
+        description: `Failed to update user role: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Update User Status Mutation
+  const updateUserStatusMutation = useMutation({
+    mutationFn: async ({ userId, isActive }: { userId: number, isActive: boolean }) => {
+      // TODO: Verify API endpoint and payload for updating user status
+      const res = await apiRequest('PATCH', `/api/admin/users/${userId}/active`, { isActive });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Status Updated',
+        description: 'The user status has been updated successfully.',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      setStatusDialogOpen(null);
+    },
+    onError: (error: Error) => {
+      // TODO: Consider extracting more specific error messages from API responses if available.
+      toast({
+        title: 'Error',
+        description: `Failed to update user status: ${error.message}`,
+        variant: 'destructive',
+      });
+    }
+  });
+
+  const onLocationSubmit = (values: z.infer<typeof locationFormSchema>) => {
+    addLocationMutation.mutate(values);
+  };
+
+  const onUserSubmit = (values: z.infer<typeof userFormSchema>) => {
+    addUserMutation.mutate(values);
+  };
+
+  return (
+    <div className="container mx-auto py-6 space-y-8">
+      <h1 className="text-3xl font-bold">Settings</h1>
+      <Tabs defaultValue="locations">
+        <TabsList className="mb-6">
+          <TabsTrigger value="locations">Locations</TabsTrigger>
+          {permissions?.canManageUsers && <TabsTrigger value="users">Users</TabsTrigger>}
+          <TabsTrigger value="account">Account</TabsTrigger>
+        </TabsList>
+
+        {/* Locations Tab */}
+        <TabsContent value="locations" className="space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold">Manage Locations</h2>
+            <Dialog open={addLocationOpen} onOpenChange={setAddLocationOpen}>
+              <DialogTrigger asChild>
+                <Button aria-label="Add Location"><PlusCircle className="mr-2 h-4 w-4" /> Add Location</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[500px]">
+                <DialogHeader>
+                  <DialogTitle>Add New Location</DialogTitle>
+                  <DialogDescription>
+                    Add the details of your business location here.
+                  </DialogDescription>
+                </DialogHeader>
+                <Form {...locationForm}>
+                  <form onSubmit={locationForm.handleSubmit(onLocationSubmit)} className="space-y-4">
+                    <FormField
+                      control={locationForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Location Name*</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Main Office" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={locationForm.control}
+                      name="address"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Address</FormLabel>
+                          <FormControl>
+                            <Input placeholder="123 Main St, City, State, ZIP" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={locationForm.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="555-123-4567" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <h3 className="text-lg font-semibold pt-4">Review Platform IDs</h3>
+                    <FormField
+                      control={locationForm.control}
+                      name="googlePlaceId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Google Place ID</FormLabel>
+                          <FormControl>
+                            <Input placeholder="ChIJrTLr-GyuEmsRBfy61i59si0" {...field} />
+                          </FormControl>
+                          <FormDescription>Used to fetch Google reviews</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={locationForm.control}
+                      name="yelpBusinessId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Yelp Business ID</FormLabel>
+                          <FormControl>
+                            <Input placeholder="xyz-cafe-san-francisco" {...field} />
+                          </FormControl>
+                          <FormDescription>Used to fetch Yelp reviews</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={locationForm.control}
+                      name="facebookPageId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Facebook Page ID</FormLabel>
+                          <FormControl>
+                            <Input placeholder="123456789012345" {...field} />
+                          </FormControl>
+                          <FormDescription>Used to fetch Facebook reviews</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={locationForm.control}
+                      name="applePlaceId"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Apple Maps Place ID</FormLabel>
+                          <FormControl>
+                            <Input placeholder="abcdef123456" {...field} />
+                          </FormControl>
+                          <FormDescription>Used to fetch Apple Maps reviews</FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <DialogFooter>
+                      <Button type="submit" disabled={addLocationMutation.isPending} aria-label="Add Location">
+                        {addLocationMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Add Location
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          {locationsLoading ? (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : locations && locations.length > 0 ? (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Address</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Connected Platforms</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {locations.map((location: Location) => (
+                    <TableRow key={location.id}>
+                      <TableCell className="font-medium">{location.name}</TableCell>
+                      <TableCell>{location.address || "—"}</TableCell>
+                      <TableCell>{location.phone || "—"}</TableCell>
+                      <TableCell>
+                        <div className="flex flex-wrap gap-1">
+                          {location.googlePlaceId && <Badge>Google</Badge>}
+                          {location.yelpBusinessId && <Badge>Yelp</Badge>}
+                          {location.facebookPageId && <Badge>Facebook</Badge>}
+                          {location.applePlaceId && <Badge>Apple Maps</Badge>}
+                          {!location.googlePlaceId && !location.yelpBusinessId && 
+                           !location.facebookPageId && !location.applePlaceId && "—"}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <AlertDialog 
+                          open={deletingLocation === location.id} 
+                          onOpenChange={(open) => !open && setDeletingLocation(null)}
+                        >
+                          <AlertDialogTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => setDeletingLocation(location.id)}
+                              aria-label="Delete Location"
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This will permanently delete the location "{location.name}" and all associated data.
+                                This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => deleteLocationMutation.mutate(location.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                aria-label="Delete Location"
+                              >
+                                {deleteLocationMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
             <Card>
               <CardHeader>
-                <CardTitle>General Settings</CardTitle>
+                <CardTitle>No Locations Found</CardTitle>
                 <CardDescription>
-                  Configure basic account preferences
+                  You haven't added any locations yet. Add your first location to start tracking reviews.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="language">Language</Label>
-                  <Select value={language} onValueChange={setLanguage}>
-                    <SelectTrigger id="language">
-                      <SelectValue placeholder="Select language" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">English</SelectItem>
-                      <SelectItem value="es">Spanish</SelectItem>
-                      <SelectItem value="fr">French</SelectItem>
-                      <SelectItem value="de">German</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="timezone">Timezone</Label>
-                  <Select value={timezone} onValueChange={setTimezone}>
-                    <SelectTrigger id="timezone">
-                      <SelectValue placeholder="Select timezone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="America/New_York">Eastern Time (ET)</SelectItem>
-                      <SelectItem value="America/Chicago">Central Time (CT)</SelectItem>
-                      <SelectItem value="America/Denver">Mountain Time (MT)</SelectItem>
-                      <SelectItem value="America/Los_Angeles">Pacific Time (PT)</SelectItem>
-                      <SelectItem value="Europe/London">London (GMT)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="date-format">Date Format</Label>
-                  <RadioGroup value={dateFormat} onValueChange={setDateFormat}>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="MM/DD/YYYY" id="fmt-mdy" />
-                      <Label htmlFor="fmt-mdy">MM/DD/YYYY</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="DD/MM/YYYY" id="fmt-dmy" />
-                      <Label htmlFor="fmt-dmy">DD/MM/YYYY</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="YYYY-MM-DD" id="fmt-ymd" />
-                      <Label htmlFor="fmt-ymd">YYYY-MM-DD</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              </CardContent>
               <CardFooter>
-                <Button onClick={handleSaveChanges}>Save Changes</Button>
+                <Button onClick={() => setAddLocationOpen(true)} aria-label="Add Location">
+                  <PlusCircle className="mr-2 h-4 w-4" /> Add Your First Location
+                </Button>
               </CardFooter>
             </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription>
-                  Update your account details
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="fullname">Full Name</Label>
-                  <Input id="fullname" defaultValue="Jane Smith" />
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" defaultValue="jane@example.com" />
-                </div>
-                
-                <div className="grid gap-2">
-                  <Label htmlFor="job-title">Job Title</Label>
-                  <Input id="job-title" defaultValue="Marketing Manager" />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={handleSaveChanges}>Save Changes</Button>
-              </CardFooter>
-            </Card>
+          )}
+        </TabsContent>
+
+        {/* Users Tab - Only visible to admins */}
+        {permissions?.canManageUsers && (
+          <TabsContent value="users" className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-bold">Manage Users</h2>
+              <Dialog open={addUserOpen} onOpenChange={setAddUserOpen}>
+                <DialogTrigger asChild>
+                  <Button aria-label="Add User"><PlusCircle className="mr-2 h-4 w-4" /> Add User</Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px]">
+                  <DialogHeader>
+                    <DialogTitle>Add New User</DialogTitle>
+                    <DialogDescription>
+                      Create a new user account with appropriate permissions.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <Form {...userForm}>
+                    <form onSubmit={userForm.handleSubmit(onUserSubmit)} className="space-y-4">
+                      <FormField
+                        control={userForm.control}
+                        name="username"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Username*</FormLabel>
+                            <FormControl>
+                              <Input placeholder="johndoe" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={userForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email*</FormLabel>
+                            <FormControl>
+                              <Input type="email" placeholder="john.doe@example.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={userForm.control}
+                        name="fullName"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Full Name*</FormLabel>
+                            <FormControl>
+                              <Input placeholder="John Doe" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={userForm.control}
+                        name="password"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Password*</FormLabel>
+                            <FormControl>
+                              <Input type="password" placeholder="••••••••" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={userForm.control}
+                        name="role"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Role*</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select a role" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="admin">Admin</SelectItem>
+                                <SelectItem value="staff">Staff</SelectItem>
+                                <SelectItem value="user">User</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              Admin: Full access to all features
+                              <br />
+                              Staff: Can manage locations and reviews
+                              <br />
+                              User: Basic access to own data
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <DialogFooter>
+                        <Button type="submit" disabled={addUserMutation.isPending} aria-label="Add User">
+                          {addUserMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                          Add User
+                        </Button>
+                      </DialogFooter>
+                    </form>
+                  </Form>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            {usersLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : users && users.length > 0 ? (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Username</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {users.map((user: User) => (
+                      <TableRow key={user.id} className={!user.isActive ? "opacity-50" : ""}>
+                        <TableCell className="font-medium">{user.fullName}</TableCell>
+                        <TableCell>{user.username}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>
+                          <Badge variant={user.role === 'admin' ? "default" : 
+                                        user.role === 'staff' ? "outline" : "secondary"}>
+                            {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={user.isActive ? "default" : "destructive"}>
+                            {user.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex space-x-2">
+                            {/* Change Role Dialog */}
+                            <Dialog open={roleDialogOpen === user.id} onOpenChange={(open) => !open && setRoleDialogOpen(null)}>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => setRoleDialogOpen(user.id)}
+                                  disabled={user.id === user?.id}
+                                  aria-label="Change Role"
+                                >
+                                  <UserCog className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                  <DialogTitle>Change User Role</DialogTitle>
+                                  <DialogDescription>
+                                    Update the role for user {user.fullName}.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                  <div className="space-y-2">
+                                    <h3 className="text-sm font-medium">Current Role: {user.role}</h3>
+                                    <div className="grid grid-cols-3 gap-2">
+                                      <Button 
+                                        variant={user.role === 'admin' ? 'default' : 'outline'} 
+                                        onClick={() => updateUserRoleMutation.mutate({ userId: user.id, role: 'admin' })}
+                                      >
+                                        Admin
+                                      </Button>
+                                      <Button 
+                                        variant={user.role === 'staff' ? 'default' : 'outline'} 
+                                        onClick={() => updateUserRoleMutation.mutate({ userId: user.id, role: 'staff' })}
+                                      >
+                                        Staff
+                                      </Button>
+                                      <Button 
+                                        variant={user.role === 'user' ? 'default' : 'outline'} 
+                                        onClick={() => updateUserRoleMutation.mutate({ userId: user.id, role: 'user' })}
+                                      >
+                                        User
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                                <DialogFooter>
+                                  <Button variant="outline" onClick={() => setRoleDialogOpen(null)}>Cancel</Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+
+                            {/* Change Status Dialog */}
+                            <Dialog open={statusDialogOpen === user.id} onOpenChange={(open) => !open && setStatusDialogOpen(null)}>
+                              <DialogTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => setStatusDialogOpen(user.id)}
+                                  disabled={user.id === user?.id}
+                                  aria-label="Change Status"
+                                >
+                                  <Switch checked={user.isActive} />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-[425px]">
+                                <DialogHeader>
+                                  <DialogTitle>Change User Status</DialogTitle>
+                                  <DialogDescription>
+                                    {user.isActive 
+                                      ? "Deactivating this user will prevent them from accessing the system."
+                                      : "Activating this user will restore their access to the system."}
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="py-6 flex items-center justify-center space-x-2">
+                                  <Switch 
+                                    checked={user.isActive}
+                                    onCheckedChange={(checked) => {
+                                      updateUserStatusMutation.mutate({ userId: user.id, isActive: checked });
+                                    }}
+                                  />
+                                  <span>{user.isActive ? "Active" : "Inactive"}</span>
+                                </div>
+                                <DialogFooter>
+                                  <Button variant="outline" onClick={() => setStatusDialogOpen(null)}>Cancel</Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>No Additional Users Found</CardTitle>
+                  <CardDescription>
+                    You haven't added any additional users yet. Add users to give them access to the system.
+                  </CardDescription>
+                </CardHeader>
+                <CardFooter>
+                  <Button onClick={() => setAddUserOpen(true)} aria-label="Add User">
+                    <PlusCircle className="mr-2 h-4 w-4" /> Add User
+                  </Button>
+                </CardFooter>
+              </Card>
+            )}
           </TabsContent>
+        )}
+
+        {/* Account Tab */}
+        <TabsContent value="account" className="space-y-6">
+          <h2 className="text-2xl font-bold">Account Settings</h2>
           
-          <TabsContent value="notifications" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Notification Preferences</CardTitle>
-                <CardDescription>
-                  Configure how and when you receive notifications
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="email-notif" className="flex-1">Email Notifications</Label>
-                  <Switch
-                    id="email-notif"
-                    checked={emailNotifications}
-                    onCheckedChange={setEmailNotifications}
-                  />
+          <Card>
+            <CardHeader>
+              <CardTitle>Profile Information</CardTitle>
+              <CardDescription>
+                Update your personal information and account settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Full Name</h3>
+                  <p className="text-sm text-muted-foreground">{user?.fullName || 'N/A'}</p>
                 </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="browser-notif" className="flex-1">Browser Notifications</Label>
-                  <Switch
-                    id="browser-notif"
-                    checked={browserNotifications}
-                    onCheckedChange={setBrowserNotifications}
-                  />
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Email</h3>
+                  <p className="text-sm text-muted-foreground">{user?.email || 'N/A'}</p>
                 </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="slack-notif" className="flex-1">Slack Notifications</Label>
-                  <Switch
-                    id="slack-notif"
-                    checked={slackNotifications}
-                    onCheckedChange={setSlackNotifications}
-                  />
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Username</h3>
+                  <p className="text-sm text-muted-foreground">{user?.username || 'N/A'}</p>
                 </div>
-                
-                <div className="grid gap-2 pt-4">
-                  <Label htmlFor="notification-frequency">Notification Frequency</Label>
-                  <Select value={notificationFrequency} onValueChange={setNotificationFrequency}>
-                    <SelectTrigger id="notification-frequency">
-                      <SelectValue placeholder="Select frequency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="immediate">Immediate</SelectItem>
-                      <SelectItem value="hourly">Hourly Digest</SelectItem>
-                      <SelectItem value="daily">Daily Digest</SelectItem>
-                      <SelectItem value="weekly">Weekly Summary</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={handleSaveChanges}>Save Changes</Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Notification Events</CardTitle>
-                <CardDescription>
-                  Choose which events trigger notifications
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="new-review-notif" className="flex-1">New Reviews</Label>
-                  <Switch id="new-review-notif" defaultChecked />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="neg-review-notif" className="flex-1">Negative Reviews (3★ or less)</Label>
-                  <Switch id="neg-review-notif" defaultChecked />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="reply-notif" className="flex-1">Review Replies</Label>
-                  <Switch id="reply-notif" defaultChecked />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="rating-change-notif" className="flex-1">Rating Changes</Label>
-                  <Switch id="rating-change-notif" defaultChecked />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="reports-notif" className="flex-1">Weekly Reports</Label>
-                  <Switch id="reports-notif" defaultChecked />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={handleSaveChanges}>Save Changes</Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="security" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Security Settings</CardTitle>
-                <CardDescription>
-                  Configure account security options
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="2fa" className="mb-1 block">Two-Factor Authentication</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Add an extra layer of security to your account
-                    </p>
-                  </div>
-                  <Switch
-                    id="2fa"
-                    checked={twoFactorEnabled}
-                    onCheckedChange={setTwoFactorEnabled}
-                  />
-                </div>
-                
-                <div className="grid gap-2 pt-4">
-                  <Label htmlFor="session-timeout">Session Timeout (minutes)</Label>
-                  <Input
-                    id="session-timeout"
-                    type="number"
-                    value={sessionTimeout}
-                    onChange={(e) => setSessionTimeout(e.target.value)}
-                    min="15"
-                    max="480"
-                  />
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Role</h3>
                   <p className="text-sm text-muted-foreground">
-                    Time until your session expires due to inactivity
+                    {user?.role ? (
+                      <Badge variant={user.role === 'admin' ? "default" :
+                                      user.role === 'staff' ? "outline" : "secondary"}>
+                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      </Badge>
+                    ) : 'N/A'}
                   </p>
                 </div>
-                
-                <div className="grid gap-2 pt-4">
-                  <Label htmlFor="login-attempts">Maximum Login Attempts</Label>
-                  <Input
-                    id="login-attempts"
-                    type="number"
-                    value={loginAttempts}
-                    onChange={(e) => setLoginAttempts(e.target.value)}
-                    min="3"
-                    max="10"
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Number of failed login attempts before account lockout
-                  </p>
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={handleSaveChanges}>Save Changes</Button>
-              </CardFooter>
-            </Card>
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Change Password</CardTitle>
-                <CardDescription>
-                  Update your account password
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+              </div>
+            </CardContent>
+            <CardFooter>
+              {/* // TODO: Implement "Edit Profile" functionality. */}
+              <Button variant="outline" aria-label="Edit Profile">Edit Profile</Button>
+            </CardFooter>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Change Password</CardTitle>
+              <CardDescription>
+                Update your password to maintain account security
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {/* // TODO: Implement "Change Password" functionality (including form handling and API call). Define and verify API endpoints. */}
+              <div className="space-y-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="current-password">Current Password</Label>
+                  {/* FIXED: Use FormLabel directly */}
+                  <FormLabel htmlFor="current-password">Current Password</FormLabel>
                   <Input id="current-password" type="password" />
                 </div>
-                
                 <div className="grid gap-2">
-                  <Label htmlFor="new-password">New Password</Label>
+                  {/* FIXED: Use FormLabel directly */}
+                  <FormLabel htmlFor="new-password">New Password</FormLabel>
                   <Input id="new-password" type="password" />
                 </div>
-                
                 <div className="grid gap-2">
-                  <Label htmlFor="confirm-password">Confirm New Password</Label>
+                  {/* FIXED: Use FormLabel directly */}
+                  <FormLabel htmlFor="confirm-password">Confirm New Password</FormLabel>
                   <Input id="confirm-password" type="password" />
                 </div>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={handleSaveChanges}>Update Password</Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="accessibility" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Accessibility Settings</CardTitle>
-                <CardDescription>
-                  Configure display and interface options for better accessibility
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="high-contrast" className="mb-1 block">High Contrast Mode</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Increase contrast for better visibility
-                    </p>
-                  </div>
-                  <Switch
-                    id="high-contrast"
-                    checked={highContrast}
-                    onCheckedChange={setHighContrast}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between pt-4">
-                  <div>
-                    <Label htmlFor="large-text" className="mb-1 block">Large Text</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Increase text size throughout the application
-                    </p>
-                  </div>
-                  <Switch
-                    id="large-text"
-                    checked={largeText}
-                    onCheckedChange={setLargeText}
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between pt-4">
-                  <div>
-                    <Label htmlFor="reduced-motion" className="mb-1 block">Reduced Motion</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Minimize animations and motion effects
-                    </p>
-                  </div>
-                  <Switch
-                    id="reduced-motion"
-                    checked={reducedMotion}
-                    onCheckedChange={setReducedMotion}
-                  />
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={handleSaveChanges}>Save Changes</Button>
-              </CardFooter>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="data" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Data Management</CardTitle>
-                <CardDescription>
-                  Manage your data and privacy settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="data-retention">Data Retention Period</Label>
-                  <Select defaultValue="24">
-                    <SelectTrigger id="data-retention">
-                      <SelectValue placeholder="Select retention period" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="3">3 months</SelectItem>
-                      <SelectItem value="6">6 months</SelectItem>
-                      <SelectItem value="12">12 months</SelectItem>
-                      <SelectItem value="24">24 months</SelectItem>
-                      <SelectItem value="36">36 months</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-sm text-muted-foreground">
-                    Period for which review data will be retained
-                  </p>
-                </div>
-                
-                <div className="space-y-2 pt-4">
-                  <Label>Data Export</Label>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Download all your data in a machine-readable format
-                  </p>
-                  <Button variant="outline">Export All Data</Button>
-                </div>
-                
-                <div className="space-y-2 pt-4">
-                  <Label className="text-red-500">Danger Zone</Label>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Delete your account and all associated data
-                  </p>
-                  <Button variant="destructive">Delete Account</Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button aria-label="Change Password">Change Password</Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

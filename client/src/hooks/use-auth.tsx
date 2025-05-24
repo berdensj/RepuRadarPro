@@ -1,12 +1,12 @@
-import { createContext, ReactNode, useContext, useEffect } from "react";
+import React, { createContext, ReactNode, useContext } from "react";
 import {
   useQuery,
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { User } from "@shared/schema";
+import { User } from "../../../shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "./use-toast";
 import { z } from "zod";
 
 type Permissions = {
@@ -31,8 +31,8 @@ type AuthContextType = {
 };
 
 const loginSchema = z.object({
-  email: z.string().min(1, "Please enter a username or email"),
-  password: z.string().min(1, "Password is required"),
+  email: z.string().min(3, "Please enter a valid email or username"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 const registerSchema = z.object({
@@ -65,31 +65,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryFn: getQueryFn({ on401: "returnNull" }),
     enabled: !!user,
   });
-  
-  // Set user role and client type in localStorage when user data is available
-  useEffect(() => {
-    if (user?.role) {
-      // Store the basic role
-      localStorage.setItem('userRole', user.role);
-      
-      // Store client type for conditional menu rendering
-      if (user.clientType) {
-        localStorage.setItem('clientType', user.clientType);
-      }
-      
-      // Determine if the user is a system admin or client admin
-      // System admins are those with admin role AND username "admin"
-      const isSystemAdmin = user.role === 'admin' && user.username === 'admin';
-      localStorage.setItem('isSystemAdmin', isSystemAdmin ? 'true' : 'false');
-      
-      console.log("User authentication info:", {
-        role: user.role,
-        username: user.username,
-        clientType: user.clientType,
-        isSystemAdmin
-      });
-    }
-  }, [user]);
 
 
   
@@ -101,12 +76,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     onSuccess: (user: User) => {
       queryClient.setQueryData(["/api/user"], user);
       queryClient.invalidateQueries({ queryKey: ['/api/permissions'] });
-      
-      // Store the user role in localStorage for access control
-      if (user.role) {
-        localStorage.setItem('userRole', user.role);
-        console.log("User role:", user.role);
-      }
       
       toast({
         title: "Login successful",
@@ -148,6 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: Error) => {
+      // TODO: Consider applying more specific error message extraction (similar to loginMutation) 
+      // if the backend provides detailed error responses for registration.
       toast({
         title: "Registration failed",
         description: error.message,
@@ -162,18 +133,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: () => {
       queryClient.setQueryData(["/api/user"], null);
-      
-      // Clear all stored user data
-      localStorage.removeItem('userRole');
-      localStorage.removeItem('isSystemAdmin');
-      localStorage.removeItem('clientType');
-      
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
       });
     },
     onError: (error: Error) => {
+      // TODO: Consider applying more specific error message extraction (similar to loginMutation) 
+      // if the backend provides detailed error responses for logout.
       toast({
         title: "Logout failed",
         description: error.message,

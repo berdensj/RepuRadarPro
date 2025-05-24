@@ -1,15 +1,13 @@
-import { useEffect, useState } from "react";
-import { useAuth, LoginData, RegisterData } from "@/hooks/use-auth";
-import { 
-  Card, 
-  CardContent 
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import React, { useEffect, useState } from "react";
+import { useAuth, LoginData, RegisterData } from "../hooks/use-auth";
+import { Card, CardContent } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 import { z } from "zod";
 import { ChartLine, User } from "lucide-react";
 import { useLocation } from "wouter";
+import logo from '../assets/logo.png';
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -42,43 +40,31 @@ export default function AuthPage() {
   useEffect(() => {
     if (user) {
       // Redirect admin users to the admin dashboard, regular users to the main dashboard
-      if (user.role === 'admin' && user.username === 'admin') {
-        console.log("Redirecting system admin to admin dashboard");
+      if (user.role === 'admin') {
         navigate("/admin");
       } else {
-        console.log("Redirecting to main dashboard");
-        navigate("/dashboard");
+        navigate("/");
       }
     }
   }, [user, navigate]);
 
   // We're using direct state management instead of react-hook-form now
 
-  const onLoginSubmit = (event: React.FormEvent) => {
+  const onLoginSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     console.log("Login attempt with:", loginEmail);
-    
-    // We need to handle the case when a user enters a username instead of email
-    loginMutation.mutate({
-      email: loginEmail,
-      password: loginPassword
-    }, {
-      onSuccess: (user) => {
-        // Console log for debugging
-        console.log("Login successful, user data:", user);
-        console.log("User role:", user.role);
-        
-        // For system admin only (username 'admin'), go to admin dashboard
-        // For all other users including client admins, go to regular dashboard
-        if (user.role === 'admin' && user.username === 'admin') {
-          console.log("Redirecting system admin to admin dashboard");
-          navigate('/admin');
-        } else {
-          console.log("Redirecting to regular dashboard");
-          navigate('/dashboard');
-        }
+    try {
+      const user = await loginMutation.mutateAsync({ email: loginEmail, password: loginPassword });
+      
+      // User role-based redirect logic
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
       }
-    });
+    } catch (error) {
+      // Error handling is managed by the mutation
+    }
   };
 
   const onRegisterSubmit = (event: React.FormEvent) => {
@@ -100,9 +86,7 @@ export default function AuthPage() {
           <CardContent className="pt-6">
             <div className="flex justify-center mb-6">
               <div className="text-primary text-3xl font-bold flex items-center">
-                <svg className="h-10 w-10 mr-2 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM12 7C13.1 7 14 7.9 14 9S13.1 11 12 11S10 10.1 10 9S10.9 7 12 7ZM12 17C10.33 17 8.86 16.16 8 14.84C8.03 13.49 10.67 12.75 12 12.75S15.97 13.49 16 14.84C15.14 16.16 13.67 17 12 17Z"/>
-                </svg>
+                <img src={logo} alt="Reputation Sentinel Logo" className="h-10 w-auto mr-3" />
                 Reputation Sentinel
               </div>
             </div>
@@ -136,9 +120,6 @@ export default function AuthPage() {
                       value={loginEmail} 
                       onChange={(e) => setLoginEmail(e.target.value)} 
                     />
-                    <div className="text-sm text-muted-foreground mt-1">
-                      Quick login: <Button type="button" variant="link" className="p-0 h-auto text-primary" onClick={() => setLoginEmail("admin")}>admin</Button> or <Button type="button" variant="link" className="p-0 h-auto text-primary" onClick={() => setLoginEmail("client")}>client</Button>
-                    </div>
                   </div>
                   
                   <div className="space-y-2">
@@ -150,9 +131,6 @@ export default function AuthPage() {
                       value={loginPassword} 
                       onChange={(e) => setLoginPassword(e.target.value)} 
                     />
-                    <div className="text-sm text-muted-foreground mt-1">
-                      Password: <Button type="button" variant="link" className="p-0 h-auto text-primary" onClick={() => setLoginPassword(loginEmail === "admin" ? "admin123" : "client123")}>fill default password</Button>
-                    </div>
                   </div>
                   
                   <Button 

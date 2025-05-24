@@ -1,9 +1,10 @@
+import React from 'react';
 import { useState } from 'react';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '../hooks/use-auth';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-import { Switch } from '@/components/ui/switch';
+import { apiRequest, queryClient } from '../lib/queryClient';
+import { useToast } from '../hooks/use-toast';
+import { Switch } from '../components/ui/switch';
 import { useLocation } from 'wouter';
 import {
   Card,
@@ -12,9 +13,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+} from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
 import { CheckCircle2, AlertCircle, ChevronRight } from 'lucide-react';
 
 // Types
@@ -90,6 +91,7 @@ const SubscriptionPage = () => {
 
   // Helper to format currency
   const formatCurrency = (amount: number) => {
+    // TODO: Confirm that all price values are in cents. If not, remove division by 100.
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -98,7 +100,8 @@ const SubscriptionPage = () => {
 
   // Get current user's subscription status
   const getUserPlanName = () => {
-    return user?.plan || 'Free';
+    // FIXED: Always default to 'Free' if user.plan is missing or falsy
+    return user?.plan && user.plan.trim() ? user.plan : 'Free';
   };
 
   const getTrialEndDate = () => {
@@ -116,48 +119,51 @@ const SubscriptionPage = () => {
       return 'Current Plan';
     }
     
+    if (plan.name === 'Free') {
+      return 'Downgrade to Free';
+    }
+    
     if (plan.price === 0) {
       return 'Get Started';
     }
     
     if (isUserInTrial()) {
-      return 'Choose Plan';
-    }
-
-    if (plan.name === 'Enterprise') {
-      return 'Schedule Call';
+      return 'Select Plan';
     }
     
-    if (plan.name === 'Starter' || plan.name === 'Growth' || plan.name === 'Agency' || plan.name === 'Enterprise') {
+    if (plan.name === 'Basic' || plan.name === 'Pro' || plan.name === 'Enterprise') {
       if (getUserPlanName() === 'Free') {
-        return 'Choose Plan';
+        return 'Upgrade';
       }
       
       // If current plan costs less than this plan
-      const currentPlan = Array.isArray(plans) ? plans.find((p: SubscriptionPlan) => p.name === getUserPlanName()) : null;
+      const currentPlan = plans.find((p: SubscriptionPlan) => p.name === getUserPlanName());
       if (currentPlan && currentPlan.price < plan.price) {
-        return 'Choose Plan';
+        return 'Upgrade';
       } else if (currentPlan && currentPlan.price > plan.price) {
-        return 'Choose Plan';
+        return 'Downgrade';
       }
     }
     
-    return 'Choose Plan';
+    return 'Select Plan';
   };
 
   // Handle subscription selection
   const handleSelectPlan = (plan: SubscriptionPlan) => {
+    // FIXED: Prevent crash if user or plans are missing
+    if (!user || !plans || plans.length === 0) {
+      toast({
+        title: "Error",
+        description: "User or plan data is missing. Please refresh the page or contact support.",
+        variant: "destructive",
+      });
+      return;
+    }
     // If it's the current plan and not in trial, don't do anything
     if (plan.name === getUserPlanName() && !isUserInTrial()) {
       return;
     }
-    
-    // For Enterprise plan, open Calendly link
-    if (plan.name === 'Enterprise') {
-      window.open('https://calendly.com/YOUR_LINK_HERE', '_blank');
-      return;
-    }
-    
+    // TODO: Add more robust backend/API error handling for subscription changes
     subscribeMutation.mutate({ 
       planId: plan.id, 
       isAnnual 
@@ -177,7 +183,7 @@ const SubscriptionPage = () => {
       <div className="text-center max-w-3xl mx-auto mb-16">
         <h1 className="text-4xl font-bold tracking-tight">Choose Your Plan</h1>
         <p className="mt-4 text-xl text-muted-foreground">
-          Select the plan that fits your needs. All paid plans include a 14-day free trial with full features.
+          Select the plan that fits your needs. All plans include a 14-day trial with full features.
         </p>
         
         {isUserInTrial() && (
@@ -185,7 +191,9 @@ const SubscriptionPage = () => {
             <div className="flex items-center">
               <AlertCircle className="h-5 w-5 text-yellow-600 mr-2" />
               <p className="text-sm text-yellow-700">
-                Your trial ends on {getTrialEndDate()}. Select a plan to continue using Reputation Sentinel.
+                {isUserInTrial()
+                  ? "Your trial has ended. Please select a plan to continue using Reputation Sentinel."
+                  : `Your trial ends on ${getTrialEndDate()}. Select a plan to continue using Reputation Sentinel.`}
               </p>
             </div>
           </div>
@@ -198,6 +206,7 @@ const SubscriptionPage = () => {
           <Switch
             checked={isAnnual}
             onCheckedChange={setIsAnnual}
+            aria-label="Toggle annual billing"
           />
           <span className={`text-sm ${isAnnual ? 'font-medium' : 'text-muted-foreground'}`}>
             Annual <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">Save 20%</span>
@@ -205,24 +214,24 @@ const SubscriptionPage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-6 max-w-7xl mx-auto">
+      <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
         {plans.filter((plan: SubscriptionPlan) => plan.isAvailable).map((plan: SubscriptionPlan) => (
           <Card 
             key={plan.id} 
-            className={`flex flex-col h-full ${plan.isPopular ? 'border-primary shadow-lg relative ring-2 ring-primary ring-opacity-50' : ''}`}
+            className={`flex flex-col ${plan.isPopular ? 'border-primary shadow-lg relative' : ''}`}
           >
             {plan.isPopular && (
-              <div className="absolute top-0 left-0 right-0 -translate-y-3 flex justify-center">
-                <Badge variant="default" className="bg-primary text-white px-3 py-1">
-                  Most Popular
+              <div className="absolute top-0 right-0 transform translate-x-2 -translate-y-2">
+                <Badge variant="default" className="bg-primary text-white">
+                  Popular
                 </Badge>
               </div>
             )}
-            <CardHeader className={`${plan.isPopular ? 'pt-8' : 'pt-6'}`}>
-              <CardTitle className="text-xl">{plan.displayName}</CardTitle>
-              <div className="mt-3 mb-2">
+            <CardHeader>
+              <CardTitle className="text-2xl">{plan.displayName}</CardTitle>
+              <CardDescription>{plan.description}</CardDescription>
+              <div className="mt-4">
                 <span className="text-3xl font-bold">
-                  {plan.name === 'Enterprise' ? 'Starting at ' : ''}
                   {formatCurrency(isAnnual && plan.annualPrice ? plan.annualPrice / 12 : plan.price)}
                 </span>
                 <span className="text-muted-foreground ml-1">/month</span>
@@ -233,12 +242,12 @@ const SubscriptionPage = () => {
                   </div>
                 )}
               </div>
-              <CardDescription className="mt-2 min-h-[2.5rem]">{plan.description}</CardDescription>
               <div className="mt-4">
                 <Button 
                   variant={plan.isPopular ? "default" : "outline"}
                   className="w-full"
                   disabled={plan.name === getUserPlanName() && !isUserInTrial()}
+                  aria-disabled={plan.name === getUserPlanName() && !isUserInTrial()}
                   onClick={() => handleSelectPlan(plan)}
                 >
                   {getButtonText(plan)}
@@ -249,11 +258,11 @@ const SubscriptionPage = () => {
             
             <CardContent className="flex-grow">
               <div className="space-y-4">
-                <div className="font-medium text-sm">Features:</div>
+                <div className="font-medium">Includes:</div>
                 <ul className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start">
-                      <CheckCircle2 className="h-4 w-4 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mr-2 flex-shrink-0 mt-0.5" />
                       <span className="text-sm">{feature}</span>
                     </li>
                   ))}
@@ -261,31 +270,23 @@ const SubscriptionPage = () => {
               </div>
             </CardContent>
             
-            <CardFooter className="border-t pt-3 mt-auto">
-              <div className="text-xs text-muted-foreground">
-                {plan.name !== 'Enterprise' && (
-                  <div>{plan.maxLocations} location{plan.maxLocations !== 1 && 's'} included</div>
-                )}
-                {plan.name === 'Enterprise' && (
-                  <div>Custom enterprise solution with volume discounts</div>
-                )}
+            <CardFooter className="border-t pt-4 mt-auto">
+              <div className="text-sm text-muted-foreground">
+                <div>Up to {plan.maxLocations} location{plan.maxLocations !== 1 && 's'}</div>
+                <div>Up to {plan.maxUsers} user{plan.maxUsers !== 1 && 's'}</div>
               </div>
             </CardFooter>
           </Card>
         ))}
       </div>
       
-      <div className="mt-16 text-center max-w-2xl mx-auto bg-slate-50 p-6 rounded-lg">
-        <h3 className="text-lg font-medium">Need a custom solution?</h3>
+      <div className="mt-16 text-center max-w-2xl mx-auto">
+        <h3 className="text-lg font-medium">Need something custom?</h3>
         <p className="mt-2 text-muted-foreground">
-          Our enterprise plans are flexible and can be tailored to your specific business requirements.
+          Contact our sales team for custom enterprise solutions tailored to your business.
         </p>
-        <Button 
-          variant="outline" 
-          className="mt-4"
-          onClick={() => window.open('https://calendly.com/YOUR_LINK_HERE', '_blank')}
-        >
-          Schedule a Call
+        <Button variant="outline" className="mt-4" aria-label="Contact Sales">
+          Contact Sales
         </Button>
       </div>
     </div>

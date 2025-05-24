@@ -62,17 +62,17 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
-// Create a more optimized query client for TanStack Query v5
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000, // 5 minutes instead of Infinity for better balance
+      // TODO: Review staleTime: Infinity. This is a strong caching strategy.
+      // Ensure diligent cache invalidation is implemented for all mutations.
+      // Consider if a shorter default staleTime might be more appropriate for some data.
+      staleTime: Infinity,
       retry: false,
-      gcTime: 10 * 60 * 1000, // 10 minutes garbage collection time (renamed from cacheTime in v5)
-      placeholderData: 'keepPrevious', // Prevent layout shifts when refetching (renamed from keepPreviousData)
     },
     mutations: {
       retry: false,
