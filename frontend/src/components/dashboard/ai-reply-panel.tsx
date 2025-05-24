@@ -5,15 +5,15 @@ import {
   CardHeader,
   CardTitle, 
   CardFooter
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+} from "../ui/card";
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
 import { X, Copy, CheckCheck, Send } from "lucide-react";
-import { StarRating } from "@/components/ui/star-rating";
+import { StarRating } from "../ui/star-rating";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { Review } from "@shared/schema";
-import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "../../lib/queryClient";
+import { Review } from "../../../../shared/schema";
+import { useToast } from "../../hooks/use-toast";
 
 interface AIReplyPanelProps {
   review: Review | null;
@@ -42,6 +42,7 @@ export function AIReplyPanel({ review, onClose, onApplyReply }: AIReplyPanelProp
       setGeneratedReply(data.reply);
     },
     onError: (error) => {
+      // TODO: Consider extracting more specific error messages from API responses if available.
       toast({
         title: "Failed to generate reply",
         description: error.message,
@@ -82,7 +83,7 @@ export function AIReplyPanel({ review, onClose, onApplyReply }: AIReplyPanelProp
     <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-lg font-semibold">AI Reply Generator</CardTitle>
-        <Button variant="ghost" size="sm" onClick={onClose}>
+        <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close AI Reply Panel">
           <X className="h-4 w-4" />
         </Button>
       </CardHeader>

@@ -8,7 +8,7 @@ import {
   aiReplies, type AiReply, type InsertAiReply,
   reviewInvites, type ReviewInvite, type InsertReviewInvite,
   healthcareSettings, type HealthcareSettings, type InsertHealthcareSettings
-} from "@shared/schema";
+} from "../../shared/schema";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 

@@ -68,6 +68,9 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "throw" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
+      // TODO: Review staleTime: Infinity. This is a strong caching strategy.
+      // Ensure diligent cache invalidation is implemented for all mutations.
+      // Consider if a shorter default staleTime might be more appropriate for some data.
       staleTime: Infinity,
       retry: false,
     },

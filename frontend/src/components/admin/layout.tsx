@@ -21,7 +21,7 @@ import {
   UserCog,
   ClipboardCheck
 } from "lucide-react";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useIsMobile } from "../../hooks/use-mobile";
 import logo from '../../assets/logo.png';
 
@@ -64,10 +64,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
         <div className="sticky top-0 p-4 flex flex-col h-screen">
           {/* Mobile Menu Toggle */}
           <div className="flex items-center justify-between lg:hidden mb-4">
-            <div className="text-primary-foreground text-xl font-bold flex items-center">
-              <ChartLine className="h-5 w-5 mr-2" />
-              Admin Panel
-            </div>
+            <Link href="/admin" className="flex items-center">
+              <img src={logo} alt="Reputation Sentinel Admin Logo" className="h-8 w-auto" /> 
+            </Link>
             <div className="flex items-center">
               <Button 
                 variant="ghost" 
@@ -105,7 +104,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                 
                 return (
                   <li key={item.href}>
-                    <a 
+                    <Link 
                       href={item.href} 
                       className={cn(
                         "py-2 px-4 flex items-center text-sm font-medium rounded-md transition-colors",
@@ -116,7 +115,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
                     >
                       <Icon className="w-5 h-5 mr-3" />
                       {item.label}
-                    </a>
+                    </Link>
                   </li>
                 );
               })}

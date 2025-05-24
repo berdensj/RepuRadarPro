@@ -12,9 +12,6 @@ import {
   Filler
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { useState } from "react";
-import { Button } from "../ui/button";
-import { Skeleton } from "../ui/skeleton";
 
 // Register ChartJS components
 ChartJS.register(
@@ -28,39 +25,52 @@ ChartJS.register(
   Filler
 );
 
-interface TrendGraphProps {
-  data?: any[];
-  labels?: string[];
-  isLoading?: boolean;
+// FIXED: Defined a more specific type for chart datasets
+interface ChartDataset {
+  label?: string;
+  data: number[];
+  borderColor?: string;
+  backgroundColor?: string;
+  tension?: number;
+  fill?: boolean;
+  yAxisID?: string;
+  // Add other Chart.js dataset properties if needed
 }
 
-export function TrendGraph({ data, labels, isLoading = false }: TrendGraphProps) {
-  // Default data if props are not provided
+interface TrendGraphProps {
+  data?: ChartDataset[]; // Expect an array of dataset objects
+  labels?: string[];
+  // isLoading prop is available but not used for internal skeleton, parent handles loading
+  // isLoading?: boolean; 
+}
+
+export function TrendGraph({ data, labels }: TrendGraphProps) {
   const defaultLabels = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
-  const defaultReviewsData = [25, 34, 42, 38, 56, 64];
-  const defaultRatingsData = [4.2, 4.1, 4.3, 4.4, 4.5, 4.6];
+  const defaultReviewsDataset: ChartDataset = {
+    label: 'Number of Reviews',
+    data: [25, 34, 42, 38, 56, 64],
+    borderColor: 'hsl(var(--primary))',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    tension: 0.4,
+    fill: true,
+    yAxisID: 'y',
+  };
+  const defaultRatingsDataset: ChartDataset = {
+    label: 'Average Rating',
+    data: [4.2, 4.1, 4.3, 4.4, 4.5, 4.6],
+    borderColor: '#10b981',
+    backgroundColor: 'transparent',
+    tension: 0.4,
+    yAxisID: 'y1',
+  };
   
-  // Chart data configuration
   const chartData = {
-    labels: labels || defaultLabels,
+    labels: labels && labels.length > 0 ? labels : defaultLabels,
     datasets: [
-      {
-        label: 'Number of Reviews',
-        data: data?.[0]?.data || defaultReviewsData,
-        borderColor: 'hsl(var(--primary))',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        tension: 0.4,
-        fill: true,
-        yAxisID: 'y',
-      },
-      {
-        label: 'Average Rating',
-        data: data?.[1]?.data || defaultRatingsData,
-        borderColor: '#10b981',
-        backgroundColor: 'transparent',
-        tension: 0.4,
-        yAxisID: 'y1',
-      }
+      // Use the first dataset passed in props, or default
+      data?.[0] ? { ...defaultReviewsDataset, ...data[0] } : defaultReviewsDataset,
+      // Use the second dataset passed in props, or default
+      data?.[1] ? { ...defaultRatingsDataset, ...data[1] } : defaultRatingsDataset,
     ],
   };
   

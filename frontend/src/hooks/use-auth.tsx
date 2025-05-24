@@ -4,9 +4,9 @@ import {
   useMutation,
   UseMutationResult,
 } from "@tanstack/react-query";
-import { User } from "@shared/schema";
+import { User } from "../../../shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "./use-toast";
 import { z } from "zod";
 
 type Permissions = {
@@ -117,6 +117,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: Error) => {
+      // TODO: Consider applying more specific error message extraction (similar to loginMutation) 
+      // if the backend provides detailed error responses for registration.
       toast({
         title: "Registration failed",
         description: error.message,
@@ -137,6 +139,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     },
     onError: (error: Error) => {
+      // TODO: Consider applying more specific error message extraction (similar to loginMutation) 
+      // if the backend provides detailed error responses for logout.
       toast({
         title: "Logout failed",
         description: error.message,

@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
+// NOTE: This is an Express.js server, not Hono.js as previously assumed.
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -44,7 +45,8 @@ app.use((req, res, next) => {
     const message = err.message || "Internal Server Error";
 
     res.status(status).json({ message });
-    throw err;
+    // FIXED: Removed re-throw of error after response has been sent.
+    // throw err;
   });
 
   // importantly only setup vite in development and after

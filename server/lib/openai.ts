@@ -1,5 +1,5 @@
 import OpenAI from "openai";
-import { Review } from "@shared/schema";
+import { Review } from "../../shared/schema";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -53,10 +53,14 @@ export async function generateAIReply(
       temperature: 0.7,
     });
 
-    return response.choices[0].message.content || "Thank you for your review.";
+    const messageContent = response.choices[0].message.content;
+    if (!messageContent) {
+      throw new Error("OpenAI returned empty message content for AI reply.");
+    }
+    return messageContent;
   } catch (error) {
     console.error("Error generating AI reply:", error);
-    return "Thank you for your feedback. We appreciate you taking the time to share your experience.";
+    throw new Error("Failed to generate AI reply due to an internal error.");
   }
 }
 
@@ -85,7 +89,11 @@ export async function analyzeReviewSentiment(reviewText: string): Promise<{
       response_format: { type: "json_object" },
     });
 
-    const result = JSON.parse(response.choices[0].message.content);
+    const messageContent = response.choices[0].message.content;
+    if (!messageContent) {
+      throw new Error("OpenAI returned empty message content for sentiment analysis.");
+    }
+    const result = JSON.parse(messageContent);
 
     return {
       sentiment: result.sentiment,
@@ -94,11 +102,7 @@ export async function analyzeReviewSentiment(reviewText: string): Promise<{
     };
   } catch (error) {
     console.error("Error analyzing review sentiment:", error);
-    return {
-      sentiment: "neutral",
-      score: 50,
-      keyThemes: [],
-    };
+    throw new Error("Failed to analyze sentiment due to an internal error.");
   }
 }
 
@@ -135,10 +139,14 @@ export async function generateKeywordTrends(reviews: Review[]): Promise<{
       response_format: { type: "json_object" },
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    const messageContentTrends = response.choices[0].message.content;
+    if (!messageContentTrends) {
+      throw new Error("OpenAI returned empty message content for keyword trends.");
+    }
+    return JSON.parse(messageContentTrends);
   } catch (error) {
     console.error("Error generating keyword trends:", error);
-    return {};
+    throw new Error("Failed to generate keyword trends due to an internal error.");
   }
 }
 

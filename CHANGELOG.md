@@ -27,12 +27,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added TODO comments for backend/API integration and robust error handling where relevant.
 - Fixed type imports from shared/schema to use relative paths.
 - frontend/src/pages/settings-page.tsx:
-  - FIXED: All import paths now use relative imports instead of '@/'.
-  - FIXED: Added missing import for React.
-  - FIXED: Improved accessibility by adding aria-labels to buttons and interactive elements.
-  - FIXED: Badge variant for user status now uses only allowed values (default/destructive).
-  - FIXED: Removed invalid Button props (such as 'from', 'import').
-  - FIXED: Added TODOs for API integration, error handling, and password change implementation.
+  - FIXED: Safely access user.role properties to prevent runtime errors.
+  - FIXED: Removed redundant custom Label component, used FormLabel directly.
+  - REVIEW: Verified import paths and React best practices. Added TODOs for API endpoint/payload checks, enhanced error messages, and future implementation of Account tab features (Edit Profile, Change Password).
 - frontend/src/pages/alerts-page.tsx:
   - FIXED: All import paths now use relative imports instead of '@/'.
   - FIXED: Added missing import for React.
@@ -55,6 +52,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - FIXED: Import path for cn utility now uses correct relative import ('../../lib/utils').
 - frontend/src/components/ui/card.tsx:
   - FIXED: Import path for cn utility now uses correct relative import ('../../lib/utils').
+- frontend/src/components/dashboard/sidebar.tsx: DELETED - Replaced by new main Sidebar and Layout components.
+- frontend/src/pages/analytics-page.tsx: Refactored to use new main Layout component, removing direct use of old dashboard sidebar.
+- frontend/src/components/dashboard/summary-metrics.tsx: DELETED - Orphaned component. Its metrics can be integrated into DashboardPage's StatCards if needed.
+- frontend/src/components/ui/sidebar.tsx: Corrected import paths from aliased to relative.
+- frontend/src/components/dashboard/trend-graph.tsx: Improved prop type safety.
+- frontend/src/components/dashboard/ai-reply-panel.tsx: Corrected import paths, added TODOs and accessibility improvement.
+- frontend/src/components/dashboard/alert-center.tsx: Corrected import paths, refined keyword trend display, added accessibility improvements and TODOs.
+- frontend/src/components/dashboard/review-feed.tsx: Corrected import paths, added accessibility improvements and TODOs.
+- frontend/src/components/admin/layout.tsx: Updated navigation to use wouter Link components and updated mobile logo.
+- frontend/src/components/admin/charts/BarChart.tsx: Improved prop type safety.
+- frontend/src/components/admin/charts/LineChart.tsx: Improved prop type safety.
+- frontend/src/hooks/use-auth.tsx: Corrected import paths, added TODOs for error handling consistency.
+- frontend/src/hooks/use-toast.ts: Corrected import paths.
+- frontend/src/hooks/use-mobile.tsx: Reviewed, no issues found.
+- frontend/src/lib/protected-route.tsx: Reviewed, no issues found.
+- frontend/src/lib/queryClient.ts: Reviewed, added TODO for staleTime configuration.
+- frontend/src/lib/openai.ts: DELETED - Unused utility function.
+- frontend/src/lib/utils.ts: Reviewed, no issues found.
 
 ## [1.0.0] - 2025-05-11
 

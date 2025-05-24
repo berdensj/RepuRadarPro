@@ -203,6 +203,7 @@ const SettingsPage = () => {
   // Add User Mutation
   const addUserMutation = useMutation({
     mutationFn: async (values: z.infer<typeof userFormSchema>) => {
+      // TODO: Verify API endpoint and payload for adding a user
       const res = await apiRequest('POST', '/api/register', values);
       return res.json();
     },
@@ -216,6 +217,7 @@ const SettingsPage = () => {
       setAddUserOpen(false);
     },
     onError: (error: Error) => {
+      // TODO: Consider extracting more specific error messages from API responses if available.
       toast({
         title: 'Error',
         description: `Failed to add user: ${error.message}`,
@@ -227,6 +229,7 @@ const SettingsPage = () => {
   // Update User Role Mutation
   const updateUserRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: number, role: string }) => {
+      // TODO: Verify API endpoint and payload for updating user role
       const res = await apiRequest('PATCH', `/api/admin/users/${userId}/role`, { role });
       return res.json();
     },
@@ -239,6 +242,7 @@ const SettingsPage = () => {
       setRoleDialogOpen(null);
     },
     onError: (error: Error) => {
+      // TODO: Consider extracting more specific error messages from API responses if available.
       toast({
         title: 'Error',
         description: `Failed to update user role: ${error.message}`,
@@ -250,6 +254,7 @@ const SettingsPage = () => {
   // Update User Status Mutation
   const updateUserStatusMutation = useMutation({
     mutationFn: async ({ userId, isActive }: { userId: number, isActive: boolean }) => {
+      // TODO: Verify API endpoint and payload for updating user status
       const res = await apiRequest('PATCH', `/api/admin/users/${userId}/active`, { isActive });
       return res.json();
     },
@@ -262,6 +267,7 @@ const SettingsPage = () => {
       setStatusDialogOpen(null);
     },
     onError: (error: Error) => {
+      // TODO: Consider extracting more specific error messages from API responses if available.
       toast({
         title: 'Error',
         description: `Failed to update user status: ${error.message}`,
@@ -778,28 +784,31 @@ const SettingsPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Full Name</h3>
-                  <p className="text-sm text-muted-foreground">{user?.fullName}</p>
+                  <p className="text-sm text-muted-foreground">{user?.fullName || 'N/A'}</p>
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Email</h3>
-                  <p className="text-sm text-muted-foreground">{user?.email}</p>
+                  <p className="text-sm text-muted-foreground">{user?.email || 'N/A'}</p>
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Username</h3>
-                  <p className="text-sm text-muted-foreground">{user?.username}</p>
+                  <p className="text-sm text-muted-foreground">{user?.username || 'N/A'}</p>
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Role</h3>
                   <p className="text-sm text-muted-foreground">
-                    <Badge variant={user?.role === 'admin' ? "default" : 
-                                    user?.role === 'staff' ? "outline" : "secondary"}>
-                      {user?.role.charAt(0).toUpperCase() + user?.role.slice(1)}
-                    </Badge>
+                    {user?.role ? (
+                      <Badge variant={user.role === 'admin' ? "default" :
+                                      user.role === 'staff' ? "outline" : "secondary"}>
+                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      </Badge>
+                    ) : 'N/A'}
                   </p>
                 </div>
               </div>
             </CardContent>
             <CardFooter>
+              {/* // TODO: Implement "Edit Profile" functionality. */}
               <Button variant="outline" aria-label="Edit Profile">Edit Profile</Button>
             </CardFooter>
           </Card>
@@ -812,17 +821,21 @@ const SettingsPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {/* // TODO: Implement "Change Password" functionality (including form handling and API call). Define and verify API endpoints. */}
               <div className="space-y-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="current-password">Current Password</Label>
+                  {/* FIXED: Use FormLabel directly */}
+                  <FormLabel htmlFor="current-password">Current Password</FormLabel>
                   <Input id="current-password" type="password" />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="new-password">New Password</Label>
+                  {/* FIXED: Use FormLabel directly */}
+                  <FormLabel htmlFor="new-password">New Password</FormLabel>
                   <Input id="new-password" type="password" />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="confirm-password">Confirm New Password</Label>
+                  {/* FIXED: Use FormLabel directly */}
+                  <FormLabel htmlFor="confirm-password">Confirm New Password</FormLabel>
                   <Input id="confirm-password" type="password" />
                 </div>
               </div>
@@ -836,10 +849,5 @@ const SettingsPage = () => {
     </div>
   );
 };
-
-// Add this to make TypeScript happy
-const Label = ({ htmlFor, children }: { htmlFor: string, children: React.ReactNode }) => (
-  <FormLabel htmlFor={htmlFor}>{children}</FormLabel>
-);
 
 export default SettingsPage;

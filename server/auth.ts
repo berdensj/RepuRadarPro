@@ -30,6 +30,8 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
+  // TODO: Ensure process.env.SESSION_SECRET is set with a strong, unique secret in production.
+  // Log a warning if it defaults, especially in a production-like environment.
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "reputation-sentinel-secret-key",
     resave: false,
@@ -73,7 +75,7 @@ export function setupAuth(app: Express) {
     }),
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user: SelectUser, done) => done(null, user.id));
   passport.deserializeUser(async (id: number, done) => {
     try {
       const user = await storage.getUser(id);
@@ -85,6 +87,7 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
+      // TODO: Validate req.body using a Zod schema (e.g., create a registerSchema in @shared/schema)
       const { email, username, password, fullName } = req.body;
       
       // Check if user already exists

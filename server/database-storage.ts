@@ -40,7 +40,7 @@ import {
   healthcareSettings,
   type HealthcareSettings,
   type InsertHealthcareSettings
-} from "@shared/schema";
+} from "../shared/schema";
 import { IStorage } from "./storage";
 import { db } from "./db";
 import { eq, and, desc, lte, gte, between, sql, count } from "drizzle-orm";
@@ -69,16 +69,18 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    // Case insensitive username lookup
-    const allUsers = await db.select().from(users);
-    const user = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
+    // FIXED: Use database-level case-insensitive query
+    const [user] = await db.select()
+      .from(users)
+      .where(sql`lower(${users.username}) = ${username.toLowerCase()}`);
     return user;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    // Case insensitive email lookup
-    const allUsers = await db.select().from(users);
-    const user = allUsers.find(u => u.email.toLowerCase() === email.toLowerCase());
+    // FIXED: Use database-level case-insensitive query
+    const [user] = await db.select()
+      .from(users)
+      .where(sql`lower(${users.email}) = ${email.toLowerCase()}`);
     return user;
   }
 

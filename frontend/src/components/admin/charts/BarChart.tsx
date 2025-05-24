@@ -21,12 +21,12 @@ ChartJS.register(
   Legend
 );
 
-interface BarChartProps {
-  data: any[];
-  xKey?: string;
-  yKeys?: string[];
-  xField?: string;
-  yField?: string;
+interface BarChartProps<TData extends Record<string, any> = Record<string, any>> {
+  data: TData[];
+  xKey?: keyof TData | string;
+  yKeys?: (keyof TData | string)[];
+  xField?: keyof TData | string;
+  yField?: keyof TData | string;
   color?: string;
   labels?: string[];
   colors?: string[];
@@ -55,41 +55,37 @@ export default function BarChart({
   stacked = false,
   xFormatter = (value) => value.toString(),
   yFormatter = (value) => value.toString(),
-}: BarChartProps) {
+}: BarChartProps<Record<string, any>>) {
   const chartData = useMemo<ChartData<'bar'>>(() => {
-    // Handle both prop formats (supporting legacy and new usage)
-    const actualXKey = xField || xKey || 'x';
+    const actualXKey = (xField || xKey || 'x') as keyof TData;
     
-    // Extract x-axis labels
     const xLabels = data.map(item => xFormatter(item[actualXKey]));
     
-    // Create datasets based on which props are provided
     const getDatasets = (): ChartData<'bar'>['datasets'] => {
       if (yKeys && yKeys.length > 0) {
-        // Multi-series chart with explicit fields
         return yKeys.map((key, index) => ({
-          label: labels && labels.length > index ? labels[index] : key,
-          data: data.map(item => item[key as keyof typeof item] !== undefined 
-            ? item[key as keyof typeof item] 
-            : 0),
+          label: labels && labels.length > index ? labels[index] : String(key),
+          data: data.map(item => {
+            const val = item[key as keyof TData];
+            return typeof val === 'number' ? val : 0;
+          }),
           backgroundColor: colors[index % colors.length],
           borderColor: colors[index % colors.length],
           borderWidth: 1,
         }));
       } else if (yField) {
-        // Single series chart
         const barColor = color || colors[0];
         return [{
-          label: yField,
-          data: data.map(item => item[yField as keyof typeof item] !== undefined 
-            ? item[yField as keyof typeof item] 
-            : 0),
+          label: String(yField),
+          data: data.map(item => {
+            const val = item[yField as keyof TData];
+            return typeof val === 'number' ? val : 0;
+          }),
           backgroundColor: barColor,
           borderColor: barColor,
           borderWidth: 1,
         }];
       } else {
-        // Fallback
         return [{
           label: 'No data',
           data: [],
