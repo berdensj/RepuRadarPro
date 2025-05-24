@@ -50,28 +50,21 @@ export default function AuthPage() {
 
   // We're using direct state management instead of react-hook-form now
 
-  const onLoginSubmit = (event: React.FormEvent) => {
+  const onLoginSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     console.log("Login attempt with:", loginEmail);
-    loginMutation.mutate({
-      email: loginEmail,
-      password: loginPassword
-    }, {
-      onSuccess: (user) => {
-        // Console log for debugging
-        console.log("Login successful, user data:", user);
-        console.log("User role:", user.role);
-        
-        // Navigate after successful login
-        if (user.role === 'admin') {
-          console.log("Redirecting to admin dashboard");
-          navigate('/admin');
-        } else {
-          console.log("Redirecting to regular dashboard");
-          navigate('/');
-        }
+    try {
+      const user = await loginMutation.mutateAsync({ email: loginEmail, password: loginPassword });
+      
+      // User role-based redirect logic
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
       }
-    });
+    } catch (error) {
+      // Error handling is managed by the mutation
+    }
   };
 
   const onRegisterSubmit = (event: React.FormEvent) => {

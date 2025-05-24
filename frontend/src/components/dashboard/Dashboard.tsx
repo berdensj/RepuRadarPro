@@ -21,10 +21,13 @@ export function Dashboard() {
   const {
     stats,
     isLoadingStats,
+    errorStats,
     activities,
     isLoadingActivities,
+    errorActivities,
     summary,
     isLoadingSummary,
+    errorSummary,
   } = useDashboardData(timeRange);
 
   return (
@@ -52,6 +55,10 @@ export function Dashboard() {
             <Skeleton className="h-32" />
             <Skeleton className="h-32" />
           </>
+        ) : errorStats ? (
+          <div className="col-span-full p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-600">Failed to load dashboard statistics. Please try refreshing the page.</p>
+          </div>
         ) : (
           <>
             <StatCard
@@ -96,6 +103,8 @@ export function Dashboard() {
                   <Skeleton className="h-24" />
                   <Skeleton className="h-24" />
                 </div>
+              ) : errorActivities ? (
+                <p className="text-center text-red-600 py-8">Failed to load recent activities. Please try refreshing the page.</p>
               ) : activities?.length === 0 ? (
                 <p className="text-center text-muted-foreground py-8">No recent activities</p>
               ) : (
@@ -143,7 +152,11 @@ export function Dashboard() {
               </div>
             </CardHeader>
             <CardContent>
-              <ReviewChart data={summary || []} isLoading={isLoadingSummary} />
+              {errorSummary ? (
+                <p className="text-center text-red-600 py-4">Failed to load chart data.</p>
+              ) : (
+                <ReviewChart data={summary || []} isLoading={isLoadingSummary} />
+              )}
             </CardContent>
           </Card>
         </div>

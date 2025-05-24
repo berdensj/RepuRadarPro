@@ -34,13 +34,15 @@ export function TrialProvider({ children }: TrialProviderProps) {
       return {
         isTrial: false,
         daysLeft: 0,
-        upgradeUrl: '/pricing',
+        upgradeUrl: '/subscription',
         isExpired: false,
         trialEndDate: null,
       };
     }
 
-    const isTrial = user.plan === 'trial' || user.subscriptionStatus === 'trial';
+    const isTrial = user.subscriptionStatus === 'trial' || 
+                   (user.plan === 'trial' && user.subscriptionStatus !== 'active');
+    
     const trialEndDate = user.trialEndsAt ? new Date(user.trialEndsAt) : null;
     
     let daysLeft = 0;
@@ -48,15 +50,21 @@ export function TrialProvider({ children }: TrialProviderProps) {
 
     if (isTrial && trialEndDate) {
       const now = new Date();
-      const timeDiff = trialEndDate.getTime() - now.getTime();
-      daysLeft = Math.max(0, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
-      isExpired = timeDiff <= 0;
+      const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      const timeDiff = trialEndDate.getTime() - endOfToday.getTime();
+      
+      daysLeft = Math.max(0, Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1);
+      isExpired = timeDiff <= -86400000;
+      
+      if (timeDiff > 0 && timeDiff <= 86400000) {
+        daysLeft = 1;
+      }
     }
 
     return {
       isTrial,
       daysLeft,
-      upgradeUrl: '/pricing',
+      upgradeUrl: '/subscription',
       isExpired,
       trialEndDate,
     };

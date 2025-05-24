@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
+import { getQueryFn } from '../lib/queryClient';
 
 interface DashboardStats {
   totalReviews: number;
@@ -30,35 +30,35 @@ interface ReviewSummary {
 
 export function useDashboardData(timeRange: 'week' | 'month') {
   const statsQuery = useQuery({
-    queryKey: ['dashboardStats'],
-    queryFn: async (): Promise<DashboardStats> => {
-      const { data } = await axios.get('/api/dashboard/stats');
-      return data;
-    }
+    queryKey: [`/api/dashboard/stats?timeRange=${timeRange}`, 'dashboardStats', timeRange],
+    queryFn: getQueryFn({ on401: "throw" }),
+    retry: 3,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const activitiesQuery = useQuery({
-    queryKey: ['recentActivities'],
-    queryFn: async (): Promise<ReviewActivity[]> => {
-      const { data } = await axios.get('/api/dashboard/activities');
-      return data;
-    }
+    queryKey: ['/api/dashboard/activities', 'recentActivities'],
+    queryFn: getQueryFn({ on401: "throw" }),
+    retry: 3,
+    staleTime: 2 * 60 * 1000, // 2 minutes
   });
 
   const summaryQuery = useQuery({
-    queryKey: ['reviewSummary', timeRange],
-    queryFn: async (): Promise<ReviewSummary[]> => {
-      const { data } = await axios.get(`/api/dashboard/summary?timeRange=${timeRange}`);
-      return data;
-    }
+    queryKey: [`/api/dashboard/summary?timeRange=${timeRange}`, 'reviewSummary', timeRange],
+    queryFn: getQueryFn({ on401: "throw" }),
+    retry: 3,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   return {
-    stats: statsQuery.data,
+    stats: statsQuery.data as DashboardStats | undefined,
     isLoadingStats: statsQuery.isLoading,
-    activities: activitiesQuery.data,
+    errorStats: statsQuery.error,
+    activities: activitiesQuery.data as ReviewActivity[] | undefined,
     isLoadingActivities: activitiesQuery.isLoading,
-    summary: summaryQuery.data,
+    errorActivities: activitiesQuery.error,
+    summary: summaryQuery.data as ReviewSummary[] | undefined,
     isLoadingSummary: summaryQuery.isLoading,
+    errorSummary: summaryQuery.error,
   };
 } 

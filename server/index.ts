@@ -58,15 +58,24 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
+  // IMPROVED: Support environment variable for port with fallback
+  const port = parseInt(process.env.PORT || "5000", 10);
+  
+  // IMPROVED: Better error handling for port conflicts
   server.listen({
     port,
     host: "0.0.0.0",
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+  }).on('error', (err: any) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Port ${port} is already in use. Please stop other processes or use a different port.`);
+      console.error(`You can set a different port with: PORT=5001 npm run dev`);
+      process.exit(1);
+    } else {
+      console.error('Server startup error:', err);
+      process.exit(1);
+    }
   });
 })();
