@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the RepuRadar project will be documented in this file.
+All notable changes to the Reputation Sentinel project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -12,11 +12,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Docker and Docker Compose configuration for containerized development and deployment
 - AWS Elastic Beanstalk deployment support
 - Comprehensive project documentation in README.md
+- Added logo to header, auth page, and admin layout.
+- Implemented new responsive sidebar navigation and integrated it into the main application layout.
 
 ### Changed
 - Restructured codebase into dedicated frontend and backend directories for better organization
 - Updated package.json with optimized scripts for development and production
 - Enhanced development workflow with proper environment configuration
+
+### Fixed
+- Fixed all import paths in `frontend/src/pages/subscription-page.tsx`, `integrations-page.tsx`, `analytics-page.tsx`, `auth-page.tsx`, and `dashboard-page.tsx` to use correct relative imports for components, hooks, and types.
+- Added `import React from 'react'` where needed for JSX compatibility.
+- Improved accessibility by adding `aria-label` and `aria-disabled` where appropriate.
+- Added TODO comments for backend/API integration and robust error handling where relevant.
+- Fixed type imports from shared/schema to use relative paths.
+- frontend/src/pages/settings-page.tsx:
+  - FIXED: All import paths now use relative imports instead of '@/'.
+  - FIXED: Added missing import for React.
+  - FIXED: Improved accessibility by adding aria-labels to buttons and interactive elements.
+  - FIXED: Badge variant for user status now uses only allowed values (default/destructive).
+  - FIXED: Removed invalid Button props (such as 'from', 'import').
+  - FIXED: Added TODOs for API integration, error handling, and password change implementation.
+- frontend/src/pages/alerts-page.tsx:
+  - FIXED: All import paths now use relative imports instead of '@/'.
+  - FIXED: Added missing import for React.
+  - FIXED: Added TODO for error handling for AlertCenter/Sidebar.
+- frontend/src/pages/responses-page.tsx:
+  - FIXED: All import paths now use relative imports instead of '@/'.
+  - FIXED: Added missing import for React.
+  - FIXED: Added aria-labels to all Button components for accessibility.
+  - FIXED: Added TODO for error handling for Sidebar and AI generation.
+- frontend/src/pages/reviews-page.tsx:
+  - FIXED: All import paths now use relative imports instead of '@/'.
+  - FIXED: Added missing import for React.
+  - FIXED: Added aria-labels to all Button components for accessibility.
+  - FIXED: Added TODO for error handling for Sidebar and ReviewFeed.
+- frontend/src/pages/not-found.tsx:
+  - FIXED: All import paths now use relative imports instead of '@/'.
+  - FIXED: Added missing import for React.
+  - FIXED: Added aria-label to AlertCircle icon for accessibility.
+- frontend/src/components/ui/button.tsx:
+  - FIXED: Import path for cn utility now uses correct relative import ('../../lib/utils').
+- frontend/src/components/ui/card.tsx:
+  - FIXED: Import path for cn utility now uses correct relative import ('../../lib/utils').
 
 ## [1.0.0] - 2025-05-11
 

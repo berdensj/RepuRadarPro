@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useAuth } from '@/hooks/use-auth';
-import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '../lib/queryClient';
+import { useAuth } from '../hooks/use-auth';
+import { useToast } from '../hooks/use-toast';
 import {
   Card,
   CardContent,
@@ -10,7 +10,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '../components/ui/card';
 import {
   Table,
   TableBody,
@@ -18,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '../components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -27,9 +27,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from '../components/ui/dialog';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import {
   Form,
   FormControl,
@@ -38,7 +38,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from '../components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -76,10 +76,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger 
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+} from '../components/ui/alert-dialog';
+import { Badge } from '../components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Textarea } from '../components/ui/textarea';
 
 // Define competitor schema
 const competitorSchema = z.object({
@@ -400,7 +401,7 @@ const CompetitorsPage = () => {
                     <FormItem>
                       <FormLabel>Notes</FormLabel>
                       <FormControl>
-                        <Input as="textarea" className="h-24" placeholder="Additional notes..." {...field} />
+                        <Textarea className="h-24" placeholder="Additional notes..." {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -668,7 +669,7 @@ const CompetitorsPage = () => {
                               <Tooltip />
                               <Legend />
                               <Bar dataKey="yourBusiness" name="Your Business" fill="#14b8a6" />
-                              <Bar dataKey="competitor" name={selectedCompetitor.name} fill="#f97316" />
+                              <Bar dataKey="competitor" name={selectedCompetitor?.name || 'Competitor'} fill="#f97316" />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -735,7 +736,7 @@ const CompetitorsPage = () => {
                                 <Line 
                                   type="monotone" 
                                   dataKey="competitor" 
-                                  name={selectedCompetitor.name} 
+                                  name={selectedCompetitor?.name || 'Competitor'} 
                                   stroke="#f97316" 
                                 />
                               </LineChart>
@@ -983,7 +984,7 @@ const CompetitorsPage = () => {
                               <Line 
                                 type="monotone" 
                                 dataKey="competitor" 
-                                name={selectedCompetitor.name} 
+                                name={selectedCompetitor?.name || 'Competitor'} 
                                 stroke="#f97316" 
                                 strokeWidth={2}
                               />
@@ -1020,7 +1021,7 @@ const CompetitorsPage = () => {
                               <Tooltip />
                               <Legend />
                               <Bar dataKey="yours" name="Your Business" fill="#14b8a6" />
-                              <Bar dataKey="competitor" name={selectedCompetitor.name} fill="#f97316" />
+                              <Bar dataKey="competitor" name={selectedCompetitor?.name || 'Competitor'} fill="#f97316" />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -1060,7 +1061,7 @@ const CompetitorsPage = () => {
                               <Tooltip />
                               <Legend />
                               <Bar dataKey="yours" name="Your Business" fill="#14b8a6" />
-                              <Bar dataKey="competitor" name={selectedCompetitor.name} fill="#f97316" />
+                              <Bar dataKey="competitor" name={selectedCompetitor?.name || 'Competitor'} fill="#f97316" />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -1106,7 +1107,7 @@ const CompetitorsPage = () => {
                       
                       <Card>
                         <CardHeader>
-                          <CardTitle>{selectedCompetitor.name} Keywords</CardTitle>
+                          <CardTitle>{selectedCompetitor?.name || 'Competitor'} Keywords</CardTitle>
                           <CardDescription>
                             Top positive and negative keywords
                           </CardDescription>

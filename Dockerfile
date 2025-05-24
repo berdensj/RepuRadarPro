@@ -24,14 +24,14 @@ WORKDIR /app
 ENV NODE_ENV production
 
 RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 repuradar
-USER repuradar
+RUN adduser --system --uid 1001 reputation-sentinel
+USER reputation-sentinel
 
-COPY --from=builder --chown=repuradar:nodejs /app/dist ./dist
-COPY --from=builder --chown=repuradar:nodejs /app/frontend/dist ./frontend/dist
-COPY --from=builder --chown=repuradar:nodejs /app/package.json ./package.json
-COPY --from=builder --chown=repuradar:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=repuradar:nodejs /app/Procfile ./Procfile
+COPY --from=builder --chown=reputation-sentinel:nodejs /app/dist ./dist
+COPY --from=builder --chown=reputation-sentinel:nodejs /app/frontend/dist ./frontend/dist
+COPY --from=builder --chown=reputation-sentinel:nodejs /app/package.json ./package.json
+COPY --from=builder --chown=reputation-sentinel:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=reputation-sentinel:nodejs /app/Procfile ./Procfile
 
 EXPOSE 5000
 

@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { useAuth } from '@/hooks/use-auth';
+import React, { useState } from 'react';
+import { useAuth } from '../hooks/use-auth';
 import { useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '../lib/queryClient';
+import { useToast } from '../hooks/use-toast';
 import {
   Card,
   CardContent,
@@ -10,9 +10,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import {
   Form,
   FormControl,
@@ -21,7 +21,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from '../components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -30,20 +30,20 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from '@/components/ui/tabs';
+} from '../components/ui/tabs';
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from '@/components/ui/avatar';
+} from '../components/ui/avatar';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+} from '../components/ui/select';
+import { Switch } from '../components/ui/switch';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,9 +54,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
+} from '../components/ui/alert-dialog';
+import { Badge } from '../components/ui/badge';
+import { Separator } from '../components/ui/separator';
+import { Textarea } from '../components/ui/textarea';
 import { 
   User, 
   Lock, 
@@ -69,8 +70,19 @@ import {
   Trash2,
   ExternalLink
 } from 'lucide-react';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+  TableCaption
+} from '../components/ui/table';
 
 // Profile update schema
+// TODO: Bug report mentions a 'bio' field that crashes if over 2000 chars. This field is not currently in the schema or UI.
+// If a bio field is added, include: bio: z.string().max(2000, 'Bio must be 2000 characters or less').optional(),
 const profileFormSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email'),
@@ -79,6 +91,7 @@ const profileFormSchema = z.object({
   companyName: z.string().optional(),
   jobTitle: z.string().optional(),
   phone: z.string().optional(),
+  // bio: z.string().max(2000, 'Bio must be 2000 characters or less').optional(), // Example if bio were added
 });
 
 // Password update schema
@@ -1195,76 +1208,5 @@ const ProfilePage = () => {
     </div>
   );
 };
-
-interface Table {
-  TableHeader: React.FC<React.HTMLAttributes<HTMLTableSectionElement>>;
-  TableBody: React.FC<React.HTMLAttributes<HTMLTableSectionElement>>;
-  TableFooter: React.FC<React.HTMLAttributes<HTMLTableSectionElement>>;
-  TableHead: React.FC<React.ThHTMLAttributes<HTMLTableCellElement>>;
-  TableRow: React.FC<React.HTMLAttributes<HTMLTableRowElement>>;
-  TableCell: React.FC<React.TdHTMLAttributes<HTMLTableCellElement>>;
-  TableCaption: React.FC<React.HTMLAttributes<HTMLTableCaptionElement>>;
-}
-
-// This is a workaround for TypeScript since we're not importing the actual Table component
-const Table: React.FC<React.TableHTMLAttributes<HTMLTableElement>> & Table = (props) => (
-  <table {...props} className={`w-full caption-bottom text-sm ${props.className || ''}`}>
-    {props.children}
-  </table>
-);
-
-Table.TableHeader = ({ ...props }) => (
-  <thead {...props} className={`[&_tr]:border-b ${props.className || ''}`}>
-    {props.children}
-  </thead>
-);
-
-Table.TableBody = ({ ...props }) => (
-  <tbody {...props} className={`[&_tr:last-child]:border-0 ${props.className || ''}`}>
-    {props.children}
-  </tbody>
-);
-
-Table.TableFooter = ({ ...props }) => (
-  <tfoot {...props} className={`border-t bg-muted/50 font-medium [&>tr]:last:border-b-0 ${props.className || ''}`}>
-    {props.children}
-  </tfoot>
-);
-
-Table.TableHead = ({ ...props }) => (
-  <th
-    {...props}
-    className={`h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0 ${props.className || ''}`}
-  >
-    {props.children}
-  </th>
-);
-
-Table.TableRow = ({ ...props }) => (
-  <tr
-    {...props}
-    className={`border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted ${props.className || ''}`}
-  >
-    {props.children}
-  </tr>
-);
-
-Table.TableCell = ({ ...props }) => (
-  <td
-    {...props}
-    className={`p-4 align-middle [&:has([role=checkbox])]:pr-0 ${props.className || ''}`}
-  >
-    {props.children}
-  </td>
-);
-
-Table.TableCaption = ({ ...props }) => (
-  <caption
-    {...props}
-    className={`mt-4 text-sm text-muted-foreground ${props.className || ''}`}
-  >
-    {props.children}
-  </caption>
-);
 
 export default ProfilePage;

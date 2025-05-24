@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext } from "react";
+import React, { createContext, ReactNode, useContext } from "react";
 import {
   useQuery,
   useMutation,
@@ -113,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       queryClient.setQueryData(["/api/user"], user);
       toast({
         title: "Registration successful",
-        description: `Welcome to RepuRadar, ${user.fullName}!`,
+        description: `Welcome to Reputation Sentinel, ${user.fullName}!`,
       });
     },
     onError: (error: Error) => {

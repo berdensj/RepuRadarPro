@@ -77,8 +77,8 @@ repuradar-pro/
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/repuradar-pro.git
-   cd repuradar-pro
+   git clone https://github.com/yourusername/reputation-sentinel.git
+   cd reputation-sentinel
    ```
 
 2. Install dependencies:
@@ -280,8 +280,8 @@ Reputation Sentinel is built with security in mind:
 
 ## 🔗 Links
 
-- [GitHub Repository](https://github.com/yourusername/repuradar-pro)
-- [Issue Tracker](https://github.com/yourusername/repuradar-pro/issues)
+- [GitHub Repository](https://github.com/yourusername/reputation-sentinel)
+- [Issue Tracker](https://github.com/yourusername/reputation-sentinel/issues)
 - [Change Log](CHANGELOG.md)
 
 ---

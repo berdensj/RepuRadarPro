@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useAuth } from '@/hooks/use-auth';
-import { useToast } from '@/hooks/use-toast';
+import { apiRequest, queryClient } from '../lib/queryClient';
+import { useAuth } from '../hooks/use-auth';
+import { useToast } from '../hooks/use-toast';
 import {
   Card,
   CardContent,
@@ -10,7 +10,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '../components/ui/card';
 import {
   Table,
   TableBody,
@@ -18,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '../components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -27,9 +27,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from '../components/ui/dialog';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import {
   Form,
   FormControl,
@@ -38,7 +38,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from '../components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -66,17 +66,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger 
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+} from '../components/ui/alert-dialog';
+import { Badge } from '../components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { 
   Select, 
   SelectContent, 
   SelectItem, 
   SelectTrigger, 
   SelectValue 
-} from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+} from '../components/ui/select';
+import { Textarea } from '../components/ui/textarea';
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -84,7 +84,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from '../components/ui/dropdown-menu';
 
 // Define review request schema
 const requestFormSchema = z.object({
@@ -493,7 +493,7 @@ const ReviewRequestsPage = () => {
                           />
                         </FormControl>
                         <FormDescription>
-                          Use variables like {{name}}, {{businessName}}, and {{reviewLink}} that will be replaced with actual values.
+                          Use variables like <code className="font-mono bg-muted px-1 rounded">&#123;&#123;name&#125;&#125;</code>, <code className="font-mono bg-muted px-1 rounded">&#123;&#123;businessName&#125;&#125;</code>, and <code className="font-mono bg-muted px-1 rounded">&#123;&#123;reviewLink&#125;&#125;</code> that will be replaced with actual values.
                         </FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -622,18 +622,24 @@ const ReviewRequestsPage = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Location (optional)</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={locationsLoading || !locations}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a location" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {locations && locations.map((location: any) => (
-                              <SelectItem key={location.id} value={location.id.toString()}>
-                                {location.name}
+                            {locations && locations.length > 0 ? (
+                              locations.map((location: any) => (
+                                <SelectItem key={location.id} value={location.id.toString()}>
+                                  {location.name}
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="" disabled>
+                                {locationsLoading ? 'Loading locations...' : 'No locations available'}
                               </SelectItem>
-                            ))}
+                            )}
                           </SelectContent>
                         </Select>
                         <FormDescription>
@@ -650,18 +656,24 @@ const ReviewRequestsPage = () => {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Template*</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value} disabled={templatesLoading || !reviewTemplates}>
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Select a template" />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            {reviewTemplates && reviewTemplates.map((template: ReviewTemplate) => (
-                              <SelectItem key={template.id} value={template.id.toString()}>
-                                {template.name} ({template.type})
+                            {reviewTemplates && reviewTemplates.length > 0 ? (
+                              reviewTemplates.map((template: ReviewTemplate) => (
+                                <SelectItem key={template.id} value={template.id.toString()}>
+                                  {template.name} ({template.type})
+                                </SelectItem>
+                              ))
+                            ) : (
+                              <SelectItem value="" disabled>
+                                {templatesLoading ? 'Loading templates...' : 'No templates available'}
                               </SelectItem>
-                            ))}
+                            )}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -822,8 +834,8 @@ const ReviewRequestsPage = () => {
                                 
                                 <DropdownMenuItem
                                   onClick={() => {
-                                    // Copy link functionality
-                                    copyToClipboard(`https://repuradar.com/review/${request.id}`);
+                                    copyToClipboard(`https://reputationsentinel.com/review/${request.id}`);
+                                    toast({ title: "Link Copied!", description: "Review request link copied to clipboard." });
                                   }}
                                 >
                                   <Copy className="mr-2 h-4 w-4" />
@@ -1108,7 +1120,7 @@ const ReviewRequestsPage = () => {
               <CardContent>
                 <ul className="space-y-2 list-disc pl-5">
                   <li className="text-sm">Keep email subject lines clear and concise</li>
-                  <li className="text-sm">Personalize your emails with {{name}} variable</li>
+                  <li className="text-sm">Personalize your emails with <code className="font-mono bg-muted px-1 rounded">&#123;&#123;name&#125;&#125;</code> variable</li>
                   <li className="text-sm">Express gratitude for their business</li>
                   <li className="text-sm">Keep the request simple and direct</li>
                   <li className="text-sm">Make the review link prominent</li>

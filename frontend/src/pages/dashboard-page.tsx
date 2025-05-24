@@ -1,19 +1,19 @@
-import { useState, useEffect } from "react";
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { Header } from "@/components/dashboard/header";
-import { SummaryMetrics } from "@/components/dashboard/summary-metrics";
-import { TrendGraph } from "@/components/dashboard/trend-graph";
-import { ReviewFeed } from "@/components/dashboard/review-feed";
-import { AIReplyPanel } from "@/components/dashboard/ai-reply-panel";
-import { AlertCenter } from "@/components/dashboard/alert-center";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React, { useState, useEffect } from "react";
+import { Sidebar } from "../components/dashboard/sidebar";
+import { Header } from "../components/dashboard/header";
+import { SummaryMetrics } from "../components/dashboard/summary-metrics";
+import { TrendGraph } from "../components/dashboard/trend-graph";
+import { ReviewFeed } from "../components/dashboard/review-feed";
+import { AIReplyPanel } from "../components/dashboard/ai-reply-panel";
+import { AlertCenter } from "../components/dashboard/alert-center";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import { Search, Download } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "../hooks/use-mobile";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Review } from "@shared/schema";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { Review } from '../../../shared/schema';
+import { apiRequest, queryClient } from "../lib/queryClient";
+import { useToast } from "../hooks/use-toast";
 import { Helmet } from "react-helmet";
 
 export default function DashboardPage() {
@@ -57,8 +57,8 @@ export default function DashboardPage() {
   return (
     <>
       <Helmet>
-        <title>Dashboard | RepuRadar</title>
-        <meta name="description" content="Monitor and manage your professional reviews with RepuRadar's comprehensive dashboard. Track metrics, respond to reviews, and analyze trends." />
+        <title>Dashboard | Reputation Sentinel</title>
+        <meta name="description" content="Monitor and manage your professional reviews with Reputation Sentinel's comprehensive dashboard. Track metrics, respond to reviews, and analyze trends." />
       </Helmet>
       
       <div className="min-h-screen flex flex-col lg:flex-row">

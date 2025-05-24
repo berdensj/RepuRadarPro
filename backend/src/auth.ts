@@ -4,13 +4,15 @@ import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import { storage } from "./storage";
-import { User as SelectUser } from "@shared/schema";
-import { attachPermissions } from "./middleware/rbac";
+import { storage } from "./db/storage.js";
+import { User as SelectUser } from "@shared/schema.js";
+import { attachPermissions } from "./middleware/middleware/rbac.js";
 
 declare global {
   namespace Express {
-    interface User extends SelectUser {}
+    interface User extends SelectUser {
+      id?: number;
+    }
   }
 }
 
@@ -31,7 +33,7 @@ async function comparePasswords(supplied: string, stored: string) {
 
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
-    secret: process.env.SESSION_SECRET || "repuradar-secret-key",
+    secret: process.env.SESSION_SECRET || "reputation-sentinel-secret-key",
     resave: false,
     saveUninitialized: false,
     store: storage.sessionStore,
@@ -73,7 +75,13 @@ export function setupAuth(app: Express) {
     }),
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user: Express.User, done) => {
+    if (user && typeof user.id === 'number') {
+      done(null, user.id);
+    } else {
+      done(new Error('User ID is missing or not a number for serialization'));
+    }
+  });
   passport.deserializeUser(async (id: number, done) => {
     try {
       const user = await storage.getUser(id);

@@ -1,4 +1,4 @@
-import { storage } from '../storage';
+import { storage } from '@db/storage.js';
 import sgMail from '@sendgrid/mail';
 import axios from 'axios';
 
@@ -51,7 +51,7 @@ export async function sendEmailReviewRequest(
     
     const msg = {
       to,
-      from: process.env.EMAIL_FROM || 'noreply@repuradar.com',
+      from: process.env.EMAIL_FROM || 'noreply@reputationsentinel.com',
       subject: `We value your feedback - ${businessName}`,
       text: emailContent.replace(/<[^>]*>/g, ''), // Strip HTML for plain text
       html: emailContent,

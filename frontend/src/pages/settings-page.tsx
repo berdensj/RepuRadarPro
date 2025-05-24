@@ -1,8 +1,9 @@
+import React from 'react';
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '../hooks/use-auth';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { apiRequest, queryClient } from '../lib/queryClient';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import {
   Card,
   CardContent,
@@ -10,7 +11,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '../components/ui/card';
 import {
   Table,
   TableBody,
@@ -18,7 +19,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from '../components/ui/table';
 import {
   Dialog,
   DialogContent,
@@ -27,9 +28,9 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+} from '../components/ui/dialog';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import {
   Form,
   FormControl,
@@ -38,22 +39,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from '../components/ui/form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '../hooks/use-toast';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
+} from '../components/ui/select';
+import { Switch } from '../components/ui/switch';
+import { Badge } from '../components/ui/badge';
 import { Loader2, PlusCircle, Trash2, UserCog } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '../components/ui/alert-dialog';
 
 // Define zod schema for location form
 const locationFormSchema = z.object({
@@ -293,7 +294,7 @@ const SettingsPage = () => {
             <h2 className="text-2xl font-bold">Manage Locations</h2>
             <Dialog open={addLocationOpen} onOpenChange={setAddLocationOpen}>
               <DialogTrigger asChild>
-                <Button><PlusCircle className="mr-2 h-4 w-4" /> Add Location</Button>
+                <Button aria-label="Add Location"><PlusCircle className="mr-2 h-4 w-4" /> Add Location</Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
@@ -401,7 +402,7 @@ const SettingsPage = () => {
                       )}
                     />
                     <DialogFooter>
-                      <Button type="submit" disabled={addLocationMutation.isPending}>
+                      <Button type="submit" disabled={addLocationMutation.isPending} aria-label="Add Location">
                         {addLocationMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Add Location
                       </Button>
@@ -454,6 +455,7 @@ const SettingsPage = () => {
                               variant="ghost" 
                               size="sm"
                               onClick={() => setDeletingLocation(location.id)}
+                              aria-label="Delete Location"
                             >
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
@@ -471,6 +473,7 @@ const SettingsPage = () => {
                               <AlertDialogAction
                                 onClick={() => deleteLocationMutation.mutate(location.id)}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                aria-label="Delete Location"
                               >
                                 {deleteLocationMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Delete
@@ -493,7 +496,7 @@ const SettingsPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardFooter>
-                <Button onClick={() => setAddLocationOpen(true)}>
+                <Button onClick={() => setAddLocationOpen(true)} aria-label="Add Location">
                   <PlusCircle className="mr-2 h-4 w-4" /> Add Your First Location
                 </Button>
               </CardFooter>
@@ -508,7 +511,7 @@ const SettingsPage = () => {
               <h2 className="text-2xl font-bold">Manage Users</h2>
               <Dialog open={addUserOpen} onOpenChange={setAddUserOpen}>
                 <DialogTrigger asChild>
-                  <Button><PlusCircle className="mr-2 h-4 w-4" /> Add User</Button>
+                  <Button aria-label="Add User"><PlusCircle className="mr-2 h-4 w-4" /> Add User</Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[500px]">
                   <DialogHeader>
@@ -601,7 +604,7 @@ const SettingsPage = () => {
                         )}
                       />
                       <DialogFooter>
-                        <Button type="submit" disabled={addUserMutation.isPending}>
+                        <Button type="submit" disabled={addUserMutation.isPending} aria-label="Add User">
                           {addUserMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                           Add User
                         </Button>
@@ -642,7 +645,7 @@ const SettingsPage = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={user.isActive ? "success" : "destructive"}>
+                          <Badge variant={user.isActive ? "default" : "destructive"}>
                             {user.isActive ? "Active" : "Inactive"}
                           </Badge>
                         </TableCell>
@@ -656,6 +659,7 @@ const SettingsPage = () => {
                                   size="sm"
                                   onClick={() => setRoleDialogOpen(user.id)}
                                   disabled={user.id === user?.id}
+                                  aria-label="Change Role"
                                 >
                                   <UserCog className="h-4 w-4" />
                                 </Button>
@@ -706,6 +710,7 @@ const SettingsPage = () => {
                                   size="sm"
                                   onClick={() => setStatusDialogOpen(user.id)}
                                   disabled={user.id === user?.id}
+                                  aria-label="Change Status"
                                 >
                                   <Switch checked={user.isActive} />
                                 </Button>
@@ -749,7 +754,7 @@ const SettingsPage = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button onClick={() => setAddUserOpen(true)}>
+                  <Button onClick={() => setAddUserOpen(true)} aria-label="Add User">
                     <PlusCircle className="mr-2 h-4 w-4" /> Add User
                   </Button>
                 </CardFooter>
@@ -795,7 +800,7 @@ const SettingsPage = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button variant="outline">Edit Profile</Button>
+              <Button variant="outline" aria-label="Edit Profile">Edit Profile</Button>
             </CardFooter>
           </Card>
 
@@ -823,7 +828,7 @@ const SettingsPage = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button>Change Password</Button>
+              <Button aria-label="Change Password">Change Password</Button>
             </CardFooter>
           </Card>
         </TabsContent>

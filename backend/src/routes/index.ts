@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
-import { setupAuth } from "./auth";
+import { storage } from "./storage.js";
+import { setupAuth } from "./auth.js";
 import { z } from "zod";
 import { 
   insertReviewSchema, 
@@ -9,21 +9,21 @@ import {
   insertMetricsSchema, 
   insertReviewRequestSchema,
   insertLocationSchema
-} from "@shared/schema";
-import { generateAIReply } from "./lib/openai";
-import { requireRole, attachPermissions } from "./middleware/rbac";
+} from "../../shared/schema.js";
+import { generateAIReply } from "./lib/openai.js";
+import { requireRole, attachPermissions } from "./middleware/rbac.js";
 
 // Import external services
-import { importGooglePlacesReviews } from "./services/google-places";
-import { importYelpReviews } from "./services/yelp";
-import { importFacebookReviews } from "./services/facebook";
-import { importAppleMapsReviews } from "./services/apple-maps";
-import { processReviewRequest } from "./services/review-request";
+import { importGooglePlacesReviews } from "./services/google-places.js";
+import { importYelpReviews } from "./services/yelp.js";
+import { importFacebookReviews } from "./services/facebook.js";
+import { importAppleMapsReviews } from "./services/apple-maps.js";
+import { processReviewRequest } from "./services/review-request.js";
 import { 
   verifyWebhookSignature, 
   verifyFacebookWebhook,
   handleReviewWebhook 
-} from "./services/webhooks";
+} from "./services/webhooks.js";
 import {
   initializeSubscriptionPlans,
   startTrial,
@@ -32,7 +32,7 @@ import {
   hasFeatureAccess,
   hasReachedLocationLimit,
   hasValidSubscription
-} from "./services/subscription";
+} from "./services/subscription.js";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -47,7 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       let reviews;
       
       const { platform, minRating, maxRating } = req.query;
@@ -74,7 +74,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const validatedData = insertReviewSchema.parse({
         ...req.body,
         userId
@@ -91,7 +91,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const limit = Number(req.query.limit) || 10;
       
       const reviews = await storage.getRecentReviews(userId, limit);
@@ -105,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const limit = Number(req.query.limit) || 5;
       
       const reviews = await storage.getNegativeReviews(userId, limit);
@@ -120,9 +120,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
       const reviewId = Number(req.params.id);
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       
-      // Check if the review belongs to the user
       const review = await storage.getReviewById(reviewId);
       if (!review) {
         return res.status(404).json({ message: "Review not found" });
@@ -132,10 +131,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(403).json({ message: "Forbidden" });
       }
       
-      const updatedReview = await storage.updateReview(reviewId, req.body);
+      // FIXED: Handle 'response_text' and define a Zod schema for the update payload
+      let payload = { ...req.body };
+      if (payload.hasOwnProperty('response_text')) {
+        payload.response = payload.response_text;
+        delete payload.response_text;
+      }
+
+      const updateReviewPayloadSchema = insertReviewSchema.pick({
+        response: true, // Take the 'response' field definition from base schema
+        isResolved: true, // Allow updating 'isResolved' as well, for example
+        // Add other fields that can be updated via this PATCH route
+      }).partial().extend({ // Make all fields optional, then refine 'response'
+        response: z.string().max(5000, "Response cannot exceed 5000 characters.").nullish() // Allow string, null, or undefined
+      });
+
+      const validatedPayload = updateReviewPayloadSchema.parse(payload);
+
+      // FIXED: Convert empty string response to null before saving, as DB column is nullable
+      // This prevents potential 500 errors if the DB or ORM layer mishandles empty strings for nullable text fields.
+      if (validatedPayload.response === "") {
+        validatedPayload.response = null;
+      }
+      
+      const updatedReview = await storage.updateReview(reviewId, validatedPayload);
       res.json(updatedReview);
     } catch (error) {
-      next(error);
+      // FIXED: Handle Zod validation errors
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Validation failed", errors: error.errors });
+      }
+      next(error); // Pass other errors to the default error handler
     }
   });
 
@@ -144,7 +170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
       const reviewId = Number(req.params.id);
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       
       // Check if the review belongs to the user
       const review = await storage.getReviewById(reviewId);
@@ -169,7 +195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
       const reviewId = Number(req.params.id);
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const tone = req.body.tone || "professional";
       
       // Check if the review belongs to the user
@@ -194,7 +220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const metrics = await storage.getUserMetrics(userId);
       
       if (!metrics) {
@@ -210,9 +236,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
-        const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+        const totalRating = reviews.reduce((sum: number, review: any) => sum + review.rating, 0);
         const averageRating = totalRating / reviews.length;
-        const positiveCount = reviews.filter(review => review.rating >= 4).length;
+        const positiveCount = reviews.filter((review: any) => review.rating >= 4).length;
         const positivePercentage = (positiveCount / reviews.length) * 100;
         
         return res.json({
@@ -234,7 +260,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const period = req.query.period || '90'; // Default to 90 days
       
       // Mock data for charts - in a real app this would be generated from actual review data
@@ -283,7 +309,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const validatedData = insertMetricsSchema.parse({
         ...req.body,
         userId
@@ -309,7 +335,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const limit = req.query.limit ? Number(req.query.limit) : undefined;
       
       const alerts = await storage.getAlertsByUserId(userId, limit);
@@ -323,7 +349,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const validatedData = insertAlertSchema.parse({
         ...req.body,
         userId
@@ -355,7 +381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const { locationId, placeId, apiKey } = req.body;
       
       if (!placeId || !apiKey) {
@@ -382,7 +408,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const { locationId, businessId, apiKey } = req.body;
       
       if (!businessId || !apiKey) {
@@ -409,7 +435,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const { locationId, pageId, accessToken } = req.body;
       
       if (!pageId || !accessToken) {
@@ -436,7 +462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const { locationId, placeId, teamId, keyId, privateKey } = req.body;
       
       if (!placeId || !teamId || !keyId || !privateKey) {
@@ -465,7 +491,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const validatedData = insertReviewRequestSchema.parse({
         ...req.body,
         userId
@@ -482,7 +508,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const reviewRequests = await storage.getReviewRequests(userId);
       
       res.json(reviewRequests);
@@ -502,7 +528,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Review request not found" });
       }
       
-      if (request.userId !== req.user!.id) {
+      if (request.userId !== (req.user as any)!.id) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -552,7 +578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const locations = await storage.getLocations(userId);
       
       res.json(locations);
@@ -565,7 +591,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const validatedData = insertLocationSchema.parse({
         ...req.body,
         userId
@@ -590,7 +616,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if the location belongs to the user (unless admin or staff with permissions)
-      if (location.userId !== req.user!.id && !req.permissions?.canViewAllLocations) {
+      if (location.userId !== (req.user as any)!.id && !(req as any).permissions?.canViewAllLocations) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -612,7 +638,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if the location belongs to the user (unless admin or staff with permissions)
-      if (location.userId !== req.user!.id && !req.permissions?.canViewAllLocations) {
+      if (location.userId !== (req.user as any)!.id && !(req as any).permissions?.canViewAllLocations) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -635,7 +661,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Check if the location belongs to the user (unless admin with permissions)
-      if (location.userId !== req.user!.id && !req.permissions?.canManageIntegrations) {
+      if (location.userId !== (req.user as any)!.id && !(req as any).permissions?.canManageIntegrations) {
         return res.status(403).json({ message: "Forbidden" });
       }
       
@@ -662,7 +688,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
       // Permissions are attached to the request by the attachPermissions middleware
-      res.json(req.permissions || {
+      res.json((req as any).permissions || {
         canManageUsers: false,
         canManageStaff: false,
         canViewAllLocations: false,
@@ -1651,7 +1677,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         const reviewCount = Math.floor(Math.random() * 500) + 50;
         const rating = (Math.random() * 1.5) + 3.5;
-        const responseRate = Math.floor(Math.random() * 25) + 75;
+        const responseRateVal = Math.floor(Math.random() * 25) + 75;
         const sentiment = Math.floor(Math.random() * 30) + 65;
         const trend = Math.floor(Math.random() * 30) - 10;
         
@@ -1660,7 +1686,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           name: locationName,
           reviewCount,
           rating,
-          responseRate,
+          responseRate: responseRateVal,
           sentiment,
           trend
         });
@@ -1883,11 +1909,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const allLocations = await storage.getAllLocations();
       
       // Remove sensitive information and add location counts
-      const safeUsers = await Promise.all(users.map(async user => {
+      const safeUsers = await Promise.all(users.map(async (user: any) => {
         const { password, ...userWithoutPassword } = user;
         
         // Count locations for this user
-        const locationCount = allLocations.filter(location => location.userId === user.id).length;
+        const locationCount = allLocations.filter((location: any) => location.userId === user.id).length;
         
         return {
           ...userWithoutPassword,
@@ -1931,7 +1957,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Don't allow admins to demote themselves
-      if (userId === req.user!.id && role !== 'admin') {
+      if (userId === (req.user as any)!.id && role !== 'admin') {
         return res.status(403).json({ 
           message: "Cannot change your own admin role" 
         });
@@ -1966,7 +1992,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Don't allow admins to deactivate themselves
-      if (userId === req.user!.id && !isActive) {
+      if (userId === (req.user as any)!.id && !isActive) {
         return res.status(403).json({ 
           message: "Cannot deactivate your own account" 
         });
@@ -2006,7 +2032,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Unauthorized" });
       }
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -2019,7 +2045,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Include permissions in the profile response
       const response = {
         ...userWithoutPassword,
-        permissions: req.permissions
+        permissions: (req as any).permissions
       };
       
       res.json(response);
@@ -2223,7 +2249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const { planId, isAnnual = false } = req.body;
       
       if (!planId) {
@@ -2244,7 +2270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const { planName = 'Pro' } = req.body;
       
       const updatedUser = await startTrial(userId, planName);
@@ -2258,7 +2284,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const updatedUser = await cancelSubscription(userId);
       res.json(updatedUser);
     } catch (error) {
@@ -2270,7 +2296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       if (!req.isAuthenticated()) return res.status(401).json({ message: "Unauthorized" });
       
-      const userId = req.user!.id;
+      const userId = (req.user as any)!.id;
       const user = await storage.getUser(userId);
       
       if (!user) {

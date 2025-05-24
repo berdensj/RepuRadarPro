@@ -4,7 +4,7 @@ import {
   metrics, type Metrics, type InsertMetrics, 
   alerts, type Alert, type InsertAlert,
   locations, type Location, type InsertLocation
-} from "@shared/schema";
+} from "@shared/schema.js";
 import session from "express-session";
 import createMemoryStore from "memorystore";
 
@@ -89,14 +89,31 @@ export class MemStorage implements IStorage {
       id: this.userCurrentId++,
       username: 'admin',
       password: '$2b$10$5QnkCEJKBTrfZS27qkZcU.tnULAjO4tmEt2s2XBuZIr6CYnigr96S', // hashed "admin123"
-      email: 'admin@repuradar.com',
+      email: 'admin@reputationsentinel.com',
       fullName: 'System Administrator',
       role: 'admin',
       isActive: true,
       createdAt: new Date(),
       profilePicture: null,
       companyLogo: null,
-      plan: 'enterprise'
+      plan: 'enterprise',
+      subscriptionStatus: 'active',
+      trialEndsAt: null,
+      subscriptionEndsAt: null,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      businessName: 'Reputation Sentinel HQ',
+      industry: 'Software',
+      clientType: 'Tech',
+      clientTypeCustom: null,
+      isAgency: false,
+      contactName: 'Admin Contact',
+      contactEmail: 'admin.contact@reputationsentinel.com',
+      contactPhone: null,
+      aiDefaultTone: 'professional',
+      aiAutoReplyToFiveStars: false,
+      notificationFrequency: 'daily',
+      onboardingCompleted: true,
     };
     this.users.set(adminUser.id, adminUser);
     
@@ -112,7 +129,24 @@ export class MemStorage implements IStorage {
       createdAt: new Date(),
       profilePicture: null,
       companyLogo: null,
-      plan: 'free'
+      plan: 'free',
+      subscriptionStatus: 'trial',
+      trialEndsAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // Example: 14 days trial
+      subscriptionEndsAt: null,
+      stripeCustomerId: null,
+      stripeSubscriptionId: null,
+      businessName: null,
+      industry: null,
+      clientType: null,
+      clientTypeCustom: null,
+      isAgency: false,
+      contactName: null,
+      contactEmail: null,
+      contactPhone: null,
+      aiDefaultTone: 'professional',
+      aiAutoReplyToFiveStars: false,
+      notificationFrequency: 'daily',
+      onboardingCompleted: false,
     };
     this.users.set(regularUser.id, regularUser);
     
@@ -139,17 +173,40 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userCurrentId++;
+    const now = new Date();
     const user: User = { 
-      ...insertUser, 
       id,
-      // Ensure all required fields are present
-      role: 'user',
-      isActive: true,
-      createdAt: new Date(),
-      // Handle nullable fields with defaults
+      username: insertUser.username,
+      password: insertUser.password,
+      email: insertUser.email,
+      fullName: insertUser.fullName,
       profilePicture: insertUser.profilePicture || null,
       companyLogo: insertUser.companyLogo || null,
-      plan: insertUser.plan || 'free'
+      
+      plan: insertUser.plan || 'Free',
+      subscriptionStatus: insertUser.subscriptionStatus || 'trial',
+      trialEndsAt: insertUser.trialEndsAt instanceof Date ? insertUser.trialEndsAt : (insertUser.trialEndsAt ? new Date(insertUser.trialEndsAt) : null),
+      subscriptionEndsAt: insertUser.subscriptionEndsAt instanceof Date ? insertUser.subscriptionEndsAt : (insertUser.subscriptionEndsAt ? new Date(insertUser.subscriptionEndsAt) : null),
+      stripeCustomerId: insertUser.stripeCustomerId || null,
+      stripeSubscriptionId: insertUser.stripeSubscriptionId || null,
+      
+      businessName: insertUser.businessName || null,
+      industry: insertUser.industry || null,
+      clientType: insertUser.clientType || null,
+      clientTypeCustom: insertUser.clientTypeCustom || null,
+      isAgency: insertUser.isAgency === undefined ? false : insertUser.isAgency,
+      contactName: insertUser.contactName || null,
+      contactEmail: insertUser.contactEmail || null,
+      contactPhone: insertUser.contactPhone || null,
+      
+      aiDefaultTone: insertUser.aiDefaultTone || 'professional',
+      aiAutoReplyToFiveStars: insertUser.aiAutoReplyToFiveStars === undefined ? false : insertUser.aiAutoReplyToFiveStars,
+      notificationFrequency: insertUser.notificationFrequency || 'daily',
+      
+      onboardingCompleted: insertUser.onboardingCompleted === undefined ? false : insertUser.onboardingCompleted,
+      role: 'user',
+      isActive: true,
+      createdAt: now,
     };
     this.users.set(id, user);
     return user;
@@ -193,18 +250,24 @@ export class MemStorage implements IStorage {
 
   async createReview(insertReview: InsertReview): Promise<Review> {
     const id = this.reviewCurrentId++;
+    const now = new Date();
     const review: Review = { 
-      ...insertReview, 
       id,
-      // Ensure all required fields are present
-      date: insertReview.date || new Date(),
-      locationId: insertReview.locationId || null,
-      isResolved: insertReview.isResolved ?? false,
-      // Handle nullable fields with defaults
-      response: insertReview.response || null,
-      externalId: insertReview.externalId || null,
-      sentimentScore: insertReview.sentimentScore || null,
-      keywords: insertReview.keywords || null
+      userId: insertReview.userId,
+      reviewerName: insertReview.reviewerName,
+      platform: insertReview.platform,
+      rating: insertReview.rating,
+      reviewText: insertReview.reviewText,
+      
+      locationId: insertReview.locationId === undefined ? null : insertReview.locationId,
+      date: insertReview.date instanceof Date ? insertReview.date : (insertReview.date ? new Date(insertReview.date) : now),
+      isResolved: insertReview.isResolved === undefined ? false : insertReview.isResolved,
+      response: insertReview.response === undefined ? null : insertReview.response,
+      externalId: insertReview.externalId === undefined ? null : insertReview.externalId,
+      sentimentScore: insertReview.sentimentScore === undefined ? null : insertReview.sentimentScore,
+      sentiment: insertReview.sentiment === undefined ? null : insertReview.sentiment,
+      keywords: insertReview.keywords === undefined ? null : insertReview.keywords,
+      ai_replied: insertReview.ai_replied === undefined ? false : insertReview.ai_replied,
     };
     this.reviews.set(id, review);
     return review;
@@ -324,7 +387,7 @@ export class MemStorage implements IStorage {
 }
 
 // Import the database storage implementation
-import { DatabaseStorage } from "./database-storage";
+import { DatabaseStorage } from "./database-storage.js";
 
 // Use DatabaseStorage instead of MemStorage for production
 // Comment the line below and uncomment the one after it to switch to in-memory storage for development

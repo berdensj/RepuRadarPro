@@ -1,11 +1,11 @@
+import React from 'react';
 import { useState, useEffect } from "react";
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { TrendGraph } from "@/components/dashboard/trend-graph";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Sidebar } from "../components/dashboard/sidebar";
+import { TrendGraph } from "../components/dashboard/trend-graph";
+import { useIsMobile } from "../hooks/use-mobile";
 import { Helmet } from "react-helmet";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { BarChart, LineChart, PieChart, CandlestickChart, BarChart2, TrendingUp, Building2 } from "lucide-react";
 import { 
   Chart as ChartJS, 
@@ -19,7 +19,8 @@ import {
 import { Tooltip } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
 import { useQuery } from "@tanstack/react-query";
-import { Location } from "@shared/schema";
+import { Location } from '../../../shared/schema';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 
 ChartJS.register(
   ArcElement, 
@@ -61,75 +62,75 @@ export default function AnalyticsPage() {
 
   // Prepare chart data based on API response or use loading state
   const prepareChartData = () => {
+    // FIXED: Ensure a default empty structure if analyticsData is not fully available
+    const defaultChartDataset = [{
+      label: 'No data',
+      data: [],
+      backgroundColor: 'rgba(200, 200, 200, 0.2)',
+      borderColor: 'rgba(200, 200, 200, 1)',
+      borderWidth: 1,
+    }];
+
     if (isLoadingAnalytics || !analyticsData) {
       return {
         platformData: {
           labels: [],
-          datasets: [{
-            label: 'Loading...',
-            data: [],
-            backgroundColor: [],
-            borderColor: [],
-            borderWidth: 1,
-          }]
+          // FIXED: Use consistent default structure
+          datasets: defaultChartDataset.map(ds => ({ ...ds, label: 'Loading platforms...' }))
         },
         ratingData: {
           labels: [],
-          datasets: [{
-            label: 'Loading...',
-            data: [],
-            backgroundColor: [],
-            borderColor: [],
-            borderWidth: 1,
-          }]
+          // FIXED: Use consistent default structure
+          datasets: defaultChartDataset.map(ds => ({ ...ds, label: 'Loading ratings...' }))
         },
         keywordData: {
           labels: [],
-          datasets: [{
-            label: 'Loading...',
-            data: [],
-            backgroundColor: 'rgba(54, 162, 235, 0.6)',
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1,
-          }]
+          // FIXED: Use consistent default structure
+          datasets: defaultChartDataset.map(ds => ({ ...ds, label: 'Loading keywords...' }))
         }
       };
     }
     
     // Platforms data
-    const platformLabels = Object.keys(analyticsData.platforms || {});
-    const platformValues = Object.values(analyticsData.platforms || {}) as number[];
+    // FIXED: Robustly handle potentially missing or malformed analyticsData.platforms
+    const platforms = analyticsData.platforms && typeof analyticsData.platforms === 'object' ? analyticsData.platforms : {};
+    const platformLabels = Object.keys(platforms);
+    const platformValues = Object.values(platforms).filter(v => typeof v === 'number') as number[];
     
     const platformData = {
-      labels: platformLabels,
-      datasets: [
+      labels: platformLabels.length > 0 ? platformLabels : ['No data'],
+      datasets: platformValues.length > 0 ? [
         {
           label: 'Reviews by Platform',
           data: platformValues,
           backgroundColor: [
             'rgba(54, 162, 235, 0.6)',
             'rgba(255, 99, 132, 0.6)',
-            'rgba(54, 162, 235, 0.4)',
+            'rgba(255, 206, 86, 0.6)', // Added one more for potential variety
             'rgba(75, 192, 192, 0.6)',
+            'rgba(153, 102, 255, 0.6)', // Added one more
           ],
           borderColor: [
             'rgba(54, 162, 235, 1)',
             'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 206, 86, 1)', // Added one more
             'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)', // Added one more
           ],
           borderWidth: 1,
         },
-      ],
+      ] : defaultChartDataset.map(ds => ({ ...ds, label: 'No platform data' })),
     };
 
     // Ratings data
-    const ratingLabels = Object.keys(analyticsData.ratings || {}).map(r => `${r} Stars`);
-    const ratingValues = Object.values(analyticsData.ratings || {}) as number[];
+    // FIXED: Robustly handle potentially missing or malformed analyticsData.ratings
+    const ratings = analyticsData.ratings && typeof analyticsData.ratings === 'object' ? analyticsData.ratings : {};
+    const ratingLabels = Object.keys(ratings).map(r => `${r} Stars`);
+    const ratingValues = Object.values(ratings).filter(v => typeof v === 'number') as number[];
     
     const ratingData = {
-      labels: ratingLabels,
-      datasets: [
+      labels: ratingLabels.length > 0 ? ratingLabels : ['No data'],
+      datasets: ratingValues.length > 0 ? [
         {
           label: 'Reviews by Rating',
           data: ratingValues,
@@ -149,16 +150,18 @@ export default function AnalyticsPage() {
           ],
           borderWidth: 1,
         },
-      ],
+      ] : defaultChartDataset.map(ds => ({ ...ds, label: 'No rating data' })),
     };
 
     // Keywords data
-    const keywordLabels = Object.keys(analyticsData.keywords || {});
-    const keywordValues = Object.values(analyticsData.keywords || {}) as number[];
+    // FIXED: Robustly handle potentially missing or malformed analyticsData.keywords
+    const keywords = analyticsData.keywords && typeof analyticsData.keywords === 'object' ? analyticsData.keywords : {};
+    const keywordLabels = Object.keys(keywords);
+    const keywordValues = Object.values(keywords).filter(v => typeof v === 'number') as number[];
     
     const keywordData = {
-      labels: keywordLabels,
-      datasets: [
+      labels: keywordLabels.length > 0 ? keywordLabels : ['No data'],
+      datasets: keywordValues.length > 0 ? [
         {
           label: 'Mentioned in Reviews',
           data: keywordValues,
@@ -166,7 +169,7 @@ export default function AnalyticsPage() {
           borderColor: 'rgba(54, 162, 235, 1)',
           borderWidth: 1,
         },
-      ],
+      ] : defaultChartDataset.map(ds => ({ ...ds, label: 'No keyword data' })),
     };
     
     return { platformData, ratingData, keywordData };
@@ -175,11 +178,15 @@ export default function AnalyticsPage() {
   // Get chart data
   const { platformData, ratingData, keywordData } = prepareChartData();
 
+  // FIXED: Ensure TrendGraph always receives valid, possibly empty, arrays for data and labels
+  const trendGraphDataProp = analyticsData?.datasets && Array.isArray(analyticsData.datasets) ? analyticsData.datasets : [];
+  const trendGraphLabelsProp = analyticsData?.labels && Array.isArray(analyticsData.labels) ? analyticsData.labels : [];
+
   return (
     <>
       <Helmet>
-        <title>Analytics | RepuRadar</title>
-        <meta name="description" content="Detailed analytics and insights about your online reputation and customer reviews." />
+        <title>Analytics | Reputation Sentinel</title>
+        <meta name="description" content="Analyze your online reputation with Reputation Sentinel's powerful analytics tools. Track trends, sentiment, and key metrics across all review platforms." />
       </Helmet>
       
       <div className="min-h-screen flex flex-col lg:flex-row">
@@ -240,7 +247,8 @@ export default function AnalyticsPage() {
                   </div>
                 </div>
               )}
-              <TrendGraph data={analyticsData?.datasets} labels={analyticsData?.labels} />
+              {/* FIXED: Pass robustly prepared props to TrendGraph */}
+              <TrendGraph data={trendGraphDataProp} labels={trendGraphLabelsProp} />
             </div>
 
             {/* Analytics Tabs */}

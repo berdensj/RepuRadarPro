@@ -12,7 +12,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/repuradar
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/reputation_sentinel
       - SESSION_SECRET=dev_session_secret
       - PORT=5000
     depends_on:
@@ -24,7 +24,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=repuradar
+      - POSTGRES_DB=reputation_sentinel
     ports:
       - "5432:5432"
     volumes:

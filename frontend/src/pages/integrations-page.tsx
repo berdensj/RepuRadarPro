@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/use-auth';
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/use-auth';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '../lib/queryClient';
 import { 
   Tabs, 
   TabsContent, 
   TabsList, 
   TabsTrigger 
-} from '@/components/ui/tabs';
+} from '../components/ui/tabs';
 import {
   Card,
   CardContent,
@@ -15,7 +15,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '../components/ui/card';
 import {
   Form,
   FormControl,
@@ -24,22 +24,22 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+} from '../components/ui/form';
+import { Input } from '../components/ui/input';
+import { Button } from '../components/ui/button';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { useToast } from '@/hooks/use-toast';
+} from "../components/ui/select";
+import { useToast } from '../hooks/use-toast';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '../components/ui/alert';
 
 // Define the Location interface
 interface Location {
@@ -299,6 +299,7 @@ const IntegrationsPage = () => {
             <Select
               value={selectedLocation}
               onValueChange={setSelectedLocation}
+              aria-label="Select location"
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select a location" />
@@ -402,6 +403,7 @@ const IntegrationsPage = () => {
                     type="submit" 
                     disabled={googleStatus === 'loading'}
                     className="mt-2"
+                    aria-label="Connect and import Google Places reviews"
                   >
                     {googleStatus === 'loading' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Connect & Import
@@ -490,6 +492,7 @@ const IntegrationsPage = () => {
                     type="submit" 
                     disabled={yelpStatus === 'loading'}
                     className="mt-2"
+                    aria-label="Connect and import Yelp reviews"
                   >
                     {yelpStatus === 'loading' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Connect & Import
@@ -578,6 +581,7 @@ const IntegrationsPage = () => {
                     type="submit" 
                     disabled={facebookStatus === 'loading'}
                     className="mt-2"
+                    aria-label="Connect and import Facebook reviews"
                   >
                     {facebookStatus === 'loading' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Connect & Import
@@ -704,6 +708,7 @@ const IntegrationsPage = () => {
                     type="submit" 
                     disabled={appleStatus === 'loading'}
                     className="mt-2"
+                    aria-label="Connect and import Apple Maps reviews"
                   >
                     {appleStatus === 'loading' && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Connect & Import

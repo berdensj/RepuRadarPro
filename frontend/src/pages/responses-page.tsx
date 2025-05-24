@@ -1,19 +1,22 @@
+import React from 'react';
 import { useState } from "react";
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Sidebar } from '../components/dashboard/sidebar';
+import { useIsMobile } from '../hooks/use-mobile';
 import { Helmet } from "react-helmet";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Button } from '../components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { MessageSquareText, Copy, RotateCw, ThumbsUp } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from '../hooks/use-toast';
+import { apiRequest } from '../lib/queryClient';
 
 export default function ResponsesPage() {
   const isMobile = useIsMobile();
   const { toast } = useToast();
   const [selectedTone, setSelectedTone] = useState("professional");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [customResponse, setCustomResponse] = useState("");
 
   const templates = {
     positive: [
@@ -46,24 +49,49 @@ export default function ResponsesPage() {
     });
   };
 
-  const handleGenerateNew = () => {
+  const handleGenerateNew = async () => {
     setIsGenerating(true);
+    setCustomResponse("");
     
-    // Simulate AI generation
-    setTimeout(() => {
-      setIsGenerating(false);
-      toast({
-        title: "New Response Generated",
-        description: "Your custom AI response is ready to use",
+    try {
+      const response = await apiRequest('POST', '/api/generate-ai-reply', { 
+        prompt: "Generate a generic customer service response.",
+        tone: selectedTone 
       });
-    }, 1500);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        throw new Error(errorData.message || 'Failed to generate AI response');
+      }
+      
+      const data = await response.json();
+      
+      if (data && data.reply) {
+        setCustomResponse(data.reply);
+        toast({
+          title: "New Response Generated",
+          description: "Your custom AI response is ready to use",
+        });
+      } else {
+        throw new Error("Invalid response format from AI service");
+      }
+    } catch (error) {
+      console.error("AI Generation Error:", error);
+      toast({
+        title: "Error Generating Response",
+        description: error instanceof Error ? error.message : String(error),
+        variant: "destructive",
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
     <>
       <Helmet>
-        <title>AI Responses | RepuRadar</title>
-        <meta name="description" content="Access pre-written response templates and generate custom AI responses for your reviews." />
+        <title>AI Responses | Reputation Sentinel</title>
+        <meta name="description" content="Generate and manage AI-powered responses to your online reviews with Reputation Sentinel." />
       </Helmet>
       
       <div className="min-h-screen flex flex-col lg:flex-row">
@@ -120,6 +148,7 @@ export default function ResponsesPage() {
                               size="sm" 
                               onClick={() => handleCopyText(template.content)}
                               className="text-xs"
+                              aria-label="Copy response"
                             >
                               <Copy className="h-3 w-3 mr-1" />
                               Copy
@@ -140,6 +169,7 @@ export default function ResponsesPage() {
                               size="sm" 
                               onClick={() => handleCopyText(template.content)}
                               className="text-xs"
+                              aria-label="Copy response"
                             >
                               <Copy className="h-3 w-3 mr-1" />
                               Copy
@@ -159,6 +189,7 @@ export default function ResponsesPage() {
                         size="sm"
                         onClick={handleGenerateNew}
                         disabled={isGenerating}
+                        aria-label={isGenerating ? "Generating new response" : "Generate new response"}
                       >
                         {isGenerating ? (
                           <>
@@ -179,7 +210,7 @@ export default function ResponsesPage() {
                     <Card className="bg-slate-50">
                       <CardContent className="p-4">
                         <p className="text-sm text-slate-600 italic">
-                          "We appreciate your valuable feedback on your recent visit. Your insights help us improve our service quality. I'd like to personally address the concerns you've raised about wait times. We're implementing a new scheduling system specifically designed to reduce waiting periods and improve efficiency. We value you as a client and hope to provide a better experience on your next visit."
+                          {customResponse || (isGenerating ? "Generating response..." : "Click \"Generate New\" to create a custom AI response.")}
                         </p>
                       </CardContent>
                     </Card>

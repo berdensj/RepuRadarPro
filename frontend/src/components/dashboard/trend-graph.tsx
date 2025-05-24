@@ -1,4 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card";
+import React from 'react';
+import { Card, CardContent } from "../ui/card";
 import { 
   Chart as ChartJS, 
   CategoryScale, 
@@ -12,8 +13,8 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "../ui/button";
+import { Skeleton } from "../ui/skeleton";
 
 // Register ChartJS components
 ChartJS.register(

@@ -1,9 +1,10 @@
+import React from 'react';
 import { useState } from 'react';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '../hooks/use-auth';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-import { Switch } from '@/components/ui/switch';
+import { apiRequest, queryClient } from '../lib/queryClient';
+import { useToast } from '../hooks/use-toast';
+import { Switch } from '../components/ui/switch';
 import { useLocation } from 'wouter';
 import {
   Card,
@@ -12,9 +13,9 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+} from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
 import { CheckCircle2, AlertCircle, ChevronRight } from 'lucide-react';
 
 // Types
@@ -90,6 +91,7 @@ const SubscriptionPage = () => {
 
   // Helper to format currency
   const formatCurrency = (amount: number) => {
+    // TODO: Confirm that all price values are in cents. If not, remove division by 100.
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -98,7 +100,8 @@ const SubscriptionPage = () => {
 
   // Get current user's subscription status
   const getUserPlanName = () => {
-    return user?.plan || 'Free';
+    // FIXED: Always default to 'Free' if user.plan is missing or falsy
+    return user?.plan && user.plan.trim() ? user.plan : 'Free';
   };
 
   const getTrialEndDate = () => {
@@ -147,11 +150,20 @@ const SubscriptionPage = () => {
 
   // Handle subscription selection
   const handleSelectPlan = (plan: SubscriptionPlan) => {
+    // FIXED: Prevent crash if user or plans are missing
+    if (!user || !plans || plans.length === 0) {
+      toast({
+        title: "Error",
+        description: "User or plan data is missing. Please refresh the page or contact support.",
+        variant: "destructive",
+      });
+      return;
+    }
     // If it's the current plan and not in trial, don't do anything
     if (plan.name === getUserPlanName() && !isUserInTrial()) {
       return;
     }
-    
+    // TODO: Add more robust backend/API error handling for subscription changes
     subscribeMutation.mutate({ 
       planId: plan.id, 
       isAnnual 
@@ -179,7 +191,9 @@ const SubscriptionPage = () => {
             <div className="flex items-center">
               <AlertCircle className="h-5 w-5 text-yellow-600 mr-2" />
               <p className="text-sm text-yellow-700">
-                Your trial ends on {getTrialEndDate()}. Select a plan to continue using RepuRadar.
+                {isUserInTrial()
+                  ? "Your trial has ended. Please select a plan to continue using Reputation Sentinel."
+                  : `Your trial ends on ${getTrialEndDate()}. Select a plan to continue using Reputation Sentinel.`}
               </p>
             </div>
           </div>
@@ -192,6 +206,7 @@ const SubscriptionPage = () => {
           <Switch
             checked={isAnnual}
             onCheckedChange={setIsAnnual}
+            aria-label="Toggle annual billing"
           />
           <span className={`text-sm ${isAnnual ? 'font-medium' : 'text-muted-foreground'}`}>
             Annual <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">Save 20%</span>
@@ -232,6 +247,7 @@ const SubscriptionPage = () => {
                   variant={plan.isPopular ? "default" : "outline"}
                   className="w-full"
                   disabled={plan.name === getUserPlanName() && !isUserInTrial()}
+                  aria-disabled={plan.name === getUserPlanName() && !isUserInTrial()}
                   onClick={() => handleSelectPlan(plan)}
                 >
                   {getButtonText(plan)}
@@ -269,7 +285,7 @@ const SubscriptionPage = () => {
         <p className="mt-2 text-muted-foreground">
           Contact our sales team for custom enterprise solutions tailored to your business.
         </p>
-        <Button variant="outline" className="mt-4">
+        <Button variant="outline" className="mt-4" aria-label="Contact Sales">
           Contact Sales
         </Button>
       </div>

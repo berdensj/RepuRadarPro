@@ -1,15 +1,13 @@
-import { useEffect, useState } from "react";
-import { useAuth, LoginData, RegisterData } from "@/hooks/use-auth";
-import { 
-  Card, 
-  CardContent 
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import React, { useEffect, useState } from "react";
+import { useAuth, LoginData, RegisterData } from "../hooks/use-auth";
+import { Card, CardContent } from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 import { z } from "zod";
 import { ChartLine, User } from "lucide-react";
 import { useLocation } from "wouter";
+import logo from '../assets/logo.png';
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
@@ -95,8 +93,8 @@ export default function AuthPage() {
           <CardContent className="pt-6">
             <div className="flex justify-center mb-6">
               <div className="text-primary text-3xl font-bold flex items-center">
-                <ChartLine className="h-6 w-6 mr-2" />
-                RepuRadar
+                <img src={logo} alt="Reputation Sentinel Logo" className="h-10 w-auto mr-3" />
+                Reputation Sentinel
               </div>
             </div>
             
@@ -239,7 +237,7 @@ export default function AuthPage() {
         <div className="hidden md:flex flex-col items-start">
           <h1 className="text-4xl font-bold text-slate-800 mb-4">Manage Your Professional Reputation with Ease</h1>
           <p className="text-lg text-slate-600 mb-6">
-            RepuRadar helps professionals monitor, analyze, and respond to online reviews across multiple platforms.
+            Reputation Sentinel helps professionals monitor, analyze, and respond to online reviews across multiple platforms.
           </p>
           
           <div className="space-y-4 w-full">
@@ -250,7 +248,7 @@ export default function AuthPage() {
               <div>
                 <h3 className="font-medium">For Professionals</h3>
                 <p className="text-sm text-slate-600">
-                  Doctors, lawyers, accountants, and more use RepuRadar to protect and enhance their online reputation.
+                  Doctors, lawyers, accountants, and more use Reputation Sentinel to protect and enhance their online reputation.
                 </p>
               </div>
             </div>

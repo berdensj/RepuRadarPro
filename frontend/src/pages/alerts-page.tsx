@@ -1,7 +1,8 @@
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { AlertCenter } from "@/components/dashboard/alert-center";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Helmet } from "react-helmet";
+import React from 'react';
+import { Sidebar } from '../components/dashboard/sidebar';
+import { AlertCenter } from '../components/dashboard/alert-center';
+import { useIsMobile } from '../hooks/use-mobile';
+import { Helmet } from 'react-helmet';
 
 export default function AlertsPage() {
   const isMobile = useIsMobile();
@@ -9,8 +10,8 @@ export default function AlertsPage() {
   return (
     <>
       <Helmet>
-        <title>Alerts | RepuRadar</title>
-        <meta name="description" content="View important alerts about negative reviews and trending issues with your reputation." />
+        <title>Alerts | Reputation Sentinel</title>
+        <meta name="description" content="View and manage alerts for your online reputation on Reputation Sentinel." />
       </Helmet>
       
       <div className="min-h-screen flex flex-col lg:flex-row">

@@ -1,8 +1,8 @@
-import { ReactNode, useState } from "react";
-import { useAuth } from "@/hooks/use-auth";
-import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import React, { ReactNode, useState } from "react";
+import { useAuth } from "../../hooks/use-auth";
+import { cn } from "../../lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
 import { 
   BarChart2, 
   FileText, 
@@ -22,7 +22,8 @@ import {
   ClipboardCheck
 } from "lucide-react";
 import { useLocation } from "wouter";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "../../hooks/use-mobile";
+import logo from '../../assets/logo.png';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -90,10 +91,9 @@ export function AdminLayout({ children }: AdminLayoutProps) {
           
           {/* Desktop Logo */}
           <div className="hidden lg:flex items-center mb-8 mt-2">
-            <div className="text-primary-foreground text-xl font-bold flex items-center">
-              <ChartLine className="h-5 w-5 mr-2" />
-              Admin Panel
-            </div>
+            <a href="/admin" className="flex items-center">
+              <img src={logo} alt="Reputation Sentinel Logo" className="h-10 w-auto" /> 
+            </a>
           </div>
           
           {/* Nav Links */}

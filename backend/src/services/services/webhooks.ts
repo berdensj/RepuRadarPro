@@ -93,6 +93,13 @@ export async function handleReviewWebhook(
       return res.status(404).json({ error: 'User not found' });
     }
     
+    // FIXED: Only allow review/alert creation if user has activity (e.g., completed onboarding or has at least one location)
+    const userLocations = await storage.getLocations(user.id);
+    if (!userLocations || userLocations.length === 0) {
+      console.log(`User ${user.id} has no activity/locations. Skipping review and alert creation.`); // FIXED: Log and skip
+      return res.status(200).json({ status: 'skipped', message: 'User has no activity/locations' });
+    }
+    
     // Check location if provided
     let location;
     if (locationId) {

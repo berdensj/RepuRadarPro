@@ -1,15 +1,16 @@
+import React from 'react';
 import { useState } from "react";
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { ReviewFeed } from "@/components/dashboard/review-feed";
-import { AIReplyPanel } from "@/components/dashboard/ai-reply-panel";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Sidebar } from '../components/dashboard/sidebar';
+import { ReviewFeed } from '../components/dashboard/review-feed';
+import { AIReplyPanel } from '../components/dashboard/ai-reply-panel';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import { Search, Download } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from '../hooks/use-mobile';
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Review } from "@shared/schema";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { Review } from '../../../shared/schema';
+import { apiRequest, queryClient } from '../lib/queryClient';
+import { useToast } from '../hooks/use-toast';
 import { Helmet } from "react-helmet";
 
 export default function ReviewsPage() {
@@ -53,7 +54,7 @@ export default function ReviewsPage() {
   return (
     <>
       <Helmet>
-        <title>Reviews | RepuRadar</title>
+        <title>Reviews | Reputation Sentinel</title>
         <meta name="description" content="View and manage all your customer reviews in one place. Filter by platform, rating, and more." />
       </Helmet>
       
@@ -81,7 +82,7 @@ export default function ReviewsPage() {
                   />
                 </div>
                 
-                <Button className="h-10">
+                <Button className="h-10" aria-label="Export reviews">
                   <Download className="h-4 w-4 mr-2" />
                   Export
                 </Button>

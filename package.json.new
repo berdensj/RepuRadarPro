@@ -1,5 +1,5 @@
 {
-  "name": "repuradar",
+  "name": "reputation-sentinel",
   "version": "1.0.0",
   "type": "module",
   "description": "SaaS dashboard for monitoring and managing online reviews with AI-powered insights",
