@@ -3,14 +3,20 @@ import { MessageSquare, Star, Clock, BarChart2 } from 'lucide-react';
 import { StatCard } from './StatCard';
 import { ReviewActivityCard } from './ReviewActivityCard';
 import { ReviewChart } from './ReviewChart';
+import { WeeklyChartDemo } from './WeeklyChartDemo';
+import { TrialBanner } from '../ui/TrialBanner';
+import { UpgradeBannerDemo } from '../ui/UpgradeBannerDemo';
+import { OnboardingDemo } from '../OnboardingDemo';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
 import { useAuth } from '../../hooks/use-auth';
 import { useDashboardData } from '../../hooks/use-dashboard-data';
+import { useTrialContext } from '../../context/TrialContext';
 import { Skeleton } from '../ui/skeleton';
 
 export function Dashboard() {
   const { user } = useAuth();
+  const { isTrial, daysLeft, upgradeUrl } = useTrialContext();
   const [timeRange, setTimeRange] = useState<'week' | 'month'>('week');
   const {
     stats,
@@ -21,18 +27,21 @@ export function Dashboard() {
     isLoadingSummary,
   } = useDashboardData(timeRange);
 
-  // Trial status using correct user properties
-  const isTrialUser = user?.plan === 'trial';
-  const trialDaysLeft = user?.trialEndsAt
-    ? Math.max(0, Math.ceil((new Date(user.trialEndsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-    : 0;
-
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Welcome Message */}
       <h1 className="text-3xl font-bold mb-8">
         Welcome back, {user?.fullName || 'User'}!
       </h1>
+
+      {/* Trial Banner */}
+      <TrialBanner className="mb-8" />
+
+      {/* Upgrade Banner Demo */}
+      <UpgradeBannerDemo />
+
+      {/* Onboarding Demo */}
+      <OnboardingDemo />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -107,8 +116,12 @@ export function Dashboard() {
           </Card>
         </div>
 
-        {/* Review Summary Chart */}
-        <div className="lg:col-span-1">
+        {/* Right Column - Charts */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Weekly Review Chart */}
+          <WeeklyChartDemo />
+
+          {/* Review Summary Chart */}
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Review Summary</CardTitle>
@@ -135,20 +148,6 @@ export function Dashboard() {
           </Card>
         </div>
       </div>
-
-      {/* Trial Banner */}
-      {isTrialUser && trialDaysLeft > 0 && (
-        <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-center justify-between">
-            <p className="text-yellow-800">
-              You have {trialDaysLeft} {trialDaysLeft === 1 ? 'day' : 'days'} left in your trial.
-            </p>
-            <Button variant="default" asChild>
-              <a href="/pricing">Upgrade Now</a>
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 } 

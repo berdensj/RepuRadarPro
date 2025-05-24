@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'wouter';
 import { useAuth } from '../hooks/use-auth';
+import { TrialBanner } from './ui/TrialBanner';
 import logo from '../assets/logo.png';
 import { cn } from '../lib/utils';
 
@@ -78,6 +79,12 @@ export function Sidebar() {
           <img src={logo} alt="Reputation Sentinel Logo" className="h-10 w-auto" />
         </Link>
       </div>
+
+      {/* Trial Banner */}
+      <div className="mb-4">
+        <TrialBanner variant="compact" />
+      </div>
+
       <nav className="flex-grow">
         <ul className="space-y-1.5">
           {mainNavLinks.map(link => renderNavLink(link))}

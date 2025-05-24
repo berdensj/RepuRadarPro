@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../hooks/use-auth";
+import { useOnboarding } from "../hooks/use-onboarding";
+import { OnboardingStepper } from "../components/OnboardingStepper";
 import { StatCard } from "../components/dashboard/StatCard";
 import { ReviewActivityCard, ReviewActivity } from "../components/dashboard/ReviewActivityCard";
 import { Button } from "../components/ui/button";
@@ -56,6 +58,7 @@ const placeholderActivities: ReviewActivity[] = [
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { shouldShow, completeOnboarding, skipOnboarding } = useOnboarding();
   const [chartTimeframe, setChartTimeframe] = useState("week");
   const isMobile = useIsMobile();
   const { toast } = useToast();
@@ -100,6 +103,14 @@ export default function DashboardPage() {
         <title>Dashboard | Reputation Sentinel</title>
         <meta name="description" content="Monitor and manage your professional reviews with Reputation Sentinel's comprehensive dashboard." />
       </Helmet>
+
+      {/* Onboarding Modal */}
+      {shouldShow && (
+        <OnboardingStepper
+          onComplete={completeOnboarding}
+          onSkip={skipOnboarding}
+        />
+      )}
 
       <h1 className="text-3xl font-semibold text-slate-800 dark:text-slate-100 mb-6">
         Welcome back, {user?.fullName || user?.username || 'User'}!

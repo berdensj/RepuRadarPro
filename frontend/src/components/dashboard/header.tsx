@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Bell, LogOut, User } from "lucide-react";
+import { Bell, LogOut, User, Clock } from "lucide-react";
 import { Button } from "../ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { useAuth } from "../../hooks/use-auth";
+import { useTrialContext } from "../../context/TrialContext";
 import logo from '../../assets/logo.png';
 
 interface HeaderProps {
@@ -19,10 +20,17 @@ interface HeaderProps {
 
 export function Header({ className }: HeaderProps) {
   const { user, logoutMutation } = useAuth();
+  const { isTrial, daysLeft, upgradeUrl, isExpired } = useTrialContext();
   const [notificationCount] = useState(0);
 
   const handleLogout = () => {
     logoutMutation.mutate();
+  };
+
+  const getTrialStatusColor = () => {
+    if (isExpired) return "text-red-600";
+    if (daysLeft <= 3) return "text-orange-600";
+    return "text-yellow-600";
   };
 
   return (
@@ -34,6 +42,21 @@ export function Header({ className }: HeaderProps) {
         </a>
 
         <div className="flex items-center">
+          {/* Trial Status Indicator */}
+          {isTrial && (
+            <div className="mr-4 hidden md:flex items-center gap-2">
+              <Clock className={`h-4 w-4 ${getTrialStatusColor()}`} />
+              <span className={`text-sm font-medium ${getTrialStatusColor()}`}>
+                {isExpired ? "Trial Expired" : `${daysLeft}d left`}
+              </span>
+              {(isExpired || daysLeft <= 7) && (
+                <Button size="sm" variant="outline" asChild>
+                  <a href={upgradeUrl}>Upgrade</a>
+                </Button>
+              )}
+            </div>
+          )}
+
           {/* Notification Bell */}
           <Button variant="ghost" size="sm" className="mr-2 relative">
             <Bell className="h-5 w-5" />
@@ -61,6 +84,25 @@ export function Header({ className }: HeaderProps) {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              
+              {/* Trial info in dropdown for mobile */}
+              {isTrial && (
+                <>
+                  <DropdownMenuItem asChild>
+                    <a href={upgradeUrl} className="cursor-pointer flex items-center">
+                      <Clock className={`mr-2 h-4 w-4 ${getTrialStatusColor()}`} />
+                      <div className="flex flex-col">
+                        <span className={getTrialStatusColor()}>
+                          {isExpired ? "Trial Expired" : `Trial: ${daysLeft} days left`}
+                        </span>
+                        <span className="text-xs text-muted-foreground">Click to upgrade</span>
+                      </div>
+                    </a>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
+              
               <DropdownMenuItem asChild>
                 <a href="/profile" className="cursor-pointer flex items-center">
                   <User className="mr-2 h-4 w-4" />
