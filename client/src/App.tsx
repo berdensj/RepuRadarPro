@@ -8,7 +8,7 @@ import NotFound from "./pages/not-found";
 import { AuthProvider } from "./hooks/use-auth";
 import { TrialProvider } from "./context/TrialContext";
 import { ProtectedRoute } from "./lib/protected-route";
-import DashboardPage from "./pages/dashboard-page";
+import DashboardPage from "./pages/dashboard-page-simple";
 import AuthPage from "./pages/auth-page";
 import ReviewsPage from "./pages/reviews-page";
 import AlertsPage from "./pages/alerts-page";
