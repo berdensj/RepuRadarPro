@@ -134,7 +134,7 @@ const SubscriptionPage = () => {
       }
       
       // If current plan costs less than this plan
-      const currentPlan = plans.find((p: SubscriptionPlan) => p.name === getUserPlanName());
+      const currentPlan = Array.isArray(plans) ? plans.find((p: SubscriptionPlan) => p.name === getUserPlanName()) : null;
       if (currentPlan && currentPlan.price < plan.price) {
         return 'Choose Plan';
       } else if (currentPlan && currentPlan.price > plan.price) {
