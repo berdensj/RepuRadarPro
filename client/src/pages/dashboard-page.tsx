@@ -3,7 +3,7 @@ import { useAuth } from "../hooks/use-auth";
 import { useOnboarding } from "../hooks/use-onboarding";
 import { OnboardingStepper } from "../components/OnboardingStepper";
 import { StatCard } from "../components/dashboard/StatCard";
-import { ReviewActivityCard } from "../components/dashboard/ReviewActivityCard";
+import { ReviewActivityCard, ReviewActivity } from "../components/dashboard/ReviewActivityCard";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
