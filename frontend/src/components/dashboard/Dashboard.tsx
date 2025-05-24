@@ -6,6 +6,7 @@ import { ReviewChart } from './ReviewChart';
 import { WeeklyChartDemo } from './WeeklyChartDemo';
 import { TrialBanner } from '../ui/TrialBanner';
 import { UpgradeBannerDemo } from '../ui/UpgradeBannerDemo';
+import { ErrorBoundaryDemo } from '../ui/ErrorBoundaryDemo';
 import { OnboardingDemo } from '../OnboardingDemo';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
@@ -39,6 +40,9 @@ export function Dashboard() {
 
       {/* Trial Banner */}
       <TrialBanner className="mb-8" />
+
+      {/* Error Boundary Demo */}
+      <ErrorBoundaryDemo />
 
       {/* Upgrade Banner Demo */}
       <UpgradeBannerDemo />
