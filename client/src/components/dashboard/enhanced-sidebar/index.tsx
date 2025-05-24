@@ -332,7 +332,7 @@ export function EnhancedSidebar({
           {/* Mobile header with close button */}
           <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-gray-800 lg:hidden">
             <div className="text-primary text-xl font-bold flex items-center">
-              <ChartLine className="h-5 w-5 mr-2" />
+              <img src="/logo.png" alt="Reputation Sentinel" className="h-8 w-8 mr-2" />
               Reputation Sentinel
             </div>
             <Button 
@@ -352,12 +352,12 @@ export function EnhancedSidebar({
           )}>
             {!collapsed && (
               <div className="text-primary text-xl font-bold flex items-center">
-                <ChartLine className="h-5 w-5 mr-2" />
+                <img src="/logo.png" alt="Reputation Sentinel" className="h-8 w-8 mr-2" />
                 Reputation Sentinel
               </div>
             )}
             {collapsed && (
-              <ChartLine className="h-6 w-6 text-primary" />
+              <img src="/favicon.png" alt="Reputation Sentinel" className="h-8 w-8" />
             )}
             
             {!collapsed && (

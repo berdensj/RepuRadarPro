@@ -100,7 +100,7 @@ export default function AuthPage() {
           <CardContent className="pt-6">
             <div className="flex justify-center mb-6">
               <div className="text-primary text-3xl font-bold flex items-center">
-                <ChartLine className="h-6 w-6 mr-2" />
+                <img src="/logo.png" alt="Reputation Sentinel" className="h-10 w-auto mr-2" />
                 Reputation Sentinel
               </div>
             </div>
