@@ -28,6 +28,7 @@ import AdminSystemPage from "@/pages/admin/system-page";
 import AdminCustomersPage from "@/pages/admin/customers-page";
 import OnboardingPage from "@/pages/admin/onboarding-page";
 import AdminAnalyticsPage from "@/pages/admin/analytics-page";
+import AdminReportsPage from "@/pages/admin/reports-page";
 import { Route } from "wouter";
 
 function Router() {
