@@ -100,7 +100,9 @@ export default function AuthPage() {
           <CardContent className="pt-6">
             <div className="flex justify-center mb-6">
               <div className="text-primary text-3xl font-bold flex items-center">
-                <img src="/logo.png" alt="Reputation Sentinel" className="h-10 w-auto mr-2" />
+                <svg className="h-10 w-10 mr-2 text-blue-600" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM12 7C13.1 7 14 7.9 14 9S13.1 11 12 11S10 10.1 10 9S10.9 7 12 7ZM12 17C10.33 17 8.86 16.16 8 14.84C8.03 13.49 10.67 12.75 12 12.75S15.97 13.49 16 14.84C15.14 16.16 13.67 17 12 17Z"/>
+                </svg>
                 Reputation Sentinel
               </div>
             </div>
