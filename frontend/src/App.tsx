@@ -1,12 +1,9 @@
-import { Switch, Route } from "wouter";
-import { queryClient } from "./lib/queryClient";
-import { QueryClientProvider } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
 import { Badge } from "./components/ui/badge";
 import { Button } from "./components/ui/button";
-import { Star, TrendingUp, MessageSquare, AlertTriangle, Settings } from "lucide-react";
+import { Star, TrendingUp, MessageSquare, AlertTriangle, Settings, BarChart3 } from "lucide-react";
 
-function Dashboard() {
+function App() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -63,7 +60,7 @@ function Dashboard() {
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Response Rate</CardTitle>
-              <MessageSquare className="h-4 w-4 text-green-600" />
+              <BarChart3 className="h-4 w-4 text-green-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">94%</div>
@@ -100,6 +97,10 @@ function Dashboard() {
                 Check Alerts
               </Button>
               <Button variant="outline" className="w-full justify-start">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Analytics
+              </Button>
+              <Button variant="outline" className="w-full justify-start">
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>
@@ -121,8 +122,8 @@ function Dashboard() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">Sarah Johnson</p>
-                    <p className="text-sm text-gray-600">"Excellent service!"</p>
-                    <p className="text-xs text-gray-500">2 hours ago</p>
+                    <p className="text-sm text-gray-600">"Excellent service! Very professional staff."</p>
+                    <p className="text-xs text-gray-500">Google • 2 hours ago</p>
                   </div>
                 </div>
                 <div className="flex items-start space-x-3">
@@ -134,9 +135,56 @@ function Dashboard() {
                   </div>
                   <div>
                     <p className="text-sm font-medium">Mike Chen</p>
-                    <p className="text-sm text-gray-600">"Good experience overall."</p>
-                    <p className="text-xs text-gray-500">5 hours ago</p>
+                    <p className="text-sm text-gray-600">"Good experience overall. Will recommend."</p>
+                    <p className="text-xs text-gray-500">Yelp • 5 hours ago</p>
                   </div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="flex space-x-1">
+                    {[1,2,3,4,5].map((star) => (
+                      <Star key={star} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Emily Rodriguez</p>
+                    <p className="text-sm text-gray-600">"Amazing experience! Highly recommend."</p>
+                    <p className="text-xs text-gray-500">Facebook • 1 day ago</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Feature Highlights */}
+        <div className="mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Platform Features</CardTitle>
+              <CardDescription>Comprehensive reputation management tools</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <MessageSquare className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Review Management</h3>
+                  <p className="text-sm text-gray-600">Monitor and respond to reviews across all platforms</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <BarChart3 className="w-6 h-6 text-green-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Advanced Analytics</h3>
+                  <p className="text-sm text-gray-600">Detailed insights and performance metrics</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-3">
+                    <AlertTriangle className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Smart Alerts</h3>
+                  <p className="text-sm text-gray-600">Instant notifications for important reviews</p>
                 </div>
               </div>
             </CardContent>
@@ -144,34 +192,6 @@ function Dashboard() {
         </div>
       </div>
     </div>
-  );
-}
-
-function NotFound() {
-  return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold">404</h1>
-        <p>Page not found</p>
-      </div>
-    </div>
-  );
-}
-
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Router />
-    </QueryClientProvider>
   );
 }
 

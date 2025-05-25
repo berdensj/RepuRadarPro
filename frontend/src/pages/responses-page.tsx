@@ -1,6 +1,5 @@
 import React from 'react';
 import { useState } from "react";
-import { Sidebar } from '../components/dashboard/sidebar';
 import { useIsMobile } from '../hooks/use-mobile';
 import { Helmet } from "react-helmet";
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -94,11 +93,7 @@ export default function ResponsesPage() {
         <meta name="description" content="Generate and manage AI-powered responses to your online reviews with Reputation Sentinel." />
       </Helmet>
       
-      <div className="min-h-screen flex flex-col lg:flex-row">
-        <Sidebar />
-        
-        <main className="flex-1 p-4 lg:p-6 bg-slate-50 min-h-screen">
-          <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto">
             {/* Header */}
             <header className="mb-6">
               <h1 className="text-2xl font-semibold text-slate-800">AI Response Templates</h1>
@@ -218,8 +213,6 @@ export default function ResponsesPage() {
                 </CardContent>
               </Card>
             </div>
-          </div>
-        </main>
       </div>
     </>
   );
