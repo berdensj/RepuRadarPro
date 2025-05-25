@@ -3,7 +3,7 @@ import { useAuth } from "../hooks/use-auth";
 import { useOnboarding } from "../hooks/use-onboarding";
 import { OnboardingStepper } from "../components/OnboardingStepper";
 import { StatCard } from "../components/dashboard/StatCard";
-import { ReviewActivityCard, ReviewActivity } from "../components/dashboard/ReviewActivityCard";
+import { ReviewActivityCard } from "../components/dashboard/ReviewActivityCard";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
@@ -29,30 +29,39 @@ const placeholderMetrics = {
   averageStarRating: 4.7,
 };
 
-const placeholderActivities: ReviewActivity[] = [
+interface PlaceholderActivity {
+  id: number;
+  customerName: string;
+  rating: number;
+  replySnippet: string;
+  date: Date;
+  platformIcon?: React.ReactNode;
+}
+
+const placeholderActivities: PlaceholderActivity[] = [
   {
     id: 1,
-    name: "John Doe",
+    customerName: "John Doe",
     rating: 5,
     replySnippet: "Thank you for your kind words, John! We are so happy to hear that you had a great experience...",
-    date: "2h ago",
-    profilePictureUrl: undefined,
+    date: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+    platformIcon: undefined,
   },
   {
     id: 2,
-    name: "Jane Smith",
+    customerName: "Jane Smith",
     rating: 4,
     replySnippet: "We appreciate your feedback, Jane. We're always looking for ways to improve and will take your comments...",
-    date: "5h ago",
-    profilePictureUrl: undefined,
+    date: new Date(Date.now() - 5 * 60 * 60 * 1000), // 5 hours ago
+    platformIcon: undefined,
   },
   {
     id: 3,
-    name: "Alex Johnson",
+    customerName: "Alex Johnson",
     rating: 5,
     replySnippet: "Wonderful! We're thrilled you enjoyed our service, Alex. Hope to see you again soon!",
-    date: "1 day ago",
-    profilePictureUrl: undefined,
+    date: new Date(Date.now() - 24 * 60 * 60 * 1000), // 1 day ago
+    platformIcon: undefined,
   },
 ];
 
@@ -133,30 +142,26 @@ export default function DashboardPage() {
         <StatCard 
           title="Total Reviews This Week" 
           value={placeholderMetrics.reviewsThisWeek} 
-          icon={Star} 
-          trend="+12% from last week"
-          trendDirection="up"
+          icon={<Star className="h-5 w-5" />}
+          trend={{ value: 12, isPositive: true }}
         />
         <StatCard 
           title="AI Replies Sent" 
           value={placeholderMetrics.aiRepliesSent} 
-          icon={MessageSquare} 
-          trend="+5% from last week"
-          trendDirection="up"
+          icon={<MessageSquare className="h-5 w-5" />}
+          trend={{ value: 5, isPositive: true }}
         />
         <StatCard 
           title="Open Review Requests" 
           value={placeholderMetrics.openReviewRequests} 
-          icon={Send}
-          trend="-3 from last week"
-          trendDirection="down"
+          icon={<Send className="h-5 w-5" />}
+          trend={{ value: 3, isPositive: false }}
         />
         <StatCard 
           title="Average Star Rating" 
           value={`${placeholderMetrics.averageStarRating}/5`} 
-          icon={CheckCircle} 
-          trend="+0.1 from last month"
-          trendDirection="up"
+          icon={<CheckCircle className="h-5 w-5" />}
+          trend={{ value: 0.1, isPositive: true }}
         />
       </div>
 
@@ -169,7 +174,14 @@ export default function DashboardPage() {
             <CardContent className="space-y-4">
               {placeholderActivities.length > 0 ? (
                 placeholderActivities.map((activity) => (
-                  <ReviewActivityCard key={activity.id} activity={activity} />
+                  <ReviewActivityCard 
+                    key={activity.id} 
+                    customerName={activity.customerName}
+                    rating={activity.rating}
+                    replySnippet={activity.replySnippet}
+                    date={activity.date}
+                    platformIcon={activity.platformIcon}
+                  />
                 ))
               ) : (
                 <p className="text-slate-500 dark:text-slate-400">No AI activity to display yet.</p>
@@ -202,8 +214,13 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="h-64 bg-slate-100 dark:bg-slate-700 flex items-center justify-center rounded-md">
-                <p className="text-slate-500 dark:text-slate-400">Chart placeholder ({chartTimeframe})</p>
+              <div className="space-y-4">
+                <div className="text-center p-8">
+                  <div className="w-16 h-16 mx-auto bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                    <Star className="h-8 w-8 text-slate-400" />
+                  </div>
+                  <p className="text-sm text-slate-500">Chart visualization will be available here</p>
+                </div>
               </div>
             </CardContent>
           </Card>
